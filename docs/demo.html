@@ -737,6 +737,76 @@
           </div>
         </div>
       </div>
+
+      <!-- Custom Shader Control -->
+      <div class="control-card">
+        <div class="control-title">
+          <div class="control-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+          </div>
+          カスタムシェーダー
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">サンプルカスタムエフェクト</label>
+          <button class="btn btn-secondary" id="customEffectBtn">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+              <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+            </svg>
+            Rippleエフェクトを適用
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">シェーダーエディタ</label>
+          <div style="display: none;" id="shaderEditor">
+            <label class="form-label" style="font-size: 0.875rem; margin-top: 1rem;">Fragment Shader</label>
+            <textarea id="customShaderCode" style="width: 100%; height: 200px; background: var(--bg-dark); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.875rem; resize: vertical;">
+precision mediump float;
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform float uProgress;
+uniform vec2 uResolution;
+uniform vec2 uImageSize0;
+uniform vec2 uImageSize1;
+
+varying vec2 vTexCoord;
+
+// リップルエフェクト
+void main() {
+  vec2 center = vec2(0.5, 0.5);
+  float dist = distance(vTexCoord, center);
+  float ripple = sin(dist * 40.0 - uProgress * 10.0) * 0.5 + 0.5;
+  float threshold = uProgress * 1.5 * ripple;
+  
+  vec2 uv0 = vTexCoord;
+  vec2 uv1 = vTexCoord;
+  
+  vec4 color0 = texture2D(uTexture0, uv0);
+  vec4 color1 = texture2D(uTexture1, uv1);
+  
+  float mixer = smoothstep(threshold - 0.1, threshold + 0.1, dist);
+  gl_FragColor = mix(color0, color1, mixer);
+}</textarea>
+            <button class="btn btn-primary" id="applyCustomShader" style="margin-top: 1rem;">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+              </svg>
+              シェーダーを適用
+            </button>
+          </div>
+          <button class="btn btn-secondary" id="toggleShaderEditor" style="width: 100%;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
+            </svg>
+            シェーダーエディタを開く
+          </button>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -948,6 +1018,64 @@
           else carousel.previous();
         }
       });
+      
+      // Custom shader functionality
+      const toggleEditorBtn = document.getElementById('toggleShaderEditor');
+      const shaderEditor = document.getElementById('shaderEditor');
+      const customEffectBtn = document.getElementById('customEffectBtn');
+      const applyShaderBtn = document.getElementById('applyCustomShader');
+      const shaderCodeTextarea = document.getElementById('customShaderCode');
+      
+      toggleEditorBtn.addEventListener('click', () => {
+        const isHidden = shaderEditor.style.display === 'none';
+        shaderEditor.style.display = isHidden ? 'block' : 'none';
+        toggleEditorBtn.innerHTML = isHidden ? `
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
+          </svg>
+          シェーダーエディタを閉じる
+        ` : `
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
+          </svg>
+          シェーダーエディタを開く
+        `;
+      });
+      
+      // Sample ripple effect
+      customEffectBtn.addEventListener('click', () => {
+        applyCustomEffect('ripple', shaderCodeTextarea.value);
+        currentEffect = 'customRipple';
+        document.getElementById('effectSelect').value = '';
+        updateEffectPreviews();
+      });
+      
+      // Apply custom shader from editor
+      applyShaderBtn.addEventListener('click', () => {
+        try {
+          applyCustomEffect('custom', shaderCodeTextarea.value);
+          currentEffect = 'custom';
+          document.getElementById('effectSelect').value = '';
+          updateEffectPreviews();
+          alert('カスタムシェーダーが適用されました！');
+        } catch (error) {
+          console.error('Shader error:', error);
+          alert('シェーダーエラー: ' + error.message);
+        }
+      });
+      
+      function applyCustomEffect(name, fragmentShader) {
+        const { createCustomEffect } = WebGLCarousel;
+        
+        const customEffect = createCustomEffect(
+          name,
+          undefined, // Use default vertex shader
+          fragmentShader
+        );
+        
+        carousel.registerEffect(customEffect);
+        carousel.setEffect(name);
+      }
     }
     
     function createPagination() {
