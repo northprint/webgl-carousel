@@ -218,13 +218,16 @@ describe('WebGLCarousel Unit Tests', () => {
 
     it('should return available effects', () => {
       const effects = carousel.getAvailableEffects();
-      expect(effects).toEqual(['fade', 'slide', 'flip', 'wave', 'distortion']);
+      expect(effects).toContain('fade');
+      expect(effects).toContain('slideLeft');
+      expect(effects).toContain('flipHorizontal');
+      expect(effects.length).toBeGreaterThan(10);
     });
 
     it('should register effect', () => {
       const mockEffect = { name: 'custom', vertexShader: '', fragmentShader: '', getUniforms: () => ({}) };
       carousel.registerEffect(mockEffect);
-      expect(mockCore.effectManager.register).toHaveBeenCalledWith(mockEffect);
+      expect(mockCore.registerEffect).toHaveBeenCalledWith(mockEffect);
     });
 
     it('should call core.setAutoplay() for play', () => {

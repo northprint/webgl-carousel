@@ -188,17 +188,24 @@ describe('ImageLoader', () => {
 
     it('should continue loading if some images fail', async () => {
       let callCount = 0;
+      const originalImage = global.Image;
       global.Image = jest.fn().mockImplementation(function (this: HTMLImageElement) {
-        callCount++;
+        const currentCount = ++callCount;
         this.naturalWidth = 100;
         this.naturalHeight = 100;
-        setTimeout(() => {
-          if (callCount === 2 && this.onerror) {
-            this.onerror(new Event('error'));
-          } else if (this.onload) {
-            this.onload(new Event('load'));
+        
+        Object.defineProperty(this, 'src', {
+          set: () => {
+            setTimeout(() => {
+              if (currentCount === 2 && this.onerror) {
+                this.onerror(new Event('error'));
+              } else if (this.onload) {
+                this.onload(new Event('load'));
+              }
+            }, 0);
           }
-        }, 0);
+        });
+        
         return this;
       }) as any;
 
@@ -216,6 +223,7 @@ describe('ImageLoader', () => {
       );
 
       consoleSpy.mockRestore();
+      global.Image = originalImage;
     });
   });
 

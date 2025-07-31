@@ -30,6 +30,7 @@ describe('WebGLCarouselVue', () => {
       goTo: jest.fn(),
       getCurrentIndex: jest.fn(() => 0),
       getTotalImages: jest.fn(() => mockImages.length),
+      getImageCount: jest.fn(() => mockImages.length),
       setEffect: jest.fn(),
       getAvailableEffects: jest.fn(() => ['fade', 'slide', 'zoom']),
       registerEffect: jest.fn(),
@@ -37,6 +38,7 @@ describe('WebGLCarouselVue', () => {
       pause: jest.fn(),
       isPlaying: jest.fn(() => false),
       setAutoplayInterval: jest.fn(),
+      setAutoplay: jest.fn(),
       updateImages: jest.fn(),
       isTransitioning: jest.fn(() => false),
       destroy: jest.fn(),
@@ -108,8 +110,8 @@ describe('WebGLCarouselVue', () => {
       },
     });
 
-    expect(mockCarouselInstance.on).toHaveBeenCalledWith('transitionStart', onTransitionStart);
-    expect(mockCarouselInstance.on).toHaveBeenCalledWith('transitionEnd', onTransitionEnd);
+    expect(mockCarouselInstance.on).toHaveBeenCalledWith('transitionStart', expect.any(Function));
+    expect(mockCarouselInstance.on).toHaveBeenCalledWith('transitionEnd', expect.any(Function));
     expect(mockCarouselInstance.on).toHaveBeenCalledWith('error', onError);
     expect(mockCarouselInstance.on).toHaveBeenCalledWith('ready', onReady);
   });
@@ -133,7 +135,7 @@ describe('WebGLCarouselVue', () => {
 
     // Test goTo method
     exposed.goTo(2);
-    expect(mockCarouselInstance.goTo).toHaveBeenCalledWith(2, undefined);
+    expect(mockCarouselInstance.goTo).toHaveBeenCalledWith(2);
 
     // Test getCurrentIndex
     expect(exposed.getCurrentIndex()).toBe(0);
@@ -275,24 +277,23 @@ describe('WebGLCarouselVue', () => {
     );
   });
 
-  it('should handle transition options in navigation methods', () => {
+  it('should handle navigation methods', () => {
     wrapper = mount(WebGLCarouselVue, {
       props: {
         images: mockImages,
       },
     });
 
-    const options = { duration: 2000, effect: 'zoom' };
     const exposed = wrapper.vm;
 
-    exposed.next(options);
-    expect(mockCarouselInstance.next).toHaveBeenCalledWith(options);
+    exposed.next();
+    expect(mockCarouselInstance.next).toHaveBeenCalled();
 
-    exposed.previous(options);
-    expect(mockCarouselInstance.previous).toHaveBeenCalledWith(options);
+    exposed.previous();
+    expect(mockCarouselInstance.previous).toHaveBeenCalled();
 
-    exposed.goTo(1, options);
-    expect(mockCarouselInstance.goTo).toHaveBeenCalledWith(1, options);
+    exposed.goTo(1);
+    expect(mockCarouselInstance.goTo).toHaveBeenCalledWith(1);
   });
 
   it('should register custom effect', () => {

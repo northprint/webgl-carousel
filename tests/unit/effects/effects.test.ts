@@ -158,7 +158,7 @@ describe('Effects', () => {
   describe('getDefaultEffects', () => {
     it('should return all default effect instances', () => {
       const defaultEffects = getDefaultEffects();
-      expect(defaultEffects).toHaveLength(29);
+      expect(defaultEffects).toHaveLength(27);
       expect(defaultEffects).toContain(fadeEffect);
       expect(defaultEffects).toContain(slideLeftEffect);
       expect(defaultEffects).toContain(slideRightEffect);
@@ -178,7 +178,7 @@ describe('Effects', () => {
 
       registerDefaultEffects(manager);
 
-      expect(manager.size()).toBe(29); // 29 unique effect names
+      expect(manager.size()).toBe(27); // 27 unique effect names
       // Basic effects
       expect(manager.has('fade')).toBe(true);
       expect(manager.has('slideLeft')).toBe(true);

@@ -21,6 +21,8 @@ export class MockWebGLRenderingContext {
   STATIC_DRAW = 35044;
   FLOAT = 5126;
   TRIANGLE_STRIP = 5;
+  ACTIVE_UNIFORMS = 35718;
+  ACTIVE_ATTRIBUTES = 35721;
   
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -62,8 +64,29 @@ export class MockWebGLRenderingContext {
     // Mock implementation
   }
 
-  getProgramParameter(program: WebGLProgram, pname: number): boolean {
+  getProgramParameter(program: WebGLProgram, pname: number): any {
+    if (pname === this.ACTIVE_UNIFORMS) return 5;
+    if (pname === this.ACTIVE_ATTRIBUTES) return 2;
     return true;
+  }
+
+  getActiveUniform(program: WebGLProgram, index: number): WebGLActiveInfo | null {
+    const uniforms = [
+      { name: 'uTexture0', type: 0x8b5e, size: 1 },
+      { name: 'uTexture1', type: 0x8b5e, size: 1 },
+      { name: 'uProgress', type: 0x1406, size: 1 },
+      { name: 'uResolution', type: 0x8b50, size: 1 },
+      { name: 'uTime', type: 0x1406, size: 1 },
+    ];
+    return uniforms[index] as any || null;
+  }
+
+  getActiveAttrib(program: WebGLProgram, index: number): WebGLActiveInfo | null {
+    const attribs = [
+      { name: 'aPosition', type: 0x8b50, size: 1 },
+      { name: 'aTexCoord', type: 0x8b50, size: 1 },
+    ];
+    return attribs[index] as any || null;
   }
 
   getProgramInfoLog(program: WebGLProgram): string | null {
@@ -216,6 +239,9 @@ Object.defineProperty(HTMLImageElement.prototype, 'src', {
     }, 0);
   },
 });
+
+// Mock HTMLCanvasElement.toDataURL
+HTMLCanvasElement.prototype.toDataURL = jest.fn(() => 'data:image/png;base64,mockdata');
 
 // Import jest-dom matchers for React testing
 import '@testing-library/jest-dom';
