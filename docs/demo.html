@@ -809,6 +809,9 @@
     
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
+      // Set initial values
+      document.getElementById('totalImages').textContent = images.length;
+      
       initializeCarousel();
       setupEventListeners();
       createPagination();
@@ -817,24 +820,56 @@
     });
     
     function initializeCarousel() {
-      const CarouselClass = WebGLCarousel.default || WebGLCarousel.WebGLCarousel || WebGLCarousel;
+      console.log('Initializing carousel...');
+      console.log('WebGLCarousel object:', WebGLCarousel);
       
-      carousel = new CarouselClass({
-        container: '#carousel',
-        images: images,
-        effect: currentEffect,
-        autoplay: false,
-        transitionDuration: 2000,
-        autoplayInterval: 4000,
-        onImageChange: (index) => {
-          updateCurrentIndex(index);
-          updatePagination(index);
-        },
-        onReady: () => {
+      const CarouselClass = WebGLCarousel.default || WebGLCarousel.WebGLCarousel || WebGLCarousel;
+      console.log('CarouselClass:', CarouselClass);
+      
+      try {
+        carousel = new CarouselClass({
+          container: '#carousel',
+          images: images,
+          effect: currentEffect,
+          autoplay: false,
+          transitionDuration: 2000,
+          autoplayInterval: 4000,
+          onImageChange: (index) => {
+            updateCurrentIndex(index);
+            updatePagination(index);
+          }
+        });
+        
+        console.log('Carousel instance created:', carousel);
+        
+        // Listen for ready event
+        carousel.on('ready', () => {
+          console.log('Carousel ready event fired');
           document.querySelector('.loading-overlay').style.display = 'none';
           updateRendererInfo();
-        }
-      });
+        });
+        
+        // Also add error handling
+        carousel.on('error', (error) => {
+          console.error('Carousel error:', error);
+          document.querySelector('.loading-overlay').style.display = 'none';
+          alert('Error initializing carousel: ' + error.message);
+        });
+        
+        // Set a timeout fallback in case ready event doesn't fire
+        setTimeout(() => {
+          const overlay = document.querySelector('.loading-overlay');
+          if (overlay && overlay.style.display !== 'none') {
+            console.warn('Ready event not fired after 5 seconds, hiding loading overlay');
+            overlay.style.display = 'none';
+            updateRendererInfo();
+          }
+        }, 5000);
+      } catch (error) {
+        console.error('Error creating carousel instance:', error);
+        document.querySelector('.loading-overlay').style.display = 'none';
+        alert('Failed to initialize carousel: ' + error.message);
+      }
     }
     
     function setupEventListeners() {
@@ -979,8 +1014,14 @@
     }
     
     function updateRendererInfo() {
-      const rendererType = carousel.isUsingWebGL ? carousel.isUsingWebGL() ? 'WebGL' : 'Canvas 2D' : 'Canvas 2D';
-      document.getElementById('rendererType').textContent = rendererType;
+      try {
+        const isWebGL = carousel && carousel.isUsingWebGL && carousel.isUsingWebGL();
+        const rendererType = isWebGL ? 'WebGL' : 'Canvas 2D';
+        document.getElementById('rendererType').textContent = rendererType;
+      } catch (error) {
+        console.error('Error updating renderer info:', error);
+        document.getElementById('rendererType').textContent = 'Unknown';
+      }
     }
   </script>
 </body>
