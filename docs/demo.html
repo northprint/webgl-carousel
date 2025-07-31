@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebGL Carousel - デモ</title>
+  <title>WebGL Carousel - Interactive Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -11,305 +14,929 @@
       box-sizing: border-box;
     }
     
+    :root {
+      --primary: #5B5FFF;
+      --primary-dark: #4448E3;
+      --secondary: #FF5B8F;
+      --bg-dark: #0F0F14;
+      --bg-card: #1A1A24;
+      --bg-card-hover: #22222E;
+      --text-primary: #FFFFFF;
+      --text-secondary: #A0A0B8;
+      --border: #2A2A3E;
+      --success: #4ADE80;
+      --warning: #FCD34D;
+      --error: #F87171;
+    }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
     }
-    
-    .demo-container {
-      max-width: 1200px;
+
+    /* Background Effects */
+    .bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(91, 95, 255, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(255, 91, 143, 0.1) 0%, transparent 50%),
+                  var(--bg-dark);
+      z-index: -1;
+    }
+
+    /* Navigation */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 15, 20, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 1rem 0;
+    }
+
+    .nav-container {
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 2rem;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    
-    h1 {
+
+    .nav-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 7rem 2rem 2rem;
+    }
+
+    /* Hero Section */
+    .hero-section {
       text-align: center;
-      margin-bottom: 2rem;
-      color: #333;
+      margin-bottom: 4rem;
     }
-    
-    .carousel-wrapper {
-      background: white;
-      border-radius: 10px;
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Carousel Section */
+    .carousel-section {
+      margin-bottom: 4rem;
+    }
+
+    .carousel-container {
+      background: var(--bg-card);
+      border-radius: 24px;
       padding: 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      position: relative;
+      overflow: hidden;
     }
-    
+
+    .carousel-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
     #carousel {
       width: 100%;
-      height: 500px;
+      height: 600px;
       background: #000;
-      border-radius: 8px;
+      border-radius: 16px;
       overflow: hidden;
       position: relative;
+      cursor: grab;
     }
-    
-    .controls {
-      margin-top: 2rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1.5rem;
+
+    #carousel:active {
+      cursor: grabbing;
     }
-    
-    .control-group {
-      background: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 8px;
-    }
-    
-    .control-group h3 {
-      margin-bottom: 1rem;
-      color: #495057;
-      font-size: 1.1rem;
-    }
-    
-    .control-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      color: #6c757d;
-      font-size: 0.9rem;
-    }
-    
-    select, input[type="range"] {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ced4da;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    
-    input[type="range"] {
-      padding: 0;
-    }
-    
-    .range-value {
-      display: inline-block;
-      margin-left: 0.5rem;
-      color: #007bff;
-      font-weight: 600;
-    }
-    
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-      width: 100%;
-    }
-    
-    button:hover {
-      background: #0056b3;
-    }
-    
-    button:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 1rem;
-    }
-    
-    .button-group button {
-      flex: 1;
-    }
-    
-    .info {
-      background: #e9ecef;
-      padding: 1rem;
-      border-radius: 5px;
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #495057;
-    }
-    
-    .loading {
+
+    /* Custom Navigation Buttons */
+    .carousel-nav {
       position: absolute;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 1.2rem;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: rgba(26, 26, 36, 0.9);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s;
+      z-index: 10;
     }
-    
+
+    .carousel-nav:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .carousel-nav.prev {
+      left: 2rem;
+    }
+
+    .carousel-nav.next {
+      right: 2rem;
+    }
+
+    .carousel-nav svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Pagination Dots */
+    .carousel-pagination {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .pagination-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .pagination-dot:hover {
+      background: rgba(255, 255, 255, 0.6);
+      transform: scale(1.2);
+    }
+
+    .pagination-dot.active {
+      background: var(--primary);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* Controls Section */
+    .controls-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .control-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+    }
+
+    .control-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(91, 95, 255, 0.2);
+    }
+
+    .control-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .control-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-icon svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      cursor: pointer;
+      appearance: none;
+      transition: all 0.3s;
+    }
+
+    select:hover {
+      border-color: var(--primary);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(91, 95, 255, 0.1);
+    }
+
+    .select-wrapper::after {
+      content: '▼';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    /* Range Slider */
+    .range-container {
+      position: relative;
+    }
+
+    .range-value {
+      position: absolute;
+      right: 0;
+      top: -1.5rem;
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-dark);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(91, 95, 255, 0.3);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 12px rgba(91, 95, 255, 0.5);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(91, 95, 255, 0.3);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(91, 95, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card);
+      border-color: var(--primary);
+    }
+
+    .btn-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Info Card */
+    .info-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .status-indicator.active {
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .status-indicator.inactive {
+      background: var(--error);
+    }
+
+    /* Loading State */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(15, 15, 20, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      z-index: 100;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
     @media (max-width: 768px) {
-      #carousel {
-        height: 300px;
+      .hero-title {
+        font-size: 2.5rem;
       }
-      
-      .controls {
+
+      #carousel {
+        height: 400px;
+      }
+
+      .carousel-nav {
+        width: 40px;
+        height: 40px;
+      }
+
+      .carousel-nav.prev {
+        left: 1rem;
+      }
+
+      .carousel-nav.next {
+        right: 1rem;
+      }
+
+      .controls-section {
         grid-template-columns: 1fr;
       }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* Effect Preview Grid */
+    .effect-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .effect-preview-btn {
+      padding: 0.5rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: var(--text-secondary);
+    }
+
+    .effect-preview-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .effect-preview-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
     }
   </style>
 </head>
 <body>
-  <div class="demo-container">
-    <h1>WebGL Carousel デモ</h1>
-    
-    <div class="carousel-wrapper">
-      <div id="carousel">
-        <div class="loading">Loading...</div>
-      </div>
+  <div class="bg-gradient"></div>
+  
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">WebGL Carousel</div>
+      <ul class="nav-links">
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="#demo">デモ</a></li>
+        <li><a href="index.html#api">API</a></li>
+        <li><a href="https://github.com/northprint/webgl-carousel" target="_blank">GitHub</a></li>
+      </ul>
     </div>
-    
-    <div class="controls">
-      <div class="control-group">
-        <h3>エフェクト選択</h3>
-        <label for="effectSelect">トランジションエフェクト</label>
-        <select id="effectSelect">
-          <option value="fade">Fade</option>
-          <option value="slideLeft">Slide Left</option>
-          <option value="slideRight">Slide Right</option>
-          <option value="slideUp">Slide Up</option>
-          <option value="slideDown">Slide Down</option>
-          <option value="flipHorizontal">Flip Horizontal</option>
-          <option value="flipVertical">Flip Vertical</option>
-          <option value="wave">Wave</option>
-          <option value="distortion">Distortion</option>
-          <option value="dissolve">Dissolve</option>
-          <option value="pixelDissolve">Pixel Dissolve</option>
-          <option value="circle">Circle</option>
-          <option value="morph">Morph</option>
-          <option value="glitch">Glitch</option>
-          <option value="pageFlip">Page Flip</option>
-        </select>
-      </div>
-      
-      <div class="control-group">
-        <h3>タイミング設定</h3>
-        <label for="durationSlider">
-          トランジション時間: <span class="range-value" id="durationValue">2000</span>ms
-        </label>
-        <input type="range" id="durationSlider" min="500" max="5000" step="100" value="2000">
+  </nav>
+
+  <div class="main-container">
+    <section class="hero-section">
+      <h1 class="hero-title">Interactive Demo</h1>
+      <p class="hero-subtitle">WebGL Carouselの全機能を体験してください。美しいトランジションエフェクトとスムーズなアニメーションをお試しください。</p>
+    </section>
+
+    <section class="carousel-section">
+      <div class="carousel-container">
+        <div id="carousel">
+          <div class="loading-overlay">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
         
-        <label for="intervalSlider">
-          自動再生間隔: <span class="range-value" id="intervalValue">4000</span>ms
-        </label>
-        <input type="range" id="intervalSlider" min="1000" max="10000" step="500" value="4000">
+        <button class="carousel-nav prev" id="prevBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        
+        <button class="carousel-nav next" id="nextBtn">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+        
+        <div class="carousel-pagination" id="pagination"></div>
       </div>
-      
-      <div class="control-group">
-        <h3>コントロール</h3>
-        <div class="button-group">
-          <button id="prevBtn">前へ</button>
-          <button id="nextBtn">次へ</button>
+    </section>
+
+    <section class="controls-section">
+      <!-- Effects Control -->
+      <div class="control-card">
+        <div class="control-title">
+          <div class="control-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+            </svg>
+          </div>
+          エフェクト設定
         </div>
-        <button id="autoplayBtn" style="margin-top: 1rem;">自動再生 開始</button>
-      </div>
-      
-      <div class="control-group">
-        <h3>情報</h3>
-        <div class="info">
-          <p>現在の画像: <strong id="currentIndex">1</strong> / <strong id="totalImages">-</strong></p>
-          <p>WebGL サポート: <strong id="webglSupport">確認中...</strong></p>
-          <p>使用レンダラー: <strong id="rendererType">-</strong></p>
+        
+        <div class="form-group">
+          <label class="form-label" for="effectSelect">トランジションエフェクト</label>
+          <div class="select-wrapper">
+            <select id="effectSelect">
+              <option value="fade">Fade - フェード</option>
+              <option value="slideLeft">Slide Left - 左スライド</option>
+              <option value="slideRight">Slide Right - 右スライド</option>
+              <option value="slideUp">Slide Up - 上スライド</option>
+              <option value="slideDown">Slide Down - 下スライド</option>
+              <option value="flipHorizontal">Flip Horizontal - 横回転</option>
+              <option value="flipVertical">Flip Vertical - 縦回転</option>
+              <option value="wave">Wave - 波</option>
+              <option value="distortion">Distortion - 歪み</option>
+              <option value="dissolve">Dissolve - ディゾルブ</option>
+              <option value="pixelDissolve">Pixel Dissolve - ピクセル分解</option>
+              <option value="circle">Circle - サークル</option>
+              <option value="morph">Morph - モーフィング</option>
+              <option value="glitch">Glitch - グリッチ</option>
+              <option value="pageFlip">Page Flip - ページめくり</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">クイック選択</label>
+          <div class="effect-preview-grid" id="effectPreviewGrid"></div>
         </div>
       </div>
-    </div>
+
+      <!-- Timing Control -->
+      <div class="control-card">
+        <div class="control-title">
+          <div class="control-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          タイミング設定
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="durationSlider">トランジション時間</label>
+          <div class="range-container">
+            <span class="range-value" id="durationValue">2000ms</span>
+            <input type="range" id="durationSlider" min="500" max="5000" step="100" value="2000">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="intervalSlider">自動再生間隔</label>
+          <div class="range-container">
+            <span class="range-value" id="intervalValue">4000ms</span>
+            <input type="range" id="intervalSlider" min="1000" max="10000" step="500" value="4000">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="autoplayBtn">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+          </svg>
+          自動再生を開始
+        </button>
+      </div>
+
+      <!-- Playback Control -->
+      <div class="control-card">
+        <div class="control-title">
+          <div class="control-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v14l-8-7z"></path>
+            </svg>
+          </div>
+          再生コントロール
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="prevBtnAlt">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+            </svg>
+            前へ
+          </button>
+          <button class="btn btn-secondary" id="nextBtnAlt">
+            次へ
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="info-card">
+          <div class="info-item">
+            <span class="info-label">現在の画像</span>
+            <span class="info-value"><span id="currentIndex">1</span> / <span id="totalImages">5</span></span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">WebGL サポート</span>
+            <span class="info-value">
+              <span class="status-indicator" id="webglIndicator"></span>
+              <span id="webglSupport">確認中...</span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">レンダラー</span>
+            <span class="info-value" id="rendererType">-</span>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="./dist/webgl-carousel.umd.js"></script>
   <script>
-    // Sample images
+    // Configuration
     const images = [
-      'https://picsum.photos/800/600?random=1',
-      'https://picsum.photos/800/600?random=2',
-      'https://picsum.photos/800/600?random=3',
-      'https://picsum.photos/800/600?random=4',
-      'https://picsum.photos/800/600?random=5',
+      'https://picsum.photos/1200/800?random=1',
+      'https://picsum.photos/1200/800?random=2', 
+      'https://picsum.photos/1200/800?random=3',
+      'https://picsum.photos/1200/800?random=4',
+      'https://picsum.photos/1200/800?random=5',
+    ];
+    
+    const effects = [
+      'fade', 'slideLeft', 'slideRight', 'slideUp', 'slideDown',
+      'flipHorizontal', 'flipVertical', 'wave', 'distortion',
+      'dissolve', 'pixelDissolve', 'circle', 'morph', 'glitch', 'pageFlip'
     ];
     
     let carousel;
     let isAutoplay = false;
+    let currentEffect = 'fade';
     
-    // Initialize carousel
+    // Initialize
     document.addEventListener('DOMContentLoaded', () => {
-      // Get carousel class
+      initializeCarousel();
+      setupEventListeners();
+      createPagination();
+      createEffectPreviews();
+      updateWebGLStatus();
+    });
+    
+    function initializeCarousel() {
       const CarouselClass = WebGLCarousel.default || WebGLCarousel.WebGLCarousel || WebGLCarousel;
       
       carousel = new CarouselClass({
         container: '#carousel',
         images: images,
-        effect: 'fade',
+        effect: currentEffect,
         autoplay: false,
         transitionDuration: 2000,
-        interval: 4000,
+        autoplayInterval: 4000,
         onImageChange: (index) => {
-          document.getElementById('currentIndex').textContent = index + 1;
+          updateCurrentIndex(index);
+          updatePagination(index);
         },
         onReady: () => {
-          document.querySelector('.loading').style.display = 'none';
-          document.getElementById('totalImages').textContent = images.length;
-          
-          // Check WebGL support
-          const canvas = document.createElement('canvas');
-          const webgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-          document.getElementById('webglSupport').textContent = webgl ? '有効' : '無効';
-          
-          // Check renderer type
-          const isWebGL = carousel.renderer && carousel.renderer.constructor.name.includes('WebGL');
-          document.getElementById('rendererType').textContent = isWebGL ? 'WebGL' : 'Canvas 2D';
+          document.querySelector('.loading-overlay').style.display = 'none';
+          updateRendererInfo();
         }
       });
+    }
+    
+    function setupEventListeners() {
+      // Navigation
+      document.getElementById('prevBtn').addEventListener('click', () => carousel.previous());
+      document.getElementById('nextBtn').addEventListener('click', () => carousel.next());
+      document.getElementById('prevBtnAlt').addEventListener('click', () => carousel.previous());
+      document.getElementById('nextBtnAlt').addEventListener('click', () => carousel.next());
       
       // Effect selector
       document.getElementById('effectSelect').addEventListener('change', (e) => {
-        carousel.setEffect(e.target.value);
+        currentEffect = e.target.value;
+        carousel.setEffect(currentEffect);
+        updateEffectPreviews();
       });
       
-      // Duration slider
+      // Sliders
       document.getElementById('durationSlider').addEventListener('input', (e) => {
         const value = e.target.value;
-        document.getElementById('durationValue').textContent = value;
+        document.getElementById('durationValue').textContent = value + 'ms';
         carousel.setTransitionDuration(parseInt(value));
       });
       
-      // Interval slider
       document.getElementById('intervalSlider').addEventListener('input', (e) => {
         const value = e.target.value;
-        document.getElementById('intervalValue').textContent = value;
-        carousel.setAutoplayInterval(parseInt(value));
+        document.getElementById('intervalValue').textContent = value + 'ms';
+        carousel.setAutoplay(isAutoplay, parseInt(value));
       });
       
-      // Navigation buttons
-      document.getElementById('prevBtn').addEventListener('click', () => {
-        carousel.previous();
-      });
-      
-      document.getElementById('nextBtn').addEventListener('click', () => {
-        carousel.next();
-      });
-      
-      // Autoplay button
+      // Autoplay
       const autoplayBtn = document.getElementById('autoplayBtn');
       autoplayBtn.addEventListener('click', () => {
         isAutoplay = !isAutoplay;
         if (isAutoplay) {
           carousel.play();
-          autoplayBtn.textContent = '自動再生 停止';
+          autoplayBtn.innerHTML = `
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
+            </svg>
+            自動再生を停止
+          `;
         } else {
           carousel.pause();
-          autoplayBtn.textContent = '自動再生 開始';
+          autoplayBtn.innerHTML = `
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
+            </svg>
+            自動再生を開始
+          `;
         }
       });
       
       // Keyboard navigation
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-          carousel.previous();
-        } else if (e.key === 'ArrowRight') {
-          carousel.next();
+        if (e.key === 'ArrowLeft') carousel.previous();
+        else if (e.key === 'ArrowRight') carousel.next();
+        else if (e.key === ' ') {
+          e.preventDefault();
+          document.getElementById('autoplayBtn').click();
         }
       });
-    });
+      
+      // Touch/swipe support
+      let touchStartX = 0;
+      const carouselEl = document.getElementById('carousel');
+      
+      carouselEl.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      });
+      
+      carouselEl.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) carousel.next();
+          else carousel.previous();
+        }
+      });
+    }
+    
+    function createPagination() {
+      const pagination = document.getElementById('pagination');
+      
+      for (let i = 0; i < images.length; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'pagination-dot';
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => carousel.goTo(i));
+        pagination.appendChild(dot);
+      }
+    }
+    
+    function createEffectPreviews() {
+      const grid = document.getElementById('effectPreviewGrid');
+      
+      effects.forEach(effect => {
+        const btn = document.createElement('button');
+        btn.className = 'effect-preview-btn';
+        btn.textContent = effect.charAt(0).toUpperCase() + effect.slice(1);
+        btn.dataset.effect = effect;
+        
+        if (effect === currentEffect) {
+          btn.classList.add('active');
+        }
+        
+        btn.addEventListener('click', () => {
+          currentEffect = effect;
+          carousel.setEffect(effect);
+          document.getElementById('effectSelect').value = effect;
+          updateEffectPreviews();
+        });
+        
+        grid.appendChild(btn);
+      });
+    }
+    
+    function updateEffectPreviews() {
+      document.querySelectorAll('.effect-preview-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.effect === currentEffect);
+      });
+    }
+    
+    function updateCurrentIndex(index) {
+      document.getElementById('currentIndex').textContent = index + 1;
+    }
+    
+    function updatePagination(index) {
+      document.querySelectorAll('.pagination-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+    }
+    
+    function updateWebGLStatus() {
+      const canvas = document.createElement('canvas');
+      const webgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const isSupported = !!webgl;
+      
+      document.getElementById('webglSupport').textContent = isSupported ? '有効' : '無効';
+      const indicator = document.getElementById('webglIndicator');
+      indicator.classList.add(isSupported ? 'active' : 'inactive');
+    }
+    
+    function updateRendererInfo() {
+      const rendererType = carousel.isUsingWebGL ? carousel.isUsingWebGL() ? 'WebGL' : 'Canvas 2D' : 'Canvas 2D';
+      document.getElementById('rendererType').textContent = rendererType;
+    }
   </script>
 </body>
 </html>
