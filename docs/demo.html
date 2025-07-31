@@ -744,12 +744,57 @@
   <script src="./dist/webgl-carousel.umd.js"></script>
   <script>
     // Configuration
+    // Generate sample images dynamically to avoid CORS issues
+    const generateSampleImage = (text, bgColor, index) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 800;
+      const ctx = canvas.getContext('2d');
+      
+      // Background
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, 1200, 800);
+      
+      // Gradient overlay
+      const gradient = ctx.createLinearGradient(0, 0, 1200, 800);
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1200, 800);
+      
+      // Pattern
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * 60, 0);
+        ctx.lineTo(i * 60, 800);
+        ctx.stroke();
+      }
+      
+      // Text
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 72px Inter, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 10;
+      ctx.fillText(text, 600, 350);
+      
+      // Subtitle
+      ctx.font = '36px Inter, -apple-system, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.fillText(`Sample Image ${index}`, 600, 450);
+      
+      return canvas.toDataURL('image/png');
+    };
+    
     const images = [
-      'https://picsum.photos/1200/800?random=1',
-      'https://picsum.photos/1200/800?random=2', 
-      'https://picsum.photos/1200/800?random=3',
-      'https://picsum.photos/1200/800?random=4',
-      'https://picsum.photos/1200/800?random=5',
+      generateSampleImage('WebGL Carousel', '#5B5FFF', 1),
+      generateSampleImage('Beautiful Effects', '#FF5B8F', 2),
+      generateSampleImage('Smooth Transitions', '#4ADE80', 3),
+      generateSampleImage('High Performance', '#FCD34D', 4),
+      generateSampleImage('Easy to Use', '#F87171', 5),
     ];
     
     const effects = [
