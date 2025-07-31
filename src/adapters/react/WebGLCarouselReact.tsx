@@ -79,10 +79,10 @@ export const WebGLCarouselReact = forwardRef<WebGLCarouselReactRef, WebGLCarouse
       const carousel = new WebGLCarousel({
         ...carouselOptions,
         container: containerRef.current,
-        onImageChange: onImageChange || carouselOptions.onImageChange,
-        onTransitionStart: onTransitionStart || carouselOptions.onTransitionStart,
-        onTransitionEnd: onTransitionEnd || carouselOptions.onTransitionEnd,
-        onError: onError || carouselOptions.onError,
+        onImageChange: onImageChange,
+        onTransitionStart: onTransitionStart,
+        onTransitionEnd: onTransitionEnd,
+        onError: onError,
       });
 
       carouselRef.current = carousel;

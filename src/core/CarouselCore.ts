@@ -182,11 +182,14 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       if (loaded === 1 && this.loadedImages.size === 0) {
         // First image loaded, can start rendering
         const startIndex = this.stateManager.get('currentIndex');
-        const initialImage = this.imageLoader.getFromCache(images[startIndex]);
-        if (initialImage) {
-          this.loadedImages.set(images[startIndex], initialImage);
-          this.emit('imageLoaded', startIndex, initialImage);
-          this.prepareInitialRender(initialImage, startIndex);
+        const imageUrl = images[startIndex];
+        if (imageUrl) {
+          const initialImage = this.imageLoader.getFromCache(imageUrl);
+          if (initialImage) {
+            this.loadedImages.set(imageUrl, initialImage);
+            this.emit('imageLoaded', startIndex, initialImage);
+            this.prepareInitialRender(initialImage, startIndex);
+          }
         }
       }
     });
@@ -266,7 +269,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
         if (effectName === 'trianglePeelV2' && effect) {
           try {
             // Check if effect requires custom mesh (WebGL 2.0)
-            if (this.renderer instanceof WebGL2Renderer && effect.requiresCustomMesh?.()) {
+            if (this.renderer instanceof WebGL2Renderer && effect.requiresCustomMesh) {
               const mesh = effect.getMesh?.();
               if (!mesh || !mesh.positions || !mesh.indices) {
                 console.error(
@@ -280,7 +283,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
                   indices: mesh.indices,
                   texCoords: mesh.texCoords,
                   normals: mesh.normals,
-                  instanceData: effect.getInstanceData?.() || undefined,
+                  instanceData: effect.getInstanceData?.()?.positions || undefined,
                 });
               }
             }
@@ -341,7 +344,9 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
 
           if (this.renderer instanceof WebGL2Renderer && effect?.getInstanceData) {
             const instanceData = effect.getInstanceData();
-            const instanceCount = instanceData ? instanceData.length / 12 : undefined;
+            const instanceCount = instanceData?.positions
+              ? instanceData.positions.length / 12
+              : undefined;
             // Only use instanced rendering if we actually have instance data
             if (instanceCount && instanceCount > 0) {
               this.renderer.render(
@@ -500,7 +505,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       const effect = this.effectManager.get(effectName);
 
       // Check if effect requires WebGL 2.0
-      if (effect && effect.requiresWebGL2?.()) {
+      if (effect && effect.requiresWebGL2) {
         if (!(this.renderer instanceof WebGL2Renderer)) {
           console.warn(
             `Effect "${effectName}" requires WebGL 2.0, but current renderer is ${this.renderer?.constructor.name}. Falling back to fade effect.`,

@@ -12,12 +12,14 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
   private canvas: HTMLCanvasElement;
   private options: Required<WebGLCarouselOptions>;
   private isInitialized = false;
+  private images: string[];
 
   constructor(options: WebGLCarouselOptions) {
     super();
 
     // Validate and set options
     this.options = this.validateOptions(options);
+    this.images = this.options.images;
 
     // Get container element
     this.container = this.getContainer(this.options.container);
@@ -53,6 +55,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       preload: options.preload ?? true,
       fallbackToCanvas2D: options.fallbackToCanvas2D ?? true,
       transitionDuration: options.transitionDuration ?? 1000,
+      startIndex: options.startIndex ?? 0,
       onImageChange: options.onImageChange || (() => {}),
       onTransitionStart: options.onTransitionStart || (() => {}),
       onTransitionEnd: options.onTransitionEnd || (() => {}),
@@ -157,20 +160,21 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
 
   private setupEventListeners(): void {
     // Forward core events
-    this.core.on('imageChange', (index) => {
+    this.core.on('imageChange', (...args: unknown[]) => {
+      const index = args[0] as number;
       this.emit('imageChange', index);
-      this.options.onImageChange(index);
+      this.options.onImageChange?.(index);
       this.updatePagination(index);
     });
 
-    this.core.on('transitionStart', (from, to) => {
+    this.core.on('transitionStart', (from: number, to: number) => {
       this.emit('transitionStart', from, to);
-      this.options.onTransitionStart(from, to);
+      this.options.onTransitionStart?.(from, to);
     });
 
-    this.core.on('transitionEnd', (index) => {
+    this.core.on('transitionEnd', (index: number) => {
       this.emit('transitionEnd', index);
-      this.options.onTransitionEnd(index);
+      this.options.onTransitionEnd?.(index);
     });
 
     this.core.on('error', (error) => {
@@ -182,7 +186,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
 
   private handleError(error: Error): void {
     this.emit('error', error);
-    this.options.onError(error);
+    this.options.onError?.(error);
     console.error('WebGLCarousel error:', error);
   }
 

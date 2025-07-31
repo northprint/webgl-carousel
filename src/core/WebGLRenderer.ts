@@ -273,7 +273,7 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
     currentTexture: WebGLTexture | null,
     nextTexture: WebGLTexture | null,
     progress: number,
-    additionalUniforms?: Record<string, number | number[]>,
+    additionalUniforms?: Record<string, number | number[] | Float32Array>,
     currentImageSrc?: string,
     nextImageSrc?: string,
   ): void {
@@ -344,19 +344,25 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
       Object.entries(additionalUniforms).forEach(([name, value]) => {
         const location = this.gl!.getUniformLocation(this.program!, name);
         if (location) {
-          if (Array.isArray(value)) {
-            switch (value.length) {
+          if (Array.isArray(value) || value instanceof Float32Array) {
+            const len = value.length;
+            switch (len) {
               case 2:
-                this.gl!.uniform2fv(location, value);
+                this.gl!.uniform2fv(location, value as Float32Array | number[]);
                 break;
               case 3:
-                this.gl!.uniform3fv(location, value);
+                this.gl!.uniform3fv(location, value as Float32Array | number[]);
                 break;
               case 4:
-                this.gl!.uniform4fv(location, value);
+                this.gl!.uniform4fv(location, value as Float32Array | number[]);
+                break;
+              default:
+                if (len === 1) {
+                  this.gl!.uniform1f(location, (value as number[])[0] ?? 0);
+                }
                 break;
             }
-          } else {
+          } else if (typeof value === 'number') {
             this.gl!.uniform1f(location, value);
           }
         }

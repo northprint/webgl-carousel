@@ -26,12 +26,12 @@ export abstract class BaseEffect implements IEffect {
   onAfterRender?(gl: WebGLRenderingContext | WebGL2RenderingContext): void;
 
   // WebGL 2.0 support
-  requiresWebGL2?(): boolean {
+  get requiresWebGL2(): boolean {
     return false;
   }
 
   // Custom mesh support
-  requiresCustomMesh?(): boolean {
+  get requiresCustomMesh(): boolean {
     return false;
   }
 
@@ -40,8 +40,12 @@ export abstract class BaseEffect implements IEffect {
   }
 
   // Instance data for instanced rendering
-  getInstanceData?(): Float32Array | null {
-    return null;
+  getInstanceData?(): { positions: Float32Array; offsets: Float32Array; scales: Float32Array } {
+    return {
+      positions: new Float32Array(0),
+      offsets: new Float32Array(0),
+      scales: new Float32Array(0),
+    };
   }
 
   // Transform feedback varyings for WebGL 2.0

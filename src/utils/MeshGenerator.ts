@@ -116,9 +116,9 @@ export class MeshGenerator {
       const triangle = mesh.triangles[i];
 
       // Position (triangle center)
-      instanceData[offset] = triangle.center[0];
-      instanceData[offset + 1] = triangle.center[1];
-      instanceData[offset + 2] = triangle.center[2];
+      instanceData[offset] = triangle?.center[0] ?? 0;
+      instanceData[offset + 1] = triangle?.center[1] ?? 0;
+      instanceData[offset + 2] = triangle?.center[2] ?? 0;
 
       // Velocity (initially zero)
       instanceData[offset + 3] = 0;
@@ -177,12 +177,16 @@ export class MeshGenerator {
 
     // Fill vertex data
     for (let i = 0; i < points.length; i++) {
-      positions[i * 3] = points[i][0];
-      positions[i * 3 + 1] = points[i][1];
+      const point = points[i];
+      if (!point) continue;
+      positions[i * 3] = point[0] ?? 0;
+      positions[i * 3 + 1] = point[1] ?? 0;
       positions[i * 3 + 2] = 0;
 
-      texCoords[i * 2] = points[i][0] / width + 0.5;
-      texCoords[i * 2 + 1] = 1 - (points[i][1] / height + 0.5);
+      const point2 = points[i];
+      if (!point2) continue;
+      texCoords[i * 2] = (point2[0] ?? 0) / width + 0.5;
+      texCoords[i * 2 + 1] = 1 - ((point2[1] ?? 0) / height + 0.5);
 
       normals[i * 3] = 0;
       normals[i * 3 + 1] = 0;
@@ -192,11 +196,12 @@ export class MeshGenerator {
     // Fill index data and create triangle objects
     for (let i = 0; i < triangles.length; i++) {
       const tri = triangles[i];
-      indices[i * 3] = tri[0];
-      indices[i * 3 + 1] = tri[1];
-      indices[i * 3 + 2] = tri[2];
+      if (!tri) continue;
+      indices[i * 3] = tri[0] ?? 0;
+      indices[i * 3 + 1] = tri[1] ?? 0;
+      indices[i * 3 + 2] = tri[2] ?? 0;
 
-      const triangleObj = this.createTriangle(positions, tri, i);
+      const triangleObj = this.createTriangle(positions, tri ?? [0, 0, 0], i);
       triangleObjects.push(triangleObj);
     }
 
@@ -221,33 +226,45 @@ export class MeshGenerator {
 
     for (let i = 0; i < 3; i++) {
       const vIdx = vertexIndices[i];
-      vertices[i * 3] = positions[vIdx * 3];
-      vertices[i * 3 + 1] = positions[vIdx * 3 + 1];
-      vertices[i * 3 + 2] = positions[vIdx * 3 + 2];
+      if (vIdx === undefined) continue;
+      vertices[i * 3] = positions[vIdx * 3] ?? 0;
+      vertices[i * 3 + 1] = positions[vIdx * 3 + 1] ?? 0;
+      vertices[i * 3 + 2] = positions[vIdx * 3 + 2] ?? 0;
 
-      centerX += vertices[i * 3];
-      centerY += vertices[i * 3 + 1];
-      centerZ += vertices[i * 3 + 2];
+      centerX += vertices[i * 3] ?? 0;
+      centerY += vertices[i * 3 + 1] ?? 0;
+      centerZ += vertices[i * 3 + 2] ?? 0;
     }
 
     const center = new Float32Array([centerX / 3, centerY / 3, centerZ / 3]);
 
     // Calculate normal using cross product
-    const v1 = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
-    const v2 = [vertices[6] - vertices[0], vertices[7] - vertices[1], vertices[8] - vertices[2]];
+    const v1 = [
+      (vertices[3] ?? 0) - (vertices[0] ?? 0),
+      (vertices[4] ?? 0) - (vertices[1] ?? 0),
+      (vertices[5] ?? 0) - (vertices[2] ?? 0),
+    ];
+    const v2 = [
+      (vertices[6] ?? 0) - (vertices[0] ?? 0),
+      (vertices[7] ?? 0) - (vertices[1] ?? 0),
+      (vertices[8] ?? 0) - (vertices[2] ?? 0),
+    ];
 
     const normal = new Float32Array([
-      v1[1] * v2[2] - v1[2] * v2[1],
-      v1[2] * v2[0] - v1[0] * v2[2],
-      v1[0] * v2[1] - v1[1] * v2[0],
+      (v1[1] ?? 0) * (v2[2] ?? 0) - (v1[2] ?? 0) * (v2[1] ?? 0),
+      (v1[2] ?? 0) * (v2[0] ?? 0) - (v1[0] ?? 0) * (v2[2] ?? 0),
+      (v1[0] ?? 0) * (v2[1] ?? 0) - (v1[1] ?? 0) * (v2[0] ?? 0),
     ]);
 
     // Normalize
-    const length = Math.sqrt(normal[0] ** 2 + normal[1] ** 2 + normal[2] ** 2);
+    const n0 = normal[0] ?? 0;
+    const n1 = normal[1] ?? 0;
+    const n2 = normal[2] ?? 0;
+    const length = Math.sqrt(n0 ** 2 + n1 ** 2 + n2 ** 2);
     if (length > 0) {
-      normal[0] /= length;
-      normal[1] /= length;
-      normal[2] /= length;
+      normal[0] = n0 / length;
+      normal[1] = n1 / length;
+      normal[2] = n2 / length;
     }
 
     return {
@@ -266,9 +283,11 @@ export class MeshGenerator {
     const triangles: Array<[number, number, number]> = [];
 
     // Sort points by x coordinate
-    const sortedIndices = Array.from({ length: points.length }, (_, i) => i).sort(
-      (a, b) => points[a][0] - points[b][0],
-    );
+    const sortedIndices = Array.from({ length: points.length }, (_, i) => i).sort((a, b) => {
+      const pa = points[a];
+      const pb = points[b];
+      return (pa?.[0] ?? 0) - (pb?.[0] ?? 0);
+    });
 
     // Create triangles by connecting nearby points
     for (let i = 0; i < sortedIndices.length - 2; i++) {
@@ -278,15 +297,19 @@ export class MeshGenerator {
           const b = sortedIndices[j];
           const c = sortedIndices[k];
 
+          if (a === undefined || b === undefined || c === undefined) continue;
+
           // Check if triangle is valid (not too thin)
           const area =
             Math.abs(
-              (points[b][0] - points[a][0]) * (points[c][1] - points[a][1]) -
-                (points[c][0] - points[a][0]) * (points[b][1] - points[a][1]),
+              ((points[b]?.[0] ?? 0) - (points[a]?.[0] ?? 0)) *
+                ((points[c]?.[1] ?? 0) - (points[a]?.[1] ?? 0)) -
+                ((points[c]?.[0] ?? 0) - (points[a]?.[0] ?? 0)) *
+                  ((points[b]?.[1] ?? 0) - (points[a]?.[1] ?? 0)),
             ) / 2;
 
           if (area > 0.01) {
-            triangles.push([a, b, c]);
+            triangles.push([a, b, c] as [number, number, number]);
           }
         }
       }

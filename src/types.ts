@@ -39,6 +39,7 @@ export interface WebGLCarouselOptions {
   preload?: boolean;
   fallbackToCanvas2D?: boolean;
   transitionDuration?: number;
+  startIndex?: number;
   onImageChange?: (index: number) => void;
   onTransitionStart?: (from: number, to: number) => void;
   onTransitionEnd?: (index: number) => void;

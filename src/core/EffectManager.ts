@@ -3,11 +3,22 @@ export interface IEffect {
   readonly vertexShader: string;
   readonly fragmentShader: string;
 
-  getUniforms(progress: number): Record<string, number | number[]>;
+  getUniforms(progress: number): Record<string, number | number[] | Float32Array>;
 
   // Optional hooks
   onBeforeRender?(gl: WebGLRenderingContext): void;
   onAfterRender?(gl: WebGLRenderingContext): void;
+
+  // Optional properties for advanced effects
+  readonly requiresWebGL2?: boolean;
+  readonly requiresCustomMesh?: boolean;
+  getMesh?(): {
+    positions: Float32Array;
+    indices: Uint16Array;
+    texCoords: Float32Array;
+    normals?: Float32Array;
+  };
+  getInstanceData?(): { positions: Float32Array; offsets: Float32Array; scales: Float32Array };
 }
 
 export class EffectManager {

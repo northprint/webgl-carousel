@@ -1,4 +1,5 @@
 import { BaseEffect } from './BaseEffect';
+import { TriangleMesh } from '../utils/MeshGenerator';
 
 export interface CustomEffectOptions {
   name: string;
@@ -51,26 +52,46 @@ export class CustomEffect extends BaseEffect {
     return baseUniforms;
   }
 
-  requiresWebGL2(): boolean {
+  get requiresWebGL2(): boolean {
     return this._requiresWebGL2;
   }
 
-  requiresCustomMesh(): boolean {
+  get requiresCustomMesh(): boolean {
     return this._requiresCustomMesh;
   }
 
-  getMesh(): { positions: Float32Array; indices: Uint16Array } {
+  getMesh(): TriangleMesh {
     if (this._getMesh) {
-      return this._getMesh();
+      const mesh = this._getMesh();
+      return {
+        positions: mesh.positions,
+        indices: mesh.indices,
+        texCoords: new Float32Array(0), // Default empty
+        normals: new Float32Array(0), // Default empty
+        triangles: [],
+      };
     }
     throw new Error('getMesh() not implemented for this custom effect');
   }
 
-  getInstanceData(): Float32Array | null {
+  getInstanceData(): { positions: Float32Array; offsets: Float32Array; scales: Float32Array } {
     if (this._getInstanceData) {
-      return this._getInstanceData();
+      const data = this._getInstanceData();
+      if (data) {
+        // Convert Float32Array to the expected format
+        return {
+          positions: data,
+          offsets: new Float32Array(0),
+          scales: new Float32Array(0),
+        };
+      }
     }
-    return null;
+    // Return empty data instead of null to match BaseEffect
+    return {
+      positions: new Float32Array(0),
+      offsets: new Float32Array(0),
+      scales: new Float32Array(0),
+    };
   }
 
   getTransformFeedbackVaryings(): string[] {

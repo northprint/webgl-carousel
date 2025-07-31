@@ -107,6 +107,7 @@ export class PhysicsEngine {
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
+      if (!particle) continue;
 
       // Update age and check lifetime
       particle.age += dt;
@@ -121,9 +122,9 @@ export class PhysicsEngine {
       particle.acceleration[2] = 0;
 
       // Apply gravity
-      particle.acceleration[0] += this.config.gravity[0];
-      particle.acceleration[1] += this.config.gravity[1];
-      particle.acceleration[2] += this.config.gravity[2];
+      particle.acceleration[0] += this.config.gravity[0] ?? 0;
+      particle.acceleration[1] += this.config.gravity[1] ?? 0;
+      particle.acceleration[2] += this.config.gravity[2] ?? 0;
 
       // Apply forces
       for (const force of this.forces) {
@@ -131,29 +132,35 @@ export class PhysicsEngine {
       }
 
       // Update velocity
-      particle.velocity[0] += particle.acceleration[0] * dt;
-      particle.velocity[1] += particle.acceleration[1] * dt;
-      particle.velocity[2] += particle.acceleration[2] * dt;
+      const a0 = particle.acceleration[0] ?? 0;
+      const a1 = particle.acceleration[1] ?? 0;
+      const a2 = particle.acceleration[2] ?? 0;
+      particle.velocity[0] = (particle.velocity[0] ?? 0) + a0 * dt;
+      particle.velocity[1] = (particle.velocity[1] ?? 0) + a1 * dt;
+      particle.velocity[2] = (particle.velocity[2] ?? 0) + a2 * dt;
 
       // Apply damping
-      particle.velocity[0] *= particle.damping;
-      particle.velocity[1] *= particle.damping;
-      particle.velocity[2] *= particle.damping;
+      particle.velocity[0] = (particle.velocity[0] ?? 0) * particle.damping;
+      particle.velocity[1] = (particle.velocity[1] ?? 0) * particle.damping;
+      particle.velocity[2] = (particle.velocity[2] ?? 0) * particle.damping;
 
       // Update position
-      particle.position[0] += particle.velocity[0] * dt;
-      particle.position[1] += particle.velocity[1] * dt;
-      particle.position[2] += particle.velocity[2] * dt;
+      particle.position[0] = (particle.position[0] ?? 0) + (particle.velocity[0] ?? 0) * dt;
+      particle.position[1] = (particle.position[1] ?? 0) + (particle.velocity[1] ?? 0) * dt;
+      particle.position[2] = (particle.position[2] ?? 0) + (particle.velocity[2] ?? 0) * dt;
 
       // Update rotation
-      particle.rotation[0] += particle.angularVelocity[0] * dt;
-      particle.rotation[1] += particle.angularVelocity[1] * dt;
-      particle.rotation[2] += particle.angularVelocity[2] * dt;
+      particle.rotation[0] = (particle.rotation[0] ?? 0) + (particle.angularVelocity[0] ?? 0) * dt;
+      particle.rotation[1] = (particle.rotation[1] ?? 0) + (particle.angularVelocity[1] ?? 0) * dt;
+      particle.rotation[2] = (particle.rotation[2] ?? 0) + (particle.angularVelocity[2] ?? 0) * dt;
 
       // Apply angular damping
-      particle.angularVelocity[0] *= particle.damping;
-      particle.angularVelocity[1] *= particle.damping;
-      particle.angularVelocity[2] *= particle.damping;
+      const av0 = particle.angularVelocity[0];
+      const av1 = particle.angularVelocity[1];
+      const av2 = particle.angularVelocity[2];
+      if (av0 !== undefined) particle.angularVelocity[0] = av0 * particle.damping;
+      if (av1 !== undefined) particle.angularVelocity[1] = av1 * particle.damping;
+      if (av2 !== undefined) particle.angularVelocity[2] = av2 * particle.damping;
 
       // Check bounds collision
       if (this.bounds) {
@@ -168,25 +175,37 @@ export class PhysicsEngine {
     switch (force.type) {
       case 'gravity':
         if (force.direction) {
-          forceVector[0] = force.direction[0] * force.strength;
-          forceVector[1] = force.direction[1] * force.strength;
-          forceVector[2] = force.direction[2] * force.strength;
+          const d0 = force.direction[0];
+          const d1 = force.direction[1];
+          const d2 = force.direction[2];
+          if (d0 !== undefined) forceVector[0] = d0 * force.strength;
+          if (d1 !== undefined) forceVector[1] = d1 * force.strength;
+          if (d2 !== undefined) forceVector[2] = d2 * force.strength;
         }
         break;
 
       case 'wind':
         if (force.direction) {
-          forceVector[0] = force.direction[0] * force.strength;
-          forceVector[1] = force.direction[1] * force.strength;
-          forceVector[2] = force.direction[2] * force.strength;
+          const d0 = force.direction[0];
+          const d1 = force.direction[1];
+          const d2 = force.direction[2];
+          if (d0 !== undefined) forceVector[0] = d0 * force.strength;
+          if (d1 !== undefined) forceVector[1] = d1 * force.strength;
+          if (d2 !== undefined) forceVector[2] = d2 * force.strength;
         }
         break;
 
       case 'explosion':
         if (force.position) {
-          const dx = particle.position[0] - force.position[0];
-          const dy = particle.position[1] - force.position[1];
-          const dz = particle.position[2] - force.position[2];
+          const px = particle.position[0] ?? 0;
+          const py = particle.position[1] ?? 0;
+          const pz = particle.position[2] ?? 0;
+          const fx = force.position[0] ?? 0;
+          const fy = force.position[1] ?? 0;
+          const fz = force.position[2] ?? 0;
+          const dx = px - fx;
+          const dy = py - fy;
+          const dz = pz - fz;
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (force.radius && distance < force.radius) {
@@ -204,8 +223,12 @@ export class PhysicsEngine {
 
       case 'vortex':
         if (force.position) {
-          const dx = particle.position[0] - force.position[0];
-          const dy = particle.position[1] - force.position[1];
+          const px = particle.position[0] ?? 0;
+          const py = particle.position[1] ?? 0;
+          const fx = force.position[0] ?? 0;
+          const fy = force.position[1] ?? 0;
+          const dx = px - fx;
+          const dy = py - fy;
           const distance2D = Math.sqrt(dx * dx + dy * dy);
 
           if (distance2D > 0.001) {
@@ -228,9 +251,15 @@ export class PhysicsEngine {
 
       case 'attractor':
         if (force.position) {
-          const dx = force.position[0] - particle.position[0];
-          const dy = force.position[1] - particle.position[1];
-          const dz = force.position[2] - particle.position[2];
+          const px = particle.position[0] ?? 0;
+          const py = particle.position[1] ?? 0;
+          const pz = particle.position[2] ?? 0;
+          const fx = force.position[0] ?? 0;
+          const fy = force.position[1] ?? 0;
+          const fz = force.position[2] ?? 0;
+          const dx = fx - px;
+          const dy = fy - py;
+          const dz = fz - pz;
           const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
           if (distance > 0.001) {
@@ -244,51 +273,84 @@ export class PhysicsEngine {
     }
 
     // Apply force to acceleration (F = ma, so a = F/m)
-    particle.acceleration[0] += forceVector[0] / particle.mass;
-    particle.acceleration[1] += forceVector[1] / particle.mass;
-    particle.acceleration[2] += forceVector[2] / particle.mass;
+    const fv0 = forceVector[0] ?? 0;
+    const fv1 = forceVector[1] ?? 0;
+    const fv2 = forceVector[2] ?? 0;
+    const a0 = particle.acceleration[0];
+    const a1 = particle.acceleration[1];
+    const a2 = particle.acceleration[2];
+    if (a0 !== undefined) particle.acceleration[0] = a0 + fv0 / particle.mass;
+    if (a1 !== undefined) particle.acceleration[1] = a1 + fv1 / particle.mass;
+    if (a2 !== undefined) particle.acceleration[2] = a2 + fv2 / particle.mass;
   }
 
   private checkBoundsCollision(particle: PhysicsParticle): void {
     if (!this.bounds) return;
 
     // Check X bounds
-    if (particle.position[0] < this.bounds.min[0]) {
-      particle.position[0] = this.bounds.min[0];
-      particle.velocity[0] *= -this.config.restitution;
-      particle.velocity[1] *= 1 - this.config.friction;
-      particle.velocity[2] *= 1 - this.config.friction;
-    } else if (particle.position[0] > this.bounds.max[0]) {
-      particle.position[0] = this.bounds.max[0];
-      particle.velocity[0] *= -this.config.restitution;
-      particle.velocity[1] *= 1 - this.config.friction;
-      particle.velocity[2] *= 1 - this.config.friction;
+    const posX = particle.position[0] ?? 0;
+    const minX = this.bounds.min[0] ?? 0;
+    const maxX = this.bounds.max[0] ?? 0;
+    if (posX < minX) {
+      particle.position[0] = minX;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v0 !== undefined) particle.velocity[0] = v0 * -this.config.restitution;
+      if (v1 !== undefined) particle.velocity[1] = v1 * (1 - this.config.friction);
+      if (v2 !== undefined) particle.velocity[2] = v2 * (1 - this.config.friction);
+    } else if (posX > maxX) {
+      particle.position[0] = maxX;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v0 !== undefined) particle.velocity[0] = v0 * -this.config.restitution;
+      if (v1 !== undefined) particle.velocity[1] = v1 * (1 - this.config.friction);
+      if (v2 !== undefined) particle.velocity[2] = v2 * (1 - this.config.friction);
     }
 
     // Check Y bounds
-    if (particle.position[1] < this.bounds.min[1]) {
-      particle.position[1] = this.bounds.min[1];
-      particle.velocity[1] *= -this.config.restitution;
-      particle.velocity[0] *= 1 - this.config.friction;
-      particle.velocity[2] *= 1 - this.config.friction;
-    } else if (particle.position[1] > this.bounds.max[1]) {
-      particle.position[1] = this.bounds.max[1];
-      particle.velocity[1] *= -this.config.restitution;
-      particle.velocity[0] *= 1 - this.config.friction;
-      particle.velocity[2] *= 1 - this.config.friction;
+    const posY = particle.position[1] ?? 0;
+    const minY = this.bounds.min[1] ?? 0;
+    const maxY = this.bounds.max[1] ?? 0;
+    if (posY < minY) {
+      particle.position[1] = minY;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v1 !== undefined) particle.velocity[1] = v1 * -this.config.restitution;
+      if (v0 !== undefined) particle.velocity[0] = v0 * (1 - this.config.friction);
+      if (v2 !== undefined) particle.velocity[2] = v2 * (1 - this.config.friction);
+    } else if (posY > maxY) {
+      particle.position[1] = maxY;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v1 !== undefined) particle.velocity[1] = v1 * -this.config.restitution;
+      if (v0 !== undefined) particle.velocity[0] = v0 * (1 - this.config.friction);
+      if (v2 !== undefined) particle.velocity[2] = v2 * (1 - this.config.friction);
     }
 
     // Check Z bounds
-    if (particle.position[2] < this.bounds.min[2]) {
-      particle.position[2] = this.bounds.min[2];
-      particle.velocity[2] *= -this.config.restitution;
-      particle.velocity[0] *= 1 - this.config.friction;
-      particle.velocity[1] *= 1 - this.config.friction;
-    } else if (particle.position[2] > this.bounds.max[2]) {
-      particle.position[2] = this.bounds.max[2];
-      particle.velocity[2] *= -this.config.restitution;
-      particle.velocity[0] *= 1 - this.config.friction;
-      particle.velocity[1] *= 1 - this.config.friction;
+    const posZ = particle.position[2] ?? 0;
+    const minZ = this.bounds.min[2] ?? 0;
+    const maxZ = this.bounds.max[2] ?? 0;
+    if (posZ < minZ) {
+      particle.position[2] = minZ;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v2 !== undefined) particle.velocity[2] = v2 * -this.config.restitution;
+      if (v0 !== undefined) particle.velocity[0] = v0 * (1 - this.config.friction);
+      if (v1 !== undefined) particle.velocity[1] = v1 * (1 - this.config.friction);
+    } else if (posZ > maxZ) {
+      particle.position[2] = maxZ;
+      const v0 = particle.velocity[0];
+      const v1 = particle.velocity[1];
+      const v2 = particle.velocity[2];
+      if (v2 !== undefined) particle.velocity[2] = v2 * -this.config.restitution;
+      if (v0 !== undefined) particle.velocity[0] = v0 * (1 - this.config.friction);
+      if (v1 !== undefined) particle.velocity[1] = v1 * (1 - this.config.friction);
     }
   }
 
@@ -303,19 +365,19 @@ export class PhysicsEngine {
       const offset = i * 12;
 
       // Position
-      data[offset] = particle.position[0];
-      data[offset + 1] = particle.position[1];
-      data[offset + 2] = particle.position[2];
+      data[offset] = particle.position[0] ?? 0;
+      data[offset + 1] = particle.position[1] ?? 0;
+      data[offset + 2] = particle.position[2] ?? 0;
 
       // Velocity
-      data[offset + 3] = particle.velocity[0];
-      data[offset + 4] = particle.velocity[1];
-      data[offset + 5] = particle.velocity[2];
+      data[offset + 3] = particle.velocity[0] ?? 0;
+      data[offset + 4] = particle.velocity[1] ?? 0;
+      data[offset + 5] = particle.velocity[2] ?? 0;
 
       // Rotation
-      data[offset + 6] = particle.rotation[0];
-      data[offset + 7] = particle.rotation[1];
-      data[offset + 8] = particle.rotation[2];
+      data[offset + 6] = particle.rotation[0] ?? 0;
+      data[offset + 7] = particle.rotation[1] ?? 0;
+      data[offset + 8] = particle.rotation[2] ?? 0;
 
       // Extra data
       data[offset + 9] = particle.scale;
