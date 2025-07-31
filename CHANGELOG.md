@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-07-31
+
+### Added
+- Custom shader demo in documentation page
+- Shader editor with live preview functionality
+- Sample ripple effect for custom shaders
+- Image loading improvements with better error handling
+
+### Fixed
+- Fixed flip effects (flipHorizontal/flipVertical) not showing next image
+- Fixed shader compilation errors with uProgress redefinition
+- Fixed image loading issues with CORS
+- Fixed E2E test timeout issues in GitHub Actions
+- Fixed TypeScript strict mode errors with noUncheckedIndexedAccess
+
+### Changed
+- Replaced demo iframe with direct link to improve page performance
+- Updated all GitHub repository links to correct URL
+- Reduced E2E tests to chromium only for faster CI
+- Improved demo page UI with modern dark theme
+
+### Removed
+- Removed PageFlip effect completely from the library
+
 ## [0.1.0] - 2024-07-31
 
 ### Added
@@ -42,5 +66,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example code for all features
 - Framework-specific examples
 
-[Unreleased]: https://github.com/northprint/webgl-carousel/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/northprint/webgl-carousel/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/northprint/webgl-carousel/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/northprint/webgl-carousel/releases/tag/v0.1.0
