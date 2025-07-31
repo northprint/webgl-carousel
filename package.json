@@ -71,7 +71,7 @@
   "homepage": "https://northprint.github.io/webgl-carousel/",
   "devDependencies": {
     "@playwright/test": "^1.54.1",
-    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
