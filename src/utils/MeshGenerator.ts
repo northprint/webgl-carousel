@@ -21,7 +21,7 @@ export class MeshGenerator {
   static generateTriangleGrid(
     width: number,
     height: number,
-    subdivisions: number = 10
+    subdivisions: number = 10,
   ): TriangleMesh {
     const cellsX = subdivisions;
     const cellsY = subdivisions;
@@ -45,8 +45,8 @@ export class MeshGenerator {
         const v = y / cellsY;
 
         // Position (normalized to -1 to 1)
-        positions[index * 3] = (u * 2 - 1) * width / 2;
-        positions[index * 3 + 1] = (v * 2 - 1) * height / 2;
+        positions[index * 3] = ((u * 2 - 1) * width) / 2;
+        positions[index * 3 + 1] = ((v * 2 - 1) * height) / 2;
         positions[index * 3 + 2] = 0;
 
         // Texture coordinates
@@ -75,11 +75,7 @@ export class MeshGenerator {
         indices[triangleIndex * 3 + 2] = topRight;
 
         // Create triangle object
-        const tri1 = this.createTriangle(
-          positions,
-          [topLeft, bottomLeft, topRight],
-          triangleIndex
-        );
+        const tri1 = this.createTriangle(positions, [topLeft, bottomLeft, topRight], triangleIndex);
         triangles.push(tri1);
         triangleIndex++;
 
@@ -92,7 +88,7 @@ export class MeshGenerator {
         const tri2 = this.createTriangle(
           positions,
           [topRight, bottomLeft, bottomRight],
-          triangleIndex
+          triangleIndex,
         );
         triangles.push(tri2);
         triangleIndex++;
@@ -149,16 +145,16 @@ export class MeshGenerator {
   static generateDelaunayMesh(
     width: number,
     height: number,
-    numPoints: number = 100
+    numPoints: number = 100,
   ): TriangleMesh {
     // Generate random points
     const points: Array<[number, number]> = [];
-    
+
     // Add corner points to ensure full coverage
-    points.push([-width/2, -height/2]);
-    points.push([width/2, -height/2]);
-    points.push([-width/2, height/2]);
-    points.push([width/2, height/2]);
+    points.push([-width / 2, -height / 2]);
+    points.push([width / 2, -height / 2]);
+    points.push([-width / 2, height / 2]);
+    points.push([width / 2, height / 2]);
 
     // Add random interior points
     for (let i = 0; i < numPoints - 4; i++) {
@@ -169,7 +165,7 @@ export class MeshGenerator {
 
     // Simple triangulation (for demonstration - in production use a proper Delaunay library)
     const triangles = this.simpleTriangulation(points);
-    
+
     const numVertices = points.length;
     const numTriangles = triangles.length;
 
@@ -185,7 +181,7 @@ export class MeshGenerator {
       positions[i * 3 + 1] = points[i][1];
       positions[i * 3 + 2] = 0;
 
-      texCoords[i * 2] = (points[i][0] / width + 0.5);
+      texCoords[i * 2] = points[i][0] / width + 0.5;
       texCoords[i * 2 + 1] = 1 - (points[i][1] / height + 0.5);
 
       normals[i * 3] = 0;
@@ -216,10 +212,12 @@ export class MeshGenerator {
   private static createTriangle(
     positions: Float32Array,
     vertexIndices: number[],
-    index: number
+    index: number,
   ): Triangle {
     const vertices = new Float32Array(9);
-    let centerX = 0, centerY = 0, centerZ = 0;
+    let centerX = 0,
+      centerY = 0,
+      centerZ = 0;
 
     for (let i = 0; i < 3; i++) {
       const vIdx = vertexIndices[i];
@@ -235,16 +233,8 @@ export class MeshGenerator {
     const center = new Float32Array([centerX / 3, centerY / 3, centerZ / 3]);
 
     // Calculate normal using cross product
-    const v1 = [
-      vertices[3] - vertices[0],
-      vertices[4] - vertices[1],
-      vertices[5] - vertices[2],
-    ];
-    const v2 = [
-      vertices[6] - vertices[0],
-      vertices[7] - vertices[1],
-      vertices[8] - vertices[2],
-    ];
+    const v1 = [vertices[3] - vertices[0], vertices[4] - vertices[1], vertices[5] - vertices[2]];
+    const v2 = [vertices[6] - vertices[0], vertices[7] - vertices[1], vertices[8] - vertices[2]];
 
     const normal = new Float32Array([
       v1[1] * v2[2] - v1[2] * v2[1],
@@ -268,14 +258,17 @@ export class MeshGenerator {
     };
   }
 
-  private static simpleTriangulation(points: Array<[number, number]>): Array<[number, number, number]> {
+  private static simpleTriangulation(
+    points: Array<[number, number]>,
+  ): Array<[number, number, number]> {
     // Very simple triangulation - just connect nearby points
     // In production, use a proper Delaunay triangulation library
     const triangles: Array<[number, number, number]> = [];
-    
+
     // Sort points by x coordinate
-    const sortedIndices = Array.from({ length: points.length }, (_, i) => i)
-      .sort((a, b) => points[a][0] - points[b][0]);
+    const sortedIndices = Array.from({ length: points.length }, (_, i) => i).sort(
+      (a, b) => points[a][0] - points[b][0],
+    );
 
     // Create triangles by connecting nearby points
     for (let i = 0; i < sortedIndices.length - 2; i++) {
@@ -286,10 +279,11 @@ export class MeshGenerator {
           const c = sortedIndices[k];
 
           // Check if triangle is valid (not too thin)
-          const area = Math.abs(
-            (points[b][0] - points[a][0]) * (points[c][1] - points[a][1]) -
-            (points[c][0] - points[a][0]) * (points[b][1] - points[a][1])
-          ) / 2;
+          const area =
+            Math.abs(
+              (points[b][0] - points[a][0]) * (points[c][1] - points[a][1]) -
+                (points[c][0] - points[a][0]) * (points[b][1] - points[a][1]),
+            ) / 2;
 
           if (area > 0.01) {
             triangles.push([a, b, c]);

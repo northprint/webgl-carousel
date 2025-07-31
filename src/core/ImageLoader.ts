@@ -73,7 +73,7 @@ export class ImageLoader {
       } catch (error) {
         // Create a placeholder image for failed loads
         console.warn(`Failed to load image: ${url}`, error);
-        
+
         // Create a 1x1 transparent image as placeholder
         const canvas = document.createElement('canvas');
         canvas.width = 1;
@@ -83,11 +83,11 @@ export class ImageLoader {
           ctx.fillStyle = 'rgba(0, 0, 0, 0)';
           ctx.fillRect(0, 0, 1, 1);
         }
-        
+
         // Convert canvas to image element
         const img = new Image();
         img.src = canvas.toDataURL();
-        
+
         const placeholderImage: LoadedImage = {
           url: url,
           element: img,
@@ -95,7 +95,7 @@ export class ImageLoader {
           height: 1,
           aspectRatio: 1,
         };
-        
+
         results.push(placeholderImage);
         loaded++;
         onProgress?.(loaded, total);
@@ -167,7 +167,7 @@ export class ImageLoader {
       if (this.options.crossOrigin) {
         img.crossOrigin = this.options.crossOrigin;
       }
-      
+
       img.onload = handleLoad;
       img.onerror = handleError;
       img.src = url;

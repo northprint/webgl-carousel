@@ -80,10 +80,22 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
 
     // Y texture coordinates are flipped to correct for WebGL's coordinate system
     const vertices = new Float32Array([
-      -1.0, -1.0, 0.0, 1.0,  // Bottom-left
-       1.0, -1.0, 1.0, 1.0,  // Bottom-right
-      -1.0,  1.0, 0.0, 0.0,  // Top-left
-       1.0,  1.0, 1.0, 0.0,  // Top-right
+      -1.0,
+      -1.0,
+      0.0,
+      1.0, // Bottom-left
+      1.0,
+      -1.0,
+      1.0,
+      1.0, // Bottom-right
+      -1.0,
+      1.0,
+      0.0,
+      0.0, // Top-left
+      1.0,
+      1.0,
+      1.0,
+      0.0, // Top-right
     ]);
 
     this.vertexBuffer = this.gl.createBuffer();
@@ -198,7 +210,7 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
 
     // Get all active uniforms dynamically from the shader program
     const numUniforms = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORMS);
-    
+
     for (let i = 0; i < numUniforms; i++) {
       const info = this.gl.getActiveUniform(this.program, i);
       if (info) {
@@ -211,7 +223,7 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
 
     // Get all active attributes dynamically from the shader program
     const numAttributes = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_ATTRIBUTES);
-    
+
     for (let i = 0; i < numAttributes; i++) {
       const info = this.gl.getActiveAttrib(this.program, i);
       if (info) {
@@ -247,7 +259,7 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
 
     // Cache texture with image src as key
     this.textures.set(image.src, texture);
-    
+
     // Cache image size
     this.imageSizes.set(image.src, {
       width: image.naturalWidth || image.width,
@@ -312,16 +324,16 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
     if (resolutionLoc && this.canvas) {
       this.gl.uniform2f(resolutionLoc, this.canvas.width, this.canvas.height);
     }
-    
+
     // Set image size uniforms
     const imageSize0Loc = this.uniforms.get('uImageSize0');
     const imageSize1Loc = this.uniforms.get('uImageSize1');
-    
+
     if (imageSize0Loc && currentImageSrc) {
       const size = this.imageSizes.get(currentImageSrc) || { width: 1, height: 1 };
       this.gl.uniform2f(imageSize0Loc, size.width, size.height);
     }
-    
+
     if (imageSize1Loc && nextImageSrc) {
       const size = this.imageSizes.get(nextImageSrc) || { width: 1, height: 1 };
       this.gl.uniform2f(imageSize1Loc, size.width, size.height);

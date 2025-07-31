@@ -66,11 +66,13 @@ export class PhysicsEngine {
 
   createParticlesFromTriangles(
     triangleCenters: Float32Array[],
-    initialVelocity?: (index: number, center: Float32Array) => Float32Array
+    initialVelocity?: (index: number, center: Float32Array) => Float32Array,
   ): PhysicsParticle[] {
     return triangleCenters.map((center, index) => {
-      const velocity = initialVelocity ? initialVelocity(index, center) : new Float32Array([0, 0, 0]);
-      
+      const velocity = initialVelocity
+        ? initialVelocity(index, center)
+        : new Float32Array([0, 0, 0]);
+
       return this.createParticle({
         position: new Float32Array(center),
         velocity,
@@ -161,7 +163,7 @@ export class PhysicsEngine {
   }
 
   private applyForce(particle: PhysicsParticle, force: PhysicsForce): void {
-    let forceVector = new Float32Array([0, 0, 0]);
+    const forceVector = new Float32Array([0, 0, 0]);
 
     switch (force.type) {
       case 'gravity':
@@ -299,7 +301,7 @@ export class PhysicsEngine {
 
     this.particles.forEach((particle, i) => {
       const offset = i * 12;
-      
+
       // Position
       data[offset] = particle.position[0];
       data[offset + 1] = particle.position[1];

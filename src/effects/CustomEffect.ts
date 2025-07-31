@@ -43,11 +43,11 @@ export class CustomEffect extends BaseEffect {
     const baseUniforms = {
       uProgress: progress,
     };
-    
+
     if (this.uniformsGetter) {
       return { ...baseUniforms, ...this.uniformsGetter() };
     }
-    
+
     return baseUniforms;
   }
 
@@ -88,11 +88,11 @@ export async function createCustomEffectFromFiles(
   name: string,
   vertexShaderUrl: string,
   fragmentShaderUrl: string,
-  options?: Partial<CustomEffectOptions>
+  options?: Partial<CustomEffectOptions>,
 ): Promise<CustomEffect> {
   const [vertexShader, fragmentShader] = await Promise.all([
-    fetch(vertexShaderUrl).then(r => r.text()),
-    fetch(fragmentShaderUrl).then(r => r.text()),
+    fetch(vertexShaderUrl).then((r) => r.text()),
+    fetch(fragmentShaderUrl).then((r) => r.text()),
   ]);
 
   return new CustomEffect({
@@ -110,7 +110,7 @@ export function createCustomEffect(
   name: string,
   vertexShader: string,
   fragmentShader: string,
-  options?: Partial<CustomEffectOptions>
+  options?: Partial<CustomEffectOptions>,
 ): CustomEffect {
   return new CustomEffect({
     name,

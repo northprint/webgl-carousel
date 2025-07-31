@@ -6,8 +6,14 @@ import { createCustomEffect } from './effects';
 export { WebGLCarousel };
 export default WebGLCarousel;
 
-// Also attach commonly used functions to the class for convenience
-(WebGLCarousel as any).createCustomEffect = createCustomEffect;
+// Extend WebGLCarousel with static methods
+interface WebGLCarouselConstructor {
+  new (options: any): WebGLCarousel;
+  createCustomEffect: typeof createCustomEffect;
+}
+
+// Attach commonly used functions to the class for convenience
+(WebGLCarousel as unknown as WebGLCarouselConstructor).createCustomEffect = createCustomEffect;
 
 // Make the constructor available directly on the namespace
 export const WebGLCarouselConstructor = WebGLCarousel;

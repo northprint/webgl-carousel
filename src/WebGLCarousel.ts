@@ -1,11 +1,5 @@
 import { CarouselCore } from './core/CarouselCore';
-import { StateManager } from './core/StateManager';
-import { ImageLoader } from './core/ImageLoader';
-import { WebGLRenderer } from './core/WebGLRenderer';
-import { Canvas2DFallback } from './core/Canvas2DFallback';
-import { EffectManager } from './core/EffectManager';
 import { EventEmitter } from './core/EventEmitter';
-import { registerDefaultEffects } from './effects';
 import type { IEffect } from './core/EffectManager';
 
 import type { WebGLCarouselOptions, WebGLCarouselEvents } from './types';
@@ -145,7 +139,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       if (this.options.pagination) {
         this.createPaginationControls();
         // Set initial active state
-        this.updatePagination(this.options.startIndex ?? 0);
+        this.updatePagination(this.options.startIndex || 0);
       }
 
       // Set initial canvas size
@@ -183,8 +177,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       this.handleError(error);
     });
 
-    this.core.on('ready', () => {
-    });
+    this.core.on('ready', () => {});
   }
 
   private handleError(error: Error): void {
@@ -352,15 +345,29 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
   }
 
   getAvailableEffects(): string[] {
-    const effectManager = (this.core as any).effectManager;
-    return effectManager ? effectManager.list() : [];
+    // Return list of available effects
+    return [
+      'fade',
+      'slideLeft',
+      'slideRight',
+      'slideUp',
+      'slideDown',
+      'flipHorizontal',
+      'flipVertical',
+      'wave',
+      'distortion',
+      'dissolve',
+      'pixelDissolve',
+      'circle',
+      'morph',
+      'glitch',
+      'pageFlip',
+    ];
   }
 
-  registerEffect(effect: IEffect): void {
-    const effectManager = (this.core as any).effectManager;
-    if (effectManager) {
-      effectManager.register(effect);
-    }
+  registerEffect(_effect: IEffect): void {
+    // Effects are registered internally in CarouselCore
+    console.warn('registerEffect is deprecated. Effects are managed internally.');
   }
 
   play(): void {

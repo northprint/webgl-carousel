@@ -108,14 +108,26 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
 
     // Default quad mesh
     const vertices = new Float32Array([
-      -1.0, -1.0, 0.0,  // Position
-       0.0,  1.0,       // TexCoord (flipped Y)
-       1.0, -1.0, 0.0,  // Position
-       1.0,  1.0,       // TexCoord
-      -1.0,  1.0, 0.0,  // Position
-       0.0,  0.0,       // TexCoord
-       1.0,  1.0, 0.0,  // Position
-       1.0,  0.0,       // TexCoord
+      -1.0,
+      -1.0,
+      0.0, // Position
+      0.0,
+      1.0, // TexCoord (flipped Y)
+      1.0,
+      -1.0,
+      0.0, // Position
+      1.0,
+      1.0, // TexCoord
+      -1.0,
+      1.0,
+      0.0, // Position
+      0.0,
+      0.0, // TexCoord
+      1.0,
+      1.0,
+      0.0, // Position
+      1.0,
+      0.0, // TexCoord
     ]);
 
     const indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
@@ -180,12 +192,11 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
   private setupMeshAttributes(): void {
     if (!this.gl || !this.program || !this.meshData) return;
 
-
     const stride = 5 * 4; // 3 for position, 2 for texCoord
 
     // Position attribute
     const positionLoc = this.gl.getAttribLocation(this.program, 'aPosition');
-    
+
     if (positionLoc >= 0) {
       this.gl.enableVertexAttribArray(positionLoc);
       this.gl.vertexAttribPointer(positionLoc, 3, this.gl.FLOAT, false, stride, 0);
@@ -195,7 +206,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
 
     // TexCoord attribute
     const texCoordLoc = this.gl.getAttribLocation(this.program, 'aTexCoord');
-    
+
     if (texCoordLoc >= 0) {
       this.gl.enableVertexAttribArray(texCoordLoc);
       this.gl.vertexAttribPointer(texCoordLoc, 2, this.gl.FLOAT, false, stride, 3 * 4);
@@ -208,10 +219,10 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       const instanceBuffer = this.gl.createBuffer();
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, instanceBuffer);
       this.gl.bufferData(this.gl.ARRAY_BUFFER, this.meshData.instanceData, this.gl.DYNAMIC_DRAW);
-      
+
       // Each instance has 12 floats: 3 for position, 4 for rotation, 2 for scale, 3 for extra
       const stride = 12 * 4; // 12 floats * 4 bytes per float
-      
+
       // Instance position (vec3)
       const positionLoc = this.gl.getAttribLocation(this.program, 'aInstancePosition');
       if (positionLoc >= 0) {
@@ -219,7 +230,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         this.gl.vertexAttribPointer(positionLoc, 3, this.gl.FLOAT, false, stride, 0);
         this.gl.vertexAttribDivisor(positionLoc, 1);
       }
-      
+
       // Instance rotation (vec4 - quaternion)
       const rotationLoc = this.gl.getAttribLocation(this.program, 'aInstanceRotation');
       if (rotationLoc >= 0) {
@@ -227,7 +238,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         this.gl.vertexAttribPointer(rotationLoc, 4, this.gl.FLOAT, false, stride, 3 * 4);
         this.gl.vertexAttribDivisor(rotationLoc, 1);
       }
-      
+
       // Instance scale (vec2)
       const scaleLoc = this.gl.getAttribLocation(this.program, 'aInstanceScale');
       if (scaleLoc >= 0) {
@@ -235,7 +246,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         this.gl.vertexAttribPointer(scaleLoc, 2, this.gl.FLOAT, false, stride, 7 * 4);
         this.gl.vertexAttribDivisor(scaleLoc, 1);
       }
-      
+
       // Instance extra (vec3)
       const extraLoc = this.gl.getAttribLocation(this.program, 'aInstanceExtra');
       if (extraLoc >= 0) {
@@ -283,8 +294,8 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     this.setEffect({ vertexShader, fragmentShader });
   }
 
-  setEffect(effect: { 
-    vertexShader: string; 
+  setEffect(effect: {
+    vertexShader: string;
     fragmentShader: string;
     transformFeedbackVaryings?: string[];
   }): void {
@@ -294,7 +305,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       // Convert WebGL 1.0 shaders to WebGL 2.0 if needed
       let vertexShader = effect.vertexShader;
       let fragmentShader = effect.fragmentShader;
-      
+
       // Check if shaders are WebGL 1.0 style (no version directive)
       if (!vertexShader.includes('#version')) {
         vertexShader = this.convertVertexShaderToWebGL2(vertexShader);
@@ -304,9 +315,9 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       }
 
       const program = this.createProgram(
-        vertexShader, 
+        vertexShader,
         fragmentShader,
-        effect.transformFeedbackVaryings
+        effect.transformFeedbackVaryings,
       );
       if (program) {
         if (this.program) {
@@ -314,7 +325,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         }
         this.program = program;
         this.cacheUniformsAndAttributes();
-        
+
         // Re-setup mesh attributes with new program
         if (this.vertexArray && this.meshData) {
           this.gl.bindVertexArray(this.vertexArray);
@@ -330,9 +341,9 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
   }
 
   private createProgram(
-    vertexSource: string, 
+    vertexSource: string,
     fragmentSource: string,
-    transformFeedbackVaryings?: string[]
+    transformFeedbackVaryings?: string[],
   ): WebGLProgram | null {
     if (!this.gl) return null;
 
@@ -354,7 +365,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       this.gl.transformFeedbackVaryings(
         program,
         transformFeedbackVaryings,
-        this.gl.INTERLEAVED_ATTRIBS
+        this.gl.INTERLEAVED_ATTRIBS,
       );
     }
 
@@ -397,14 +408,13 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
   private cacheUniformsAndAttributes(): void {
     if (!this.gl || !this.program) return;
 
-
     this.uniforms.clear();
     this.attributes.clear();
     this.uniformBlockIndices.clear();
 
     // Get all active uniforms
     const numUniforms = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORMS);
-    
+
     for (let i = 0; i < numUniforms; i++) {
       const info = this.gl.getActiveUniform(this.program, i);
       if (info) {
@@ -417,7 +427,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
 
     // Get all active attributes
     const numAttributes = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_ATTRIBUTES);
-    
+
     for (let i = 0; i < numAttributes; i++) {
       const info = this.gl.getActiveAttrib(this.program, i);
       if (info) {
@@ -429,7 +439,10 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     }
 
     // Cache uniform block indices
-    const numUniformBlocks = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORM_BLOCKS);
+    const numUniformBlocks = this.gl.getProgramParameter(
+      this.program,
+      this.gl.ACTIVE_UNIFORM_BLOCKS,
+    );
     for (let i = 0; i < numUniformBlocks; i++) {
       const name = this.gl.getActiveUniformBlockName(this.program, i);
       if (name) {
@@ -442,12 +455,11 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
   loadTexture(image: HTMLImageElement): WebGLTexture | null {
     if (!this.gl) return null;
 
-
     const texture = this.gl.createTexture();
     if (!texture) return null;
 
     this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    
+
     try {
       this.gl.texImage2D(
         this.gl.TEXTURE_2D,
@@ -469,7 +481,11 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     // Set texture parameters
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_LINEAR);
+    this.gl.texParameteri(
+      this.gl.TEXTURE_2D,
+      this.gl.TEXTURE_MIN_FILTER,
+      this.gl.LINEAR_MIPMAP_LINEAR,
+    );
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
 
     // Enable anisotropic filtering if available
@@ -481,7 +497,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
 
     // Cache texture with image src as key
     this.textures.set(image.src, texture);
-    
+
     // Cache image size
     this.imageSizes.set(image.src, {
       width: image.naturalWidth || image.width,
@@ -507,7 +523,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       0,
       this.gl.RGBA,
       this.gl.FLOAT,
-      data || null
+      data || null,
     );
 
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
@@ -518,7 +534,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     return texture;
   }
 
-  setupTransformFeedback(buffers: WebGLBuffer[], varyings: string[]): void {
+  setupTransformFeedback(buffers: WebGLBuffer[], _varyings: string[]): void {
     if (!this.gl) return;
 
     if (this.transformFeedback) {
@@ -544,13 +560,12 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     nextImageSrc?: string,
     instanceCount?: number,
   ): void {
-    
     if (!this.gl || !this.program || !currentTexture || !this.vertexArray) {
       console.error('[WebGL2Renderer.render] Missing required resources:', {
         gl: !!this.gl,
         program: !!this.program,
         currentTexture: !!currentTexture,
-        vertexArray: !!this.vertexArray
+        vertexArray: !!this.vertexArray,
       });
       return;
     }
@@ -585,16 +600,16 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     if (resolutionLoc && this.canvas) {
       this.gl.uniform2f(resolutionLoc, this.canvas.width, this.canvas.height);
     }
-    
+
     // Set image size uniforms
     const imageSize0Loc = this.uniforms.get('uImageSize0');
     const imageSize1Loc = this.uniforms.get('uImageSize1');
-    
+
     if (imageSize0Loc && currentImageSrc) {
       const size = this.imageSizes.get(currentImageSrc) || { width: 1, height: 1 };
       this.gl.uniform2f(imageSize0Loc, size.width, size.height);
     }
-    
+
     if (imageSize1Loc && nextImageSrc) {
       const size = this.imageSizes.get(nextImageSrc) || { width: 1, height: 1 };
       this.gl.uniform2f(imageSize1Loc, size.width, size.height);
@@ -645,7 +660,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     }
 
     // Draw
-    
+
     try {
       if (this.meshData) {
         if (instanceCount && instanceCount > 1) {
@@ -654,20 +669,20 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
             this.meshData.indices.length,
             this.gl.UNSIGNED_SHORT,
             0,
-            instanceCount
+            instanceCount,
           );
         } else {
           this.gl.drawElements(
             this.gl.TRIANGLES,
             this.meshData.indices.length,
             this.gl.UNSIGNED_SHORT,
-            0
+            0,
           );
         }
       } else {
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
       }
-      
+
       // Check for GL errors
       const error = this.gl.getError();
       if (error !== this.gl.NO_ERROR) {
@@ -794,41 +809,40 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
 
   private convertVertexShaderToWebGL2(shader: string): string {
     let converted = shader;
-    
+
     // Remove any existing precision declarations first
     converted = converted.replace(/precision\s+\w+\s+float\s*;/g, '');
-    
+
     // Add version and precision at the beginning
     converted = '#version 300 es\nprecision highp float;\n' + converted;
-    
+
     // Convert attribute to in
     converted = converted.replace(/\battribute\s+/g, 'in ');
-    
+
     // Convert varying to out
     converted = converted.replace(/\bvarying\s+/g, 'out ');
-    
+
     return converted;
   }
 
   private convertFragmentShaderToWebGL2(shader: string): string {
     let converted = shader;
-    
+
     // Remove any existing precision declarations first
-    const hasPrecision = /precision\s+\w+\s+float\s*;/.test(converted);
     converted = converted.replace(/precision\s+\w+\s+float\s*;/g, '');
-    
+
     // Add version, precision, and output variable at the beginning
     converted = '#version 300 es\nprecision highp float;\nout vec4 fragColor;\n' + converted;
-    
+
     // Convert varying to in
     converted = converted.replace(/\bvarying\s+/g, 'in ');
-    
+
     // Replace gl_FragColor with fragColor
     converted = converted.replace(/\bgl_FragColor\b/g, 'fragColor');
-    
+
     // Replace texture2D with texture
     converted = converted.replace(/\btexture2D\s*\(/g, 'texture(');
-    
+
     return converted;
   }
 }

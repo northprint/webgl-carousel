@@ -14,7 +14,12 @@ export { PixelDissolveEffect, type PixelDissolveOptions } from './pixelDissolve'
 export { MorphEffect, type MorphOptions } from './morph';
 export { GlitchEffect, type GlitchOptions } from './glitch';
 export { PageFlipEffect, type PageFlipOptions } from './pageFlip';
-export { CustomEffect, createCustomEffect, createCustomEffectFromFiles, type CustomEffectOptions } from './CustomEffect';
+export {
+  CustomEffect,
+  createCustomEffect,
+  createCustomEffectFromFiles,
+  type CustomEffectOptions,
+} from './CustomEffect';
 
 // Import classes for creating instances
 import { FadeEffect } from './fade';

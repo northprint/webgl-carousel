@@ -57,7 +57,13 @@ export {
 
 // Type exports
 export type { IEffect } from './core/EffectManager';
-export type { SlideDirection, FlipAxis, WaveOptions, DistortionOptions, CustomEffectOptions } from './effects';
+export type {
+  SlideDirection,
+  FlipAxis,
+  WaveOptions,
+  DistortionOptions,
+  CustomEffectOptions,
+} from './effects';
 export type {
   CarouselState,
   LoadedImage,
