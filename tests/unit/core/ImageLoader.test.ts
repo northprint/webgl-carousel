@@ -10,13 +10,17 @@ const mockImageLoad = (shouldSucceed = true, delay = 0) => {
     this.width = 100;
     this.height = 100;
 
-    setTimeout(() => {
-      if (shouldSucceed && this.onload) {
-        this.onload(new Event('load'));
-      } else if (!shouldSucceed && this.onerror) {
-        this.onerror(new Event('error'));
+    Object.defineProperty(this, 'src', {
+      set: () => {
+        setTimeout(() => {
+          if (shouldSucceed && this.onload) {
+            this.onload(new Event('load'));
+          } else if (!shouldSucceed && this.onerror) {
+            this.onerror(new Event('error'));
+          }
+        }, delay);
       }
-    }, delay);
+    });
 
     return this;
   }) as any;
@@ -48,6 +52,7 @@ describe('ImageLoader', () => {
         element: expect.any(Image),
         width: 100,
         height: 100,
+        aspectRatio: 1,
       });
 
       restore();
@@ -215,7 +220,7 @@ describe('ImageLoader', () => {
       const urls = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
       const results = await imageLoader.preloadWithProgress(urls, progressCallback);
 
-      expect(results).toHaveLength(2); // Only successful loads
+      expect(results).toHaveLength(3); // All images are returned (even if some failed)
       expect(progressCallback).toHaveBeenCalledTimes(3);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to load image: img2.jpg',

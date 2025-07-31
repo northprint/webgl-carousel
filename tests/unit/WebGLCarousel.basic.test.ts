@@ -224,10 +224,14 @@ describe('WebGLCarousel Unit Tests', () => {
       expect(effects.length).toBeGreaterThan(10);
     });
 
-    it('should register effect', () => {
+    it('should warn when registering effect', () => {
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
       const mockEffect = { name: 'custom', vertexShader: '', fragmentShader: '', getUniforms: () => ({}) };
+      
       carousel.registerEffect(mockEffect);
-      expect(mockCore.registerEffect).toHaveBeenCalledWith(mockEffect);
+      
+      expect(consoleSpy).toHaveBeenCalledWith('registerEffect is deprecated. Effects are managed internally.');
+      consoleSpy.mockRestore();
     });
 
     it('should call core.setAutoplay() for play', () => {

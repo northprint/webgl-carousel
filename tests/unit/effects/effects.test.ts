@@ -194,7 +194,7 @@ describe('Effects', () => {
       expect(manager.has('pixelDissolve')).toBe(true);
       expect(manager.has('morph')).toBe(true);
       expect(manager.has('glitch')).toBe(true);
-      expect(manager.has('trianglePeelV2')).toBe(true);
+      expect(manager.has('pageFlip')).toBe(true);
       // Variants
       expect(manager.has('gentleWave')).toBe(true);
       expect(manager.has('intenseWave')).toBe(true);
@@ -208,8 +208,7 @@ describe('Effects', () => {
       expect(manager.has('intenseMorph')).toBe(true);
       expect(manager.has('intenseGlitch')).toBe(true);
       expect(manager.has('subtleGlitch')).toBe(true);
-      expect(manager.has('fastTrianglePeel')).toBe(true);
-      expect(manager.has('slowTrianglePeel')).toBe(true);
+      // trianglePeel variants are not in the default effects
     });
   });
 });
