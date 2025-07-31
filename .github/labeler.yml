@@ -1,0 +1,22 @@
+# Configuration for GitHub labeler
+
+documentation:
+  - any: ['docs/**', '*.md']
+
+core:
+  - src/core/**
+
+effects:
+  - src/effects/**
+
+adapters:
+  - src/adapters/**
+
+tests:
+  - any: ['**/*.test.ts', '**/*.spec.ts', 'e2e/**']
+
+build:
+  - any: ['rollup.config.js', 'tsconfig.json', 'package.json']
+
+ci:
+  - .github/**

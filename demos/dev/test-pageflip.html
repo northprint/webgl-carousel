@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageFlip Test - Debug</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 20px;
+    }
+    #carousel {
+      border: 2px solid #333;
+      background: white;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #debug {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 400px;
+      max-height: 300px;
+      overflow: auto;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e0e0e0;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PageFlip Effect Debug</h1>
+  <div id="carousel"></div>
+  <div class="controls">
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    <button id="toggleAuto">Toggle Autoplay</button>
+  </div>
+  <div class="status">
+    <p>Current Index: <span id="currentIndex">0</span></p>
+    <p>Transition Progress: <span id="progress">0</span></p>
+    <p>Image URLs: <span id="imageUrls"></span></p>
+  </div>
+  <div id="debug"></div>
+
+  <script src="../dist/webgl-carousel.umd.js"></script>
+  <script>
+    const debugLog = (msg) => {
+      const debugEl = document.getElementById('debug');
+      debugEl.innerHTML = new Date().toISOString().split('T')[1].slice(0, 8) + ' ' + msg + '<br>' + debugEl.innerHTML;
+      console.log(msg);
+    };
+
+    const images = [
+      'https://picsum.photos/800/600?random=1',
+      'https://picsum.photos/800/600?random=2',
+      'https://picsum.photos/800/600?random=3',
+    ];
+
+    debugLog('Images: ' + JSON.stringify(images));
+    document.getElementById('imageUrls').textContent = images.join(', ');
+
+    const options = {
+      images: images,
+      effect: 'pageFlip',
+      autoplay: false,
+      transitionDuration: 2000,
+      onTransitionStart: (event) => {
+        debugLog(`Transition start: ${event.from} -> ${event.to}`);
+      },
+      onTransitionEnd: (event) => {
+        debugLog(`Transition end: ${event.from} -> ${event.to}`);
+      },
+      onImageLoad: (event) => {
+        debugLog(`Image loaded: ${event.index} - ${event.src}`);
+      },
+      onError: (error) => {
+        debugLog(`Error: ${error.message}`);
+        console.error(error);
+      },
+      onReady: () => {
+        debugLog('Carousel ready');
+      }
+    };
+
+    const carousel = new WebGLCarousel.WebGLCarousel({
+      container: '#carousel',
+      ...options
+    });
+
+    // Add debug render hook
+    if (carousel.core && carousel.core.renderer) {
+      const originalRender = carousel.core.renderer.render.bind(carousel.core.renderer);
+      carousel.core.renderer.render = function(effect, uniforms) {
+        // Log uniforms being passed
+        if (uniforms.uProgress !== undefined) {
+          document.getElementById('progress').textContent = uniforms.uProgress.toFixed(3);
+        }
+        return originalRender(effect, uniforms);
+      };
+    }
+
+    document.getElementById('prev').addEventListener('click', () => {
+      debugLog('Previous clicked');
+      carousel.previous();
+    });
+
+    document.getElementById('next').addEventListener('click', () => {
+      debugLog('Next clicked');
+      carousel.next();
+    });
+
+    document.getElementById('toggleAuto').addEventListener('click', () => {
+      carousel.setAutoplay(!carousel.getState().isPlaying);
+      debugLog('Autoplay: ' + carousel.getState().isPlaying);
+    });
+
+    // Update current index display
+    carousel.on('transitionEnd', (event) => {
+      document.getElementById('currentIndex').textContent = event.to;
+    });
+
+    // Add keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') carousel.previous();
+      if (e.key === 'ArrowRight') carousel.next();
+    });
+
+    // Expose carousel to console for debugging
+    window.carousel = carousel;
+    debugLog('Carousel exposed to window.carousel');
+  </script>
+</body>
+</html>

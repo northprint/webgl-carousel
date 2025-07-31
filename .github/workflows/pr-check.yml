@@ -1,0 +1,51 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-size:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build library
+      run: npm run build
+    
+    - name: Check bundle size
+      uses: andresz1/size-limit-action@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        skip_step: build
+        build_script: echo "Already built"
+
+  check-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Check for security vulnerabilities
+      run: npm audit --production
+    
+    - name: Check for outdated dependencies
+      run: |
+        echo "## Outdated Dependencies" >> $GITHUB_STEP_SUMMARY
+        npm outdated --long >> $GITHUB_STEP_SUMMARY || true

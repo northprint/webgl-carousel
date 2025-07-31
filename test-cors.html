@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CORS Test for Picsum Photos</title>
+</head>
+<body>
+    <h1>Testing CORS with Picsum Photos</h1>
+    <div id="results"></div>
+    <canvas id="testCanvas" width="200" height="300"></canvas>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        async function testCORS() {
+            // Test 1: Direct fetch
+            try {
+                const response = await fetch('https://picsum.photos/200/300');
+                resultsDiv.innerHTML += `<p>Fetch test: ${response.ok ? 'Success' : 'Failed'}</p>`;
+                resultsDiv.innerHTML += `<p>Response headers: ${JSON.stringify([...response.headers.entries()])}</p>`;
+            } catch (error) {
+                resultsDiv.innerHTML += `<p>Fetch error: ${error.message}</p>`;
+            }
+            
+            // Test 2: Image with crossOrigin
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = function() {
+                resultsDiv.innerHTML += '<p>Image loaded successfully with crossOrigin="anonymous"</p>';
+                
+                // Test 3: Try to use in canvas
+                try {
+                    const canvas = document.getElementById('testCanvas');
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Try to get image data (this will fail if CORS is not properly set)
+                    const imageData = ctx.getImageData(0, 0, 1, 1);
+                    resultsDiv.innerHTML += '<p style="color: green;">✓ Canvas operations successful - CORS is working!</p>';
+                } catch (error) {
+                    resultsDiv.innerHTML += `<p style="color: red;">✗ Canvas error: ${error.message}</p>`;
+                }
+            };
+            
+            img.onerror = function() {
+                resultsDiv.innerHTML += '<p style="color: red;">✗ Image failed to load with CORS</p>';
+            };
+            
+            // Get a fresh image URL
+            img.src = 'https://picsum.photos/200/300?' + Date.now();
+        }
+        
+        testCORS();
+    </script>
+</body>
+</html>

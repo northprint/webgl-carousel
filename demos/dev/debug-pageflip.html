@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug PageFlip</title>
+  <style>
+    body { margin: 20px; font-family: Arial, sans-serif; }
+    #carousel { width: 800px; height: 600px; border: 1px solid #ccc; margin: 20px auto; }
+    .controls { text-align: center; margin: 20px; }
+    button { margin: 0 10px; padding: 10px 20px; }
+    #log { margin: 20px auto; width: 800px; height: 200px; overflow: auto; border: 1px solid #ccc; padding: 10px; font-family: monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center;">Debug PageFlip Effect</h1>
+  
+  <div id="carousel"></div>
+  
+  <div class="controls">
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    <select id="effectSelect">
+      <option value="fade">Fade</option>
+      <option value="slideLeft">Slide Left</option>
+      <option value="pageFlip" selected>PageFlip</option>
+      <option value="pageFlipSimple">PageFlip Simple</option>
+    </select>
+  </div>
+  
+  <div id="log"></div>
+
+  <script src="../dist/webgl-carousel.umd.js"></script>
+  <script>
+    const log = (msg) => {
+      const logEl = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logEl.innerHTML += `[${time}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    // Simple test images with different colors
+    const images = [
+      'https://via.placeholder.com/800x600/FF0000/FFFFFF?text=Image+1',
+      'https://via.placeholder.com/800x600/00FF00/FFFFFF?text=Image+2',
+      'https://via.placeholder.com/800x600/0000FF/FFFFFF?text=Image+3'
+    ];
+
+    log('Starting carousel with images: ' + images.join(', '));
+
+    const carousel = new WebGLCarousel.WebGLCarousel({
+      container: '#carousel',
+      images: images,
+      effect: 'pageFlip',
+      autoplay: false,
+      transitionDuration: 2000,
+      onTransitionStart: (e) => {
+        log(`Transition start: ${e.from} -> ${e.to}`);
+      },
+      onTransitionEnd: (e) => {
+        log(`Transition end: ${e.from} -> ${e.to}`);
+      },
+      onImageLoad: (e) => {
+        log(`Image loaded: ${e.index}`);
+      },
+      onError: (error) => {
+        log(`ERROR: ${error.message}`);
+        console.error(error);
+      },
+      onReady: () => {
+        log('Carousel ready');
+      }
+    });
+
+    document.getElementById('prev').addEventListener('click', () => {
+      log('Previous button clicked');
+      carousel.previous();
+    });
+
+    document.getElementById('next').addEventListener('click', () => {
+      log('Next button clicked');
+      carousel.next();
+    });
+
+    document.getElementById('effectSelect').addEventListener('change', (e) => {
+      const effect = e.target.value;
+      log(`Changing effect to: ${effect}`);
+      carousel.setEffect(effect);
+    });
+
+    // Expose for debugging
+    window.carousel = carousel;
+    log('Carousel available at window.carousel');
+  </script>
+</body>
+</html>

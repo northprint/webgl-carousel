@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Shader Demo - WebGL Carousel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #carousel {
+      width: 800px;
+      height: 600px;
+      margin: 20px auto;
+      border: 2px solid #333;
+      background: white;
+    }
+    .controls {
+      text-align: center;
+      margin: 20px;
+    }
+    button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .shader-code {
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    pre {
+      background: #282c34;
+      color: #abb2bf;
+      padding: 15px;
+      border-radius: 5px;
+      overflow: auto;
+      font-size: 14px;
+    }
+    .shader-input {
+      margin: 20px auto;
+      max-width: 800px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 12px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .apply-button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 30px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .apply-button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Custom Shader Demo</h1>
+    
+    <div id="carousel"></div>
+    
+    <div class="controls">
+      <button id="prev">Previous</button>
+      <button id="next">Next</button>
+      <button id="play">Play/Pause</button>
+      <button id="reset">Reset to Default</button>
+    </div>
+
+    <div class="shader-input">
+      <h2>Vertex Shader</h2>
+      <textarea id="vertexShader">
+attribute vec2 aPosition;
+attribute vec2 aTexCoord;
+
+varying vec2 vTexCoord;
+
+void main() {
+  vTexCoord = aTexCoord;
+  gl_Position = vec4(aPosition, 0.0, 1.0);
+}</textarea>
+
+      <h2>Fragment Shader</h2>
+      <textarea id="fragmentShader">
+precision mediump float;
+
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform float uProgress;
+uniform vec2 uResolution;
+uniform vec2 uImageSize0;
+uniform vec2 uImageSize1;
+
+varying vec2 vTexCoord;
+
+// Calculate UV coordinates for cover fit
+vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+  if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
+    return uv;
+  }
+  
+  float imageAspect = imageSize.x / imageSize.y;
+  float canvasAspect = resolution.x / resolution.y;
+  
+  vec2 scale = vec2(1.0);
+  if (imageAspect > canvasAspect) {
+    scale.x = imageAspect / canvasAspect;
+  } else {
+    scale.y = canvasAspect / imageAspect;
+  }
+  
+  return (uv - 0.5) / scale + 0.5;
+}
+
+void main() {
+  vec2 uv = vTexCoord;
+  
+  // Simple crossfade example
+  vec2 uv0 = getCoverUV(uv, uImageSize0, uResolution);
+  vec2 uv1 = getCoverUV(uv, uImageSize1, uResolution);
+  
+  vec4 color0 = texture2D(uTexture0, uv0);
+  vec4 color1 = texture2D(uTexture1, uv1);
+  
+  gl_FragColor = mix(color0, color1, uProgress);
+}</textarea>
+
+      <button class="apply-button" id="applyShader">Apply Custom Shader</button>
+      
+      <h3>Quick Presets:</h3>
+      <button onclick="applyPreset('wave')">Wave Effect</button>
+      <button onclick="applyPreset('zoom')">Zoom Effect</button>
+      <button onclick="applyPreset('blur')">Blur Transition</button>
+    </div>
+
+    <div class="shader-code">
+      <h2>Example: Wave Transition</h2>
+      <pre><code>// Fragment Shader
+void main() {
+  vec2 uv = vTexCoord;
+  
+  // Wave displacement
+  float wave = sin(uv.y * 10.0 + uProgress * 6.28) * 0.05;
+  vec2 displacedUV = vec2(uv.x + wave * (1.0 - uProgress), uv.y);
+  
+  vec2 uv0 = getCoverUV(displacedUV, uImageSize0, uResolution);
+  vec2 uv1 = getCoverUV(displacedUV, uImageSize1, uResolution);
+  
+  vec4 color0 = texture2D(uTexture0, uv0);
+  vec4 color1 = texture2D(uTexture1, uv1);
+  
+  gl_FragColor = mix(color0, color1, uProgress);
+}</code></pre>
+    </div>
+  </div>
+
+  <script src="../dist/webgl-carousel.umd.js"></script>
+  <script>
+    let carousel;
+    let customEffect;
+
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize carousel with default fade effect
+      carousel = new WebGLCarousel.WebGLCarousel({
+        container: '#carousel',
+        images: [
+          'https://picsum.photos/800/600?random=1',
+          'https://picsum.photos/800/600?random=2',
+          'https://picsum.photos/800/600?random=3',
+          'https://picsum.photos/800/600?random=4',
+        ],
+        effect: 'fade',
+        autoplay: false,
+        transitionDuration: 2000,
+      });
+
+      // Apply custom shader function
+      function applyCustomShader() {
+        const vertexShader = document.getElementById('vertexShader').value;
+        const fragmentShader = document.getElementById('fragmentShader').value;
+        
+        try {
+          // Create custom effect
+          customEffect = WebGLCarousel.createCustomEffect(
+            'customShader',
+            vertexShader,
+            fragmentShader
+          );
+          
+          // Register and use the custom effect
+          console.log('Custom effect created:', customEffect);
+          console.log('Effect name:', customEffect.name);
+          carousel.core.effectManager.register(customEffect);
+          console.log('Effect registered. Available effects:', carousel.core.effectManager.list());
+          
+          carousel.setEffect('customShader');
+          
+          alert('Custom shader applied successfully! Try clicking Next/Previous to see the effect.');
+        } catch (error) {
+          alert('Error applying shader: ' + error.message);
+          console.error(error);
+        }
+      }
+
+      // Control buttons
+      document.getElementById('prev').addEventListener('click', () => carousel.previous());
+      document.getElementById('next').addEventListener('click', () => carousel.next());
+      document.getElementById('play').addEventListener('click', () => {
+        const isPlaying = carousel.getState().isPlaying;
+        carousel.setAutoplay(!isPlaying);
+      });
+      document.getElementById('reset').addEventListener('click', () => {
+        carousel.setEffect('fade');
+        alert('Reset to default fade effect');
+      });
+      document.getElementById('applyShader').addEventListener('click', applyCustomShader);
+
+      // Example presets
+      const presets = {
+        wave: {
+          fragment: `precision mediump float;
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform float uProgress;
+uniform vec2 uResolution;
+uniform vec2 uImageSize0;
+uniform vec2 uImageSize1;
+varying vec2 vTexCoord;
+
+vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+  if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
+    return uv;
+  }
+  float imageAspect = imageSize.x / imageSize.y;
+  float canvasAspect = resolution.x / resolution.y;
+  vec2 scale = vec2(1.0);
+  if (imageAspect > canvasAspect) {
+    scale.x = imageAspect / canvasAspect;
+  } else {
+    scale.y = canvasAspect / imageAspect;
+  }
+  return (uv - 0.5) / scale + 0.5;
+}
+
+void main() {
+  vec2 uv = vTexCoord;
+  float wave = sin(uv.y * 10.0 + uProgress * 6.28) * 0.05;
+  vec2 displacedUV = vec2(uv.x + wave * (1.0 - uProgress), uv.y);
+  vec2 uv0 = getCoverUV(displacedUV, uImageSize0, uResolution);
+  vec2 uv1 = getCoverUV(displacedUV, uImageSize1, uResolution);
+  vec4 color0 = texture2D(uTexture0, uv0);
+  vec4 color1 = texture2D(uTexture1, uv1);
+  gl_FragColor = mix(color0, color1, uProgress);
+}`
+        },
+        zoom: {
+          fragment: `precision mediump float;
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform float uProgress;
+uniform vec2 uResolution;
+uniform vec2 uImageSize0;
+uniform vec2 uImageSize1;
+varying vec2 vTexCoord;
+
+vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+  if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
+    return uv;
+  }
+  float imageAspect = imageSize.x / imageSize.y;
+  float canvasAspect = resolution.x / resolution.y;
+  vec2 scale = vec2(1.0);
+  if (imageAspect > canvasAspect) {
+    scale.x = imageAspect / canvasAspect;
+  } else {
+    scale.y = canvasAspect / imageAspect;
+  }
+  return (uv - 0.5) / scale + 0.5;
+}
+
+void main() {
+  vec2 uv = vTexCoord;
+  vec2 center = vec2(0.5, 0.5);
+  
+  // Zoom out current image
+  vec2 zoomUV0 = (uv - center) * (1.0 + uProgress) + center;
+  vec2 uv0 = getCoverUV(zoomUV0, uImageSize0, uResolution);
+  vec4 color0 = texture2D(uTexture0, uv0);
+  
+  // Zoom in next image
+  vec2 zoomUV1 = (uv - center) * (2.0 - uProgress) + center;
+  vec2 uv1 = getCoverUV(zoomUV1, uImageSize1, uResolution);
+  vec4 color1 = texture2D(uTexture1, uv1);
+  
+  gl_FragColor = mix(color0, color1, uProgress);
+}`
+        }
+      };
+
+      // Apply preset function
+      window.applyPreset = function(presetName) {
+        if (presetName === 'blur') {
+          // Blur transition preset
+          const blurFrag = `precision mediump float;
+uniform sampler2D uTexture0;
+uniform sampler2D uTexture1;
+uniform float uProgress;
+uniform vec2 uResolution;
+uniform vec2 uImageSize0;
+uniform vec2 uImageSize1;
+varying vec2 vTexCoord;
+
+vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+  if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
+    return uv;
+  }
+  float imageAspect = imageSize.x / imageSize.y;
+  float canvasAspect = resolution.x / resolution.y;
+  vec2 scale = vec2(1.0);
+  if (imageAspect > canvasAspect) {
+    scale.x = imageAspect / canvasAspect;
+  } else {
+    scale.y = canvasAspect / imageAspect;
+  }
+  return (uv - 0.5) / scale + 0.5;
+}
+
+void main() {
+  vec2 uv = vTexCoord;
+  vec2 uv0 = getCoverUV(uv, uImageSize0, uResolution);
+  vec2 uv1 = getCoverUV(uv, uImageSize1, uResolution);
+  
+  // Simple blur effect on transition
+  float blurAmount = sin(uProgress * 3.14159) * 0.01;
+  vec4 color0 = vec4(0.0);
+  vec4 color1 = vec4(0.0);
+  
+  // Sample multiple times for blur
+  for(float x = -2.0; x <= 2.0; x += 1.0) {
+    for(float y = -2.0; y <= 2.0; y += 1.0) {
+      vec2 offset = vec2(x, y) * blurAmount;
+      color0 += texture2D(uTexture0, uv0 + offset);
+      color1 += texture2D(uTexture1, uv1 + offset);
+    }
+  }
+  
+  color0 /= 25.0;
+  color1 /= 25.0;
+  
+  gl_FragColor = mix(color0, color1, uProgress);
+}`;
+          document.getElementById('fragmentShader').value = blurFrag;
+        } else if (presets[presetName]) {
+          document.getElementById('fragmentShader').value = presets[presetName].fragment;
+        }
+        applyCustomShader();
+      };
+
+      // Expose for debugging
+      window.carousel = carousel;
+      window.presets = presets;
+    });
+  </script>
+</body>
+</html>

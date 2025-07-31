@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load External Shaders - WebGL Carousel</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .carousel-wrapper {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .carousel-container {
+      text-align: center;
+    }
+    .carousel {
+      width: 400px;
+      height: 300px;
+      border: 2px solid #333;
+      background: white;
+      margin-bottom: 10px;
+    }
+    .controls {
+      margin: 10px 0;
+    }
+    button {
+      margin: 0 5px;
+      padding: 8px 15px;
+      font-size: 14px;
+    }
+    #log {
+      margin: 20px auto;
+      max-width: 800px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>External Shader Files Demo</h1>
+    
+    <div class="carousel-wrapper">
+      <div class="carousel-container">
+        <h3>Ripple Effect</h3>
+        <div id="carousel1" class="carousel"></div>
+        <div class="controls">
+          <button onclick="carousels[0].previous()">Previous</button>
+          <button onclick="carousels[0].next()">Next</button>
+        </div>
+      </div>
+      
+      <div class="carousel-container">
+        <h3>Mosaic Effect</h3>
+        <div id="carousel2" class="carousel"></div>
+        <div class="controls">
+          <button onclick="carousels[1].previous()">Previous</button>
+          <button onclick="carousels[1].next()">Next</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="log"></div>
+  </div>
+
+  <script src="../dist/webgl-carousel.umd.js"></script>
+  <script>
+    const log = (msg) => {
+      const logEl = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logEl.innerHTML += `[${time}] ${msg}<br>`;
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    };
+
+    const images = [
+      'https://picsum.photos/400/300?random=10',
+      'https://picsum.photos/400/300?random=11',
+      'https://picsum.photos/400/300?random=12',
+      'https://picsum.photos/400/300?random=13',
+    ];
+
+    const carousels = [];
+
+    // Load external shader files
+    async function loadShaderEffects() {
+      try {
+        // Load ripple effect
+        log('Loading ripple effect shaders...');
+        const rippleEffect = await WebGLCarousel.createCustomEffectFromFiles(
+          'ripple',
+          'shaders/ripple.vert',
+          'shaders/ripple.frag'
+        );
+        log('Ripple effect loaded successfully');
+
+        // Load mosaic effect
+        log('Loading mosaic effect shaders...');
+        const mosaicEffect = await WebGLCarousel.createCustomEffectFromFiles(
+          'mosaic',
+          'shaders/mosaic.vert',
+          'shaders/mosaic.frag'
+        );
+        log('Mosaic effect loaded successfully');
+
+        // Create carousel with ripple effect
+        const carousel1 = new WebGLCarousel.WebGLCarousel({
+          container: '#carousel1',
+          images: images,
+          effect: rippleEffect,
+          autoplay: true,
+          interval: 3000,
+          transitionDuration: 1500,
+          onError: (error) => log(`Carousel 1 error: ${error.message}`),
+        });
+        carousels.push(carousel1);
+
+        // Create carousel with mosaic effect
+        const carousel2 = new WebGLCarousel.WebGLCarousel({
+          container: '#carousel2',
+          images: images,
+          effect: mosaicEffect,
+          autoplay: true,
+          interval: 3500,
+          transitionDuration: 2000,
+          onError: (error) => log(`Carousel 2 error: ${error.message}`),
+        });
+        carousels.push(carousel2);
+
+        log('Both carousels initialized with custom shaders');
+
+      } catch (error) {
+        log(`Error loading shaders: ${error.message}`);
+        console.error(error);
+      }
+    }
+
+    // You can also create effects from strings
+    function createInlineEffect() {
+      const swipeEffect = WebGLCarousel.createCustomEffect(
+        'swipe',
+        // Vertex shader
+        `
+        attribute vec2 aPosition;
+        attribute vec2 aTexCoord;
+        varying vec2 vTexCoord;
+        
+        void main() {
+          vTexCoord = aTexCoord;
+          gl_Position = vec4(aPosition, 0.0, 1.0);
+        }
+        `,
+        // Fragment shader
+        `
+        precision mediump float;
+        
+        uniform sampler2D uTexture0;
+        uniform sampler2D uTexture1;
+        uniform float uProgress;
+        uniform vec2 uResolution;
+        uniform vec2 uImageSize0;
+        uniform vec2 uImageSize1;
+        
+        varying vec2 vTexCoord;
+        
+        vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+          if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
+            return uv;
+          }
+          float imageAspect = imageSize.x / imageSize.y;
+          float canvasAspect = resolution.x / resolution.y;
+          vec2 scale = vec2(1.0);
+          if (imageAspect > canvasAspect) {
+            scale.x = imageAspect / canvasAspect;
+          } else {
+            scale.y = canvasAspect / imageAspect;
+          }
+          return (uv - 0.5) / scale + 0.5;
+        }
+        
+        void main() {
+          vec2 uv = vTexCoord;
+          float swipeEdge = uProgress;
+          
+          vec4 color;
+          if (uv.x < swipeEdge) {
+            vec2 uv1 = getCoverUV(uv, uImageSize1, uResolution);
+            color = texture2D(uTexture1, uv1);
+          } else {
+            vec2 uv0 = getCoverUV(uv, uImageSize0, uResolution);
+            color = texture2D(uTexture0, uv0);
+          }
+          
+          // Add edge glow
+          float edgeDist = abs(uv.x - swipeEdge);
+          if (edgeDist < 0.01) {
+            color.rgb += vec3(0.5, 0.5, 0.5) * (1.0 - edgeDist / 0.01);
+          }
+          
+          gl_FragColor = color;
+        }
+        `
+      );
+      
+      return swipeEffect;
+    }
+
+    // Initialize everything
+    loadShaderEffects();
+
+    // Expose for debugging
+    window.carousels = carousels;
+    window.createInlineEffect = createInlineEffect;
+    window.log = log;
+  </script>
+</body>
+</html>

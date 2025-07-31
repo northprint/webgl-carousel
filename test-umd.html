@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>UMD Build Test</title>
+</head>
+<body>
+  <h1>UMD Build Test</h1>
+  <div id="output"></div>
+  
+  <script src="./dist/webgl-carousel.umd.js"></script>
+  <script>
+    const output = document.getElementById('output');
+    
+    console.log('WebGLCarousel:', WebGLCarousel);
+    
+    // Check what's exported
+    const info = {
+      type: typeof WebGLCarousel,
+      keys: WebGLCarousel ? Object.keys(WebGLCarousel) : [],
+      hasDefault: WebGLCarousel && 'default' in WebGLCarousel,
+      hasWebGLCarousel: WebGLCarousel && 'WebGLCarousel' in WebGLCarousel,
+      defaultType: WebGLCarousel && WebGLCarousel.default ? typeof WebGLCarousel.default : 'undefined'
+    };
+    
+    output.innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+    
+    // Try to create instance
+    try {
+      let carousel;
+      if (WebGLCarousel.default && typeof WebGLCarousel.default === 'function') {
+        carousel = new WebGLCarousel.default({ container: '#test' });
+        output.innerHTML += '<p>Created with WebGLCarousel.default</p>';
+      } else if (WebGLCarousel.WebGLCarousel && typeof WebGLCarousel.WebGLCarousel === 'function') {
+        carousel = new WebGLCarousel.WebGLCarousel({ container: '#test' });
+        output.innerHTML += '<p>Created with WebGLCarousel.WebGLCarousel</p>';
+      } else if (typeof WebGLCarousel === 'function') {
+        carousel = new WebGLCarousel({ container: '#test' });
+        output.innerHTML += '<p>Created with WebGLCarousel directly</p>';
+      } else {
+        output.innerHTML += '<p style="color: red;">Could not create carousel instance</p>';
+      }
+    } catch (error) {
+      output.innerHTML += '<p style="color: red;">Error: ' + error.message + '</p>';
+    }
+  </script>
+</body>
+</html>

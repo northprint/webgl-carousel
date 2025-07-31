@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Carousel - 高性能画像カルーセルライブラリ</title>
+  <meta name="description" content="WebGLを使用した高性能な画像カルーセルライブラリ。美しいトランジションエフェクトとスムーズなアニメーションを実現。">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <h1>WebGL Carousel</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#features">特徴</a></li>
+        <li><a href="#demo">デモ</a></li>
+        <li><a href="#installation">インストール</a></li>
+        <li><a href="#usage">使い方</a></li>
+        <li><a href="#api">API</a></li>
+        <li><a href="https://github.com/yourusername/webgl-carousel" target="_blank">GitHub</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <h2>WebGLで実現する高性能画像カルーセル</h2>
+      <p class="subtitle">GPU加速による滑らかなアニメーションと美しいトランジションエフェクト</p>
+      <div class="hero-buttons">
+        <a href="#installation" class="btn btn-primary">はじめる</a>
+        <a href="demo.html" class="btn btn-secondary">デモを見る</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="section">
+    <div class="container">
+      <h2>主な特徴</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>高速パフォーマンス</h3>
+          <p>WebGLによるGPU加速で60fpsの滑らかなアニメーションを実現</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">✨</div>
+          <h3>豊富なエフェクト</h3>
+          <p>15種類以上のビルトインエフェクトとカスタムシェーダーサポート</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>レスポンシブ対応</h3>
+          <p>モバイルデバイスでも快適に動作するタッチジェスチャー対応</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>フレームワーク対応</h3>
+          <p>React、Vue、Svelteなど主要フレームワークをサポート</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>カスタマイズ可能</h3>
+          <p>独自のGLSLシェーダーを使用してオリジナルエフェクトを作成</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>フォールバック</h3>
+          <p>WebGL非対応環境でもCanvas 2Dによる代替表示</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="section section-dark">
+    <div class="container">
+      <h2>デモ</h2>
+      <div class="demo-preview">
+        <iframe src="demo.html" width="100%" height="600" frameborder="0"></iframe>
+      </div>
+      <div class="demo-actions">
+        <a href="demo.html" class="btn btn-primary" target="_blank">フルスクリーンで見る</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="installation" class="section">
+    <div class="container">
+      <h2>インストール</h2>
+      
+      <h3>npm</h3>
+      <pre><code class="language-bash">npm install webgl-carousel</code></pre>
+      
+      <h3>yarn</h3>
+      <pre><code class="language-bash">yarn add webgl-carousel</code></pre>
+      
+      <h3>CDN</h3>
+      <pre><code class="language-html">&lt;script src="https://unpkg.com/webgl-carousel/dist/webgl-carousel.umd.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+  </section>
+
+  <section id="usage" class="section section-light">
+    <div class="container">
+      <h2>使い方</h2>
+      
+      <h3>基本的な使い方</h3>
+      <pre><code class="language-javascript">import { WebGLCarousel } from 'webgl-carousel';
+
+const carousel = new WebGLCarousel({
+  container: '#carousel',
+  images: [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ],
+  effect: 'fade',
+  autoplay: true,
+  transitionDuration: 2000
+});</code></pre>
+
+      <h3>Reactでの使い方</h3>
+      <pre><code class="language-jsx">import { ReactCarousel } from 'webgl-carousel/react';
+
+function App() {
+  const images = [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ];
+
+  return (
+    &lt;ReactCarousel
+      images={images}
+      effect="slideLeft"
+      autoplay
+      transitionDuration={1500}
+      style={{ width: '100%', height: '400px' }}
+    /&gt;
+  );
+}</code></pre>
+
+      <h3>Vueでの使い方</h3>
+      <pre><code class="language-vue">&lt;template&gt;
+  &lt;VueCarousel
+    :images="images"
+    effect="wave"
+    :autoplay="true"
+    :transition-duration="2000"
+    style="width: 100%; height: 400px;"
+  /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { VueCarousel } from 'webgl-carousel/vue';
+
+const images = [
+  'path/to/image1.jpg',
+  'path/to/image2.jpg',
+  'path/to/image3.jpg'
+];
+&lt;/script&gt;</code></pre>
+
+      <h3>Svelteでの使い方</h3>
+      <pre><code class="language-javascript">&lt;script&gt;
+  import { SvelteCarousel } from 'webgl-carousel/svelte';
+  
+  const images = [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ];
+&lt;/script&gt;
+
+&lt;SvelteCarousel
+  {images}
+  effect="flip"
+  autoplay={true}
+  transitionDuration={1800}
+  style="width: 100%; height: 400px;"
+/&gt;</code></pre>
+    </div>
+  </section>
+
+  <section id="effects" class="section">
+    <div class="container">
+      <h2>利用可能なエフェクト</h2>
+      <div class="effects-grid">
+        <div class="effect-item">
+          <h4>fade</h4>
+          <p>シンプルなフェード効果</p>
+        </div>
+        <div class="effect-item">
+          <h4>slideLeft / slideRight</h4>
+          <p>左右へのスライド</p>
+        </div>
+        <div class="effect-item">
+          <h4>slideUp / slideDown</h4>
+          <p>上下へのスライド</p>
+        </div>
+        <div class="effect-item">
+          <h4>flipHorizontal / flipVertical</h4>
+          <p>3D回転エフェクト</p>
+        </div>
+        <div class="effect-item">
+          <h4>wave</h4>
+          <p>波形アニメーション</p>
+        </div>
+        <div class="effect-item">
+          <h4>distortion</h4>
+          <p>歪みエフェクト</p>
+        </div>
+        <div class="effect-item">
+          <h4>dissolve</h4>
+          <p>ディゾルブ効果</p>
+        </div>
+        <div class="effect-item">
+          <h4>pixelDissolve</h4>
+          <p>ピクセル単位のディゾルブ</p>
+        </div>
+        <div class="effect-item">
+          <h4>circle</h4>
+          <p>円形トランジション</p>
+        </div>
+        <div class="effect-item">
+          <h4>morph</h4>
+          <p>モーフィング効果</p>
+        </div>
+        <div class="effect-item">
+          <h4>glitch</h4>
+          <p>グリッチエフェクト</p>
+        </div>
+        <div class="effect-item">
+          <h4>pageFlip</h4>
+          <p>ページめくり効果</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="api" class="section section-light">
+    <div class="container">
+      <h2>API リファレンス</h2>
+      
+      <h3>コンストラクタオプション</h3>
+      <div class="api-table">
+        <table>
+          <thead>
+            <tr>
+              <th>オプション</th>
+              <th>型</th>
+              <th>デフォルト</th>
+              <th>説明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>container</td>
+              <td>string | HTMLElement</td>
+              <td>必須</td>
+              <td>カルーセルを表示するコンテナ</td>
+            </tr>
+            <tr>
+              <td>images</td>
+              <td>string[]</td>
+              <td>[]</td>
+              <td>表示する画像のURL配列</td>
+            </tr>
+            <tr>
+              <td>effect</td>
+              <td>string</td>
+              <td>'fade'</td>
+              <td>使用するトランジションエフェクト</td>
+            </tr>
+            <tr>
+              <td>autoplay</td>
+              <td>boolean</td>
+              <td>false</td>
+              <td>自動再生の有効/無効</td>
+            </tr>
+            <tr>
+              <td>interval</td>
+              <td>number</td>
+              <td>3000</td>
+              <td>自動再生の間隔（ミリ秒）</td>
+            </tr>
+            <tr>
+              <td>transitionDuration</td>
+              <td>number</td>
+              <td>1000</td>
+              <td>トランジションの長さ（ミリ秒）</td>
+            </tr>
+            <tr>
+              <td>loop</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>最後の画像の後に最初に戻るか</td>
+            </tr>
+            <tr>
+              <td>showControls</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>ナビゲーションコントロールの表示</td>
+            </tr>
+            <tr>
+              <td>showIndicators</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>インジケーターの表示</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>メソッド</h3>
+      <pre><code class="language-javascript">// 次の画像へ
+carousel.next();
+
+// 前の画像へ
+carousel.previous();
+
+// 特定のインデックスへ
+carousel.goTo(2);
+
+// 自動再生の開始/停止
+carousel.play();
+carousel.pause();
+
+// エフェクトの変更
+carousel.setEffect('wave');
+
+// リサイズ
+carousel.resize();
+
+// 破棄
+carousel.dispose();</code></pre>
+
+      <h3>イベント</h3>
+      <pre><code class="language-javascript">// 画像変更時
+carousel.on('change', (index) => {
+  console.log('Current image:', index);
+});
+
+// トランジション開始時
+carousel.on('transitionStart', (from, to) => {
+  console.log(`Transitioning from ${from} to ${to}`);
+});
+
+// トランジション完了時
+carousel.on('transitionEnd', (index) => {
+  console.log('Transition completed:', index);
+});
+
+// エラー時
+carousel.on('error', (error) => {
+  console.error('Carousel error:', error);
+});</code></pre>
+    </div>
+  </section>
+
+  <section id="custom-effects" class="section">
+    <div class="container">
+      <h2>カスタムエフェクトの作成</h2>
+      <p>独自のGLSLシェーダーを使用してカスタムエフェクトを作成できます。</p>
+      
+      <pre><code class="language-javascript">import { createCustomEffect } from 'webgl-carousel';
+
+const myEffect = createCustomEffect(
+  'myCustomEffect',
+  // Vertex shader (optional)
+  `
+  attribute vec2 aPosition;
+  attribute vec2 aTexCoord;
+  varying vec2 vTexCoord;
+  
+  void main() {
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+    vTexCoord = aTexCoord;
+  }
+  `,
+  // Fragment shader
+  `
+  precision mediump float;
+  
+  uniform sampler2D uTexture0;
+  uniform sampler2D uTexture1;
+  uniform float uProgress;
+  uniform vec2 uResolution;
+  
+  varying vec2 vTexCoord;
+  
+  void main() {
+    vec2 uv = vTexCoord;
+    
+    // カスタムエフェクトロジック
+    float wave = sin(uv.y * 10.0 + uProgress * 3.14159) * 0.05;
+    vec2 distortedUV = vec2(uv.x + wave * uProgress, uv.y);
+    
+    vec4 color0 = texture2D(uTexture0, distortedUV);
+    vec4 color1 = texture2D(uTexture1, uv);
+    
+    gl_FragColor = mix(color0, color1, uProgress);
+  }
+  `
+);
+
+// カスタムエフェクトを登録
+carousel.registerEffect(myEffect);
+carousel.setEffect('myCustomEffect');</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>WebGL Carousel</h4>
+          <p>高性能な画像カルーセルライブラリ</p>
+        </div>
+        <div class="footer-section">
+          <h4>リンク</h4>
+          <ul>
+            <li><a href="https://github.com/yourusername/webgl-carousel">GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/webgl-carousel">npm</a></li>
+            <li><a href="#api">API ドキュメント</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>サポート</h4>
+          <ul>
+            <li><a href="https://github.com/yourusername/webgl-carousel/issues">Issues</a></li>
+            <li><a href="https://github.com/yourusername/webgl-carousel/discussions">Discussions</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 WebGL Carousel. MIT License.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script>
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
