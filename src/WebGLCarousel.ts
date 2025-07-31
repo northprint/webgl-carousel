@@ -389,7 +389,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
 
   getImageCount(): number {
     // Return the actual number of successfully loaded images
-    return this.core.getImages().length;
+    return this.images.length;
   }
 
   destroy(): void {

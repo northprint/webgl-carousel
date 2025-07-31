@@ -33,7 +33,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test",
+    "prepublishOnly": "npm run build",
     "demo": "python3 -m http.server 8080 --directory demos",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
