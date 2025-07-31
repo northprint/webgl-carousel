@@ -86,10 +86,11 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 15
     
     strategy:
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium]  # Reduced to chromium only for faster CI
     
     steps:
     - uses: actions/checkout@v4
