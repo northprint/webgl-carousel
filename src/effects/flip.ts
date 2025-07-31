@@ -74,11 +74,12 @@ export class FlipEffect extends BaseEffect {
     void main() {
       vec2 uv = vTexCoord;
       
-      // Determine which side is visible based on uniform progress
-      float side = step(0.5, uProgress);
+      // Determine which side is visible based on rotation angle
+      // When progress > 0.5, we're seeing the back side
+      bool isBackside = uProgress > 0.5;
       
-      // Flip UV coordinates for back side
-      if (side > 0.5) {
+      // Flip UV coordinates for back side to mirror the image correctly
+      if (isBackside) {
         // Check if vertical flip
         if (uAxis > 0.5) {
           uv.y = 1.0 - uv.y;  // Flip vertically for vertical flip
@@ -94,12 +95,26 @@ export class FlipEffect extends BaseEffect {
       vec4 color0 = texture2D(uTexture0, uv0);
       vec4 color1 = texture2D(uTexture1, uv1);
       
-      // Show texture0 on front, texture1 on back
-      gl_FragColor = mix(color0, color1, side);
+      // Show texture0 on front side (progress < 0.5), texture1 on back side (progress >= 0.5)
+      gl_FragColor = isBackside ? color1 : color0;
       
-      // Add slight darkening during flip
+      // Add slight darkening during flip for better visual effect
       float darkness = 1.0 - abs(uProgress - 0.5) * 0.4;
       gl_FragColor.rgb *= darkness;
+      
+      // Handle backface culling - hide pixels that shouldn't be visible
+      // This is important for proper 3D flip effect
+      float angle = uProgress * 3.14159;
+      float cosAngle = cos(angle);
+      
+      // For horizontal flip, check if we're viewing from behind
+      if (uAxis < 0.5 && cosAngle < 0.0 && !isBackside) {
+        discard;
+      }
+      // For vertical flip, similar check
+      if (uAxis > 0.5 && cosAngle < 0.0 && !isBackside) {
+        discard;
+      }
     }
   `);
 
