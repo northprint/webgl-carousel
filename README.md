@@ -145,7 +145,6 @@ const images = [
 
 ### 3Dエフェクト
 - `flipHorizontal` / `flipVertical` - 3D回転
-- `pageFlip` - ページめくり
 
 ### クリエイティブエフェクト
 - `wave` / `gentleWave` / `intenseWave` - 波形アニメーション

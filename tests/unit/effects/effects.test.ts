@@ -158,7 +158,7 @@ describe('Effects', () => {
   describe('getDefaultEffects', () => {
     it('should return all default effect instances', () => {
       const defaultEffects = getDefaultEffects();
-      expect(defaultEffects).toHaveLength(27);
+      expect(defaultEffects).toHaveLength(26);
       expect(defaultEffects).toContain(fadeEffect);
       expect(defaultEffects).toContain(slideLeftEffect);
       expect(defaultEffects).toContain(slideRightEffect);
@@ -178,7 +178,7 @@ describe('Effects', () => {
 
       registerDefaultEffects(manager);
 
-      expect(manager.size()).toBe(27); // 27 unique effect names
+      expect(manager.size()).toBe(26); // 26 unique effect names
       // Basic effects
       expect(manager.has('fade')).toBe(true);
       expect(manager.has('slideLeft')).toBe(true);
@@ -194,7 +194,6 @@ describe('Effects', () => {
       expect(manager.has('pixelDissolve')).toBe(true);
       expect(manager.has('morph')).toBe(true);
       expect(manager.has('glitch')).toBe(true);
-      expect(manager.has('pageFlip')).toBe(true);
       // Variants
       expect(manager.has('gentleWave')).toBe(true);
       expect(manager.has('intenseWave')).toBe(true);

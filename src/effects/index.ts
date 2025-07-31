@@ -13,7 +13,6 @@ export { CircleEffect, type CircleOptions } from './circle';
 export { PixelDissolveEffect, type PixelDissolveOptions } from './pixelDissolve';
 export { MorphEffect, type MorphOptions } from './morph';
 export { GlitchEffect, type GlitchOptions } from './glitch';
-export { PageFlipEffect, type PageFlipOptions } from './pageFlip';
 export {
   CustomEffect,
   createCustomEffect,
@@ -32,7 +31,6 @@ import { CircleEffect } from './circle';
 import { PixelDissolveEffect } from './pixelDissolve';
 import { MorphEffect } from './morph';
 import { GlitchEffect } from './glitch';
-import { PageFlipEffect } from './pageFlip';
 
 // Create and export singleton instances
 export const fadeEffect = new FadeEffect();
@@ -104,7 +102,6 @@ export const subtleGlitchEffect = new GlitchEffect({
   colorShift: 0.02,
   noiseAmount: 0.05,
 });
-export const pageFlipEffect = new PageFlipEffect();
 
 // Set unique names for effect variants
 gentleWaveEffect.name = 'gentleWave';
@@ -120,7 +117,6 @@ smallPixelDissolveEffect.name = 'smallPixelDissolve';
 intenseMorphEffect.name = 'intenseMorph';
 intenseGlitchEffect.name = 'intenseGlitch';
 subtleGlitchEffect.name = 'subtleGlitch';
-pageFlipEffect.name = 'pageFlip';
 
 // Collection of all default effects
 export function getDefaultEffects() {
@@ -151,7 +147,6 @@ export function getDefaultEffects() {
     glitchEffect,
     intenseGlitchEffect,
     subtleGlitchEffect,
-    pageFlipEffect,
   ];
 }
 
