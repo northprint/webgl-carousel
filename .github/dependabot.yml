@@ -15,20 +15,21 @@ updates:
           - "jest*"
           - "rollup*"
           - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-      production-dependencies:
-        patterns:
-          - "*"
-        exclude-patterns:
-          - "@types/*"
-          - "eslint*"
-          - "jest*"
-          - "rollup*"
-          - "typescript"
-        update-types:
-          - "patch"
+          - "@rollup/*"
+          - "@typescript-eslint/*"
+          - "@testing-library/*"
+          - "@playwright/*"
+          - "husky"
+          - "prettier"
+          - "ts-jest"
+          - "@vue/*"
+          - "svelte"
+          - "react"
+          - "react-dom"
+          - "vue"
+          - "vite"
+          - "playwright"
+        dependency-type: "development"
   
   - package-ecosystem: "github-actions"
     directory: "/"

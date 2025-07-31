@@ -1,22 +1,41 @@
 # Configuration for GitHub labeler
 
 documentation:
-  - any: ['docs/**', '*.md']
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**'
+      - '*.md'
 
 core:
-  - src/core/**
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/core/**'
 
 effects:
-  - src/effects/**
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/effects/**'
 
 adapters:
-  - src/adapters/**
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'src/adapters/**'
 
 tests:
-  - any: ['**/*.test.ts', '**/*.spec.ts', 'e2e/**']
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.test.ts'
+      - '**/*.spec.ts'
+      - 'e2e/**'
 
 build:
-  - any: ['rollup.config.js', 'tsconfig.json', 'package.json']
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'rollup.config.js'
+      - 'tsconfig.json'
+      - 'package.json'
 
 ci:
-  - .github/**
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**'
