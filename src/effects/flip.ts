@@ -25,6 +25,7 @@ export class FlipEffect extends BaseEffect {
     
     varying vec2 vTexCoord;
     varying float vProgress;
+    varying float vBackface;
     
     mat4 rotationMatrix(vec3 axis, float angle) {
       axis = normalize(axis);
@@ -54,6 +55,9 @@ export class FlipEffect extends BaseEffect {
       vec4 position = vec4(aPosition, 0.0, 1.0);
       position = rotationMatrix(axis, angle) * position;
       
+      // Check if we're showing the backface
+      vBackface = step(0.5, uProgress);
+      
       // Apply perspective
       float perspective = 1.0 / (1.0 + position.z * 0.5);
       position.xy *= perspective;
@@ -64,13 +68,15 @@ export class FlipEffect extends BaseEffect {
 
   readonly fragmentShader = createFragmentShader(`
     uniform float uAxis;
+    uniform float uProgress;
     varying float vProgress;
+    varying float vBackface;
     
     void main() {
       vec2 uv = vTexCoord;
       
-      // Determine which side is visible
-      float side = step(0.5, vProgress);
+      // Determine which side is visible based on uniform progress
+      float side = step(0.5, uProgress);
       
       // Flip UV coordinates for back side
       if (side > 0.5) {
@@ -93,7 +99,7 @@ export class FlipEffect extends BaseEffect {
       gl_FragColor = mix(color0, color1, side);
       
       // Add slight darkening during flip
-      float darkness = 1.0 - abs(vProgress - 0.5) * 0.4;
+      float darkness = 1.0 - abs(uProgress - 0.5) * 0.4;
       gl_FragColor.rgb *= darkness;
     }
   `);
