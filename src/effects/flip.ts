@@ -68,7 +68,6 @@ export class FlipEffect extends BaseEffect {
 
   readonly fragmentShader = createFragmentShader(`
     uniform float uAxis;
-    uniform float uProgress;
     varying float vProgress;
     varying float vBackface;
     
