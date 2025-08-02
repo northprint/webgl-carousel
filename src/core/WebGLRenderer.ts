@@ -306,9 +306,14 @@ export class WebGLRenderer extends EventEmitter<WebGLRendererEvents> {
     this.gl.activeTexture(this.gl.TEXTURE0);
     this.gl.bindTexture(this.gl.TEXTURE_2D, currentTexture);
 
-    // Always bind texture1, use currentTexture as fallback if nextTexture is null
+    // Bind texture1 - nextTexture if available, otherwise bind current texture
     this.gl.activeTexture(this.gl.TEXTURE1);
-    this.gl.bindTexture(this.gl.TEXTURE_2D, nextTexture || currentTexture);
+    if (nextTexture) {
+      this.gl.bindTexture(this.gl.TEXTURE_2D, nextTexture);
+    } else {
+      // For single texture rendering, bind currentTexture to both slots
+      this.gl.bindTexture(this.gl.TEXTURE_2D, currentTexture);
+    }
 
     // Set uniforms
     const texture0Loc = this.uniforms.get('uTexture0');

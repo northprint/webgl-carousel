@@ -13,108 +13,70 @@ export class FlipEffect extends BaseEffect {
     this.name = `flip${axis.charAt(0).toUpperCase() + axis.slice(1)}`;
   }
 
-  // Custom vertex shader for 3D flip effect
+  // カスタム頂点シェーダー - 画像を変形
   readonly vertexShader = `
-    precision mediump float;
-    
     attribute vec2 aPosition;
     attribute vec2 aTexCoord;
     
     uniform float uProgress;
-    uniform float uAxis; // 0 for horizontal, 1 for vertical
+    uniform float uAxis;
     
     varying vec2 vTexCoord;
-    varying float vProgress;
-    varying float vBackface;
-    
-    mat4 rotationMatrix(vec3 axis, float angle) {
-      axis = normalize(axis);
-      float s = sin(angle);
-      float c = cos(angle);
-      float oc = 1.0 - c;
-      
-      return mat4(
-        oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-        oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-        oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-        0.0,                                 0.0,                                 0.0,                                 1.0
-      );
-    }
     
     void main() {
       vTexCoord = aTexCoord;
-      vProgress = uProgress;
       
-      // Create rotation axis based on flip direction
-      vec3 axis = uAxis > 0.5 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
-      
-      // Calculate rotation angle
+      // 回転角度
       float angle = uProgress * 3.14159;
+      float scale = abs(cos(angle));
       
-      // Apply rotation
-      vec4 position = vec4(aPosition, 0.0, 1.0);
-      position = rotationMatrix(axis, angle) * position;
+      vec2 position = aPosition;
       
-      // Check if we're showing the backface
-      vBackface = step(0.5, uProgress);
+      if (uAxis < 0.5) {
+        // Horizontal flip - X方向のみ縮小
+        position.x *= scale;
+      } else {
+        // Vertical flip - Y方向のみ縮小  
+        position.y *= scale;
+      }
       
-      // Apply perspective
-      float perspective = 1.0 / (1.0 + position.z * 0.5);
-      position.xy *= perspective;
-      
-      gl_Position = position;
+      gl_Position = vec4(position, 0.0, 1.0);
     }
   `;
 
   readonly fragmentShader = createFragmentShader(`
     uniform float uAxis;
-    varying float vProgress;
-    varying float vBackface;
     
     void main() {
       vec2 uv = vTexCoord;
       
-      // Determine which side is visible based on rotation angle
-      // When progress > 0.5, we're seeing the back side
-      bool isBackside = uProgress > 0.5;
-      
-      // Flip UV coordinates for back side to mirror the image correctly
-      if (isBackside) {
-        // Check if vertical flip
-        if (uAxis > 0.5) {
-          uv.y = 1.0 - uv.y;  // Flip vertically for vertical flip
-        } else {
-          uv.x = 1.0 - uv.x;  // Flip horizontally for horizontal flip
-        }
-      }
-      
-      // Apply aspect ratio correction
-      vec2 uv0 = getCoverUV(uv, uImageSize0, uResolution);
-      vec2 uv1 = getCoverUV(uv, uImageSize1, uResolution);
-      
-      vec4 color0 = texture2D(uTexture0, uv0);
-      vec4 color1 = texture2D(uTexture1, uv1);
-      
-      // Show texture0 on front side (progress < 0.5), texture1 on back side (progress >= 0.5)
-      gl_FragColor = isBackside ? color1 : color0;
-      
-      // Add slight darkening during flip for better visual effect
-      float darkness = 1.0 - abs(uProgress - 0.5) * 0.4;
-      gl_FragColor.rgb *= darkness;
-      
-      // Handle backface culling - hide pixels that shouldn't be visible
-      // This is important for proper 3D flip effect
+      // 回転角度
       float angle = uProgress * 3.14159;
       float cosAngle = cos(angle);
       
-      // For horizontal flip, check if we're viewing from behind
-      if (uAxis < 0.5 && cosAngle < 0.0 && !isBackside) {
-        discard;
+      // スケール計算（0で完全に消える）
+      float scale = abs(cosAngle);
+      
+      // 表裏の判定
+      bool isBackface = cosAngle < 0.0;
+      
+      vec4 finalColor;
+      
+      if (!isBackface) {
+        // 表面：1枚目の画像
+        vec2 uv0 = getCoverUV(uv, uImageSize0, uResolution);
+        finalColor = texture2D(uTexture0, uv0);
+      } else {
+        // 裏面：2枚目の画像
+        vec2 uv1 = getCoverUV(uv, uImageSize1, uResolution);
+        finalColor = texture2D(uTexture1, uv1);
       }
-      // For vertical flip, similar check
-      if (uAxis > 0.5 && cosAngle < 0.0 && !isBackside) {
-        discard;
-      }
+      
+      // 軽いシェーディング効果
+      float shading = 0.7 + 0.3 * scale;
+      finalColor.rgb *= shading;
+      
+      gl_FragColor = finalColor;
     }
   `);
 

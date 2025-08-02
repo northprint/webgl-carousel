@@ -601,20 +601,6 @@
             <div class="loading-spinner"></div>
           </div>
         </div>
-        
-        <button class="carousel-nav prev" id="prevBtn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </button>
-        
-        <button class="carousel-nav next" id="nextBtn">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
-        
-        <div class="carousel-pagination" id="pagination"></div>
       </div>
     </section>
 
@@ -810,7 +796,7 @@ void main() {
     </section>
   </div>
 
-  <script src="./dist/webgl-carousel.umd.js"></script>
+  <script src="./dist/webgl-carousel.umd.js?v=20250802"></script>
   <script>
     // Configuration
     // Generate sample images dynamically to avoid CORS issues
@@ -883,7 +869,6 @@ void main() {
       
       initializeCarousel();
       setupEventListeners();
-      createPagination();
       createEffectPreviews();
       updateWebGLStatus();
     });
@@ -943,16 +928,22 @@ void main() {
     
     function setupEventListeners() {
       // Navigation
-      document.getElementById('prevBtn').addEventListener('click', () => carousel.previous());
-      document.getElementById('nextBtn').addEventListener('click', () => carousel.next());
-      document.getElementById('prevBtnAlt').addEventListener('click', () => carousel.previous());
-      document.getElementById('nextBtnAlt').addEventListener('click', () => carousel.next());
+      document.getElementById('prevBtnAlt').addEventListener('click', () => {
+        console.log('Previous alt button clicked');
+        carousel.previous();
+      });
+      document.getElementById('nextBtnAlt').addEventListener('click', () => {
+        console.log('Next alt button clicked');
+        carousel.next();
+      });
       
       // Effect selector
       document.getElementById('effectSelect').addEventListener('change', (e) => {
+        console.log(`Effect selector changed to: ${e.target.value}`);
         currentEffect = e.target.value;
         carousel.setEffect(currentEffect);
         updateEffectPreviews();
+        console.log(`Current effect is now: ${currentEffect}`);
       });
       
       // Sliders
@@ -1078,18 +1069,6 @@ void main() {
       }
     }
     
-    function createPagination() {
-      const pagination = document.getElementById('pagination');
-      
-      for (let i = 0; i < images.length; i++) {
-        const dot = document.createElement('button');
-        dot.className = 'pagination-dot';
-        if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => carousel.goTo(i));
-        pagination.appendChild(dot);
-      }
-    }
-    
     function createEffectPreviews() {
       const grid = document.getElementById('effectPreviewGrid');
       
@@ -1104,10 +1083,12 @@ void main() {
         }
         
         btn.addEventListener('click', () => {
+          console.log(`Setting effect: ${effect}`);
           currentEffect = effect;
           carousel.setEffect(effect);
           document.getElementById('effectSelect').value = effect;
           updateEffectPreviews();
+          console.log(`Effect set to: ${effect}`);
         });
         
         grid.appendChild(btn);
