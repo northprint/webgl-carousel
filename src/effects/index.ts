@@ -150,7 +150,9 @@ export function getDefaultEffects() {
   ];
 }
 
+import type { EffectManager } from '../core/EffectManager';
+
 // Helper to register all default effects
-export function registerDefaultEffects(manager: any): void {
+export function registerDefaultEffects(manager: EffectManager): void {
   getDefaultEffects().forEach((effect) => manager.register(effect));
 }

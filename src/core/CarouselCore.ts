@@ -245,7 +245,6 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     const fromImage = this.loadedImages.get(images[from]!);
     const toImage = this.loadedImages.get(images[to]!);
 
-
     if (!fromImage || !toImage) {
       // Images not loaded yet, skip transition
       this.stateManager.endTransition(to);
@@ -260,7 +259,6 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     ) {
       const fromTexture = this.textures.get(images[from]!);
       const toTexture = this.textures.get(images[to]!);
-
 
       if (fromTexture && toTexture) {
         // Set effect if needed

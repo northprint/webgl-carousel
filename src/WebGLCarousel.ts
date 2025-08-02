@@ -369,9 +369,9 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
     ];
   }
 
-  registerEffect(_effect: IEffect): void {
-    // Effects are registered internally in CarouselCore
-    console.warn('registerEffect is deprecated. Effects are managed internally.');
+  registerEffect(effect: IEffect): void {
+    if (!this.isInitialized) return;
+    this.core.registerEffect(effect);
   }
 
   play(): void {

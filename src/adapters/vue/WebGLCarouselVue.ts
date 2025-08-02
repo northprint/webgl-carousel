@@ -129,17 +129,17 @@ export const WebGLCarouselVue = defineComponent({
 
       // Add custom effects if provided
       if (props.effects) {
-        (options as any).effects = props.effects;
+        options.effects = props.effects;
       }
 
       // Add custom effect object if provided
       if (typeof props.effect === 'object') {
-        (options as any).effects = [props.effect];
+        options.effects = [props.effect];
       }
 
       // Add easing function if provided
       if (props.easing) {
-        (options as any).easing = props.easing;
+        options.easing = props.easing;
       }
 
       carousel = new WebGLCarousel(options);
@@ -253,8 +253,8 @@ export const WebGLCarouselVue = defineComponent({
     };
 
     const registerEffect = (effect: BaseEffect) => {
-      // Convert BaseEffect to IEffect if needed
-      carousel?.registerEffect(effect as any);
+      // BaseEffect already implements IEffect
+      carousel?.registerEffect(effect);
     };
 
     const play = () => {

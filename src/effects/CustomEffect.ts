@@ -129,13 +129,26 @@ export async function createCustomEffectFromFiles(
  */
 export function createCustomEffect(
   name: string,
-  vertexShader: string,
+  vertexShader: string | undefined,
   fragmentShader: string,
   options?: Partial<CustomEffectOptions>,
 ): CustomEffect {
+  // Use default vertex shader if not provided
+  const defaultVertexShader = `
+    attribute vec2 aPosition;
+    attribute vec2 aTexCoord;
+    
+    varying vec2 vTexCoord;
+    
+    void main() {
+      gl_Position = vec4(aPosition, 0.0, 1.0);
+      vTexCoord = aTexCoord;
+    }
+  `;
+
   return new CustomEffect({
     name,
-    vertexShader,
+    vertexShader: vertexShader || defaultVertexShader,
     fragmentShader,
     ...options,
   });

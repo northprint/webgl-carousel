@@ -1,3 +1,5 @@
+import type { IEffect } from './core/EffectManager';
+
 export interface CarouselState {
   currentIndex: number;
   images: string[];
@@ -30,7 +32,8 @@ export interface CarouselTransitionOptions {
 export interface WebGLCarouselOptions {
   container: string | HTMLElement;
   images: string[];
-  effect?: string;
+  effect?: string | IEffect;
+  effects?: IEffect[];
   autoplay?: boolean;
   autoplayInterval?: number;
   navigation?: boolean;
@@ -40,6 +43,7 @@ export interface WebGLCarouselOptions {
   fallbackToCanvas2D?: boolean;
   transitionDuration?: number;
   startIndex?: number;
+  easing?: (t: number) => number;
   onImageChange?: (index: number) => void;
   onTransitionStart?: (from: number, to: number) => void;
   onTransitionEnd?: (index: number) => void;

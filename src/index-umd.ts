@@ -1,10 +1,11 @@
 // UMD build entry point - exports everything to global WebGLCarousel namespace
 import { WebGLCarousel } from './WebGLCarousel';
+import type { WebGLCarouselOptions } from './WebGLCarousel';
 import { createCustomEffect, createCustomEffectFromFiles } from './effects';
 
 // Extend WebGLCarousel with static methods
 interface WebGLCarouselConstructor {
-  new (options: any): WebGLCarousel;
+  new (options: WebGLCarouselOptions): WebGLCarousel;
   createCustomEffect: typeof createCustomEffect;
   createCustomEffectFromFiles: typeof createCustomEffectFromFiles;
 }
