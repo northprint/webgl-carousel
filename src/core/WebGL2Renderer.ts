@@ -397,7 +397,6 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
       const error = this.gl.getShaderInfoLog(shader);
       console.error('[WebGL2Renderer] Shader compilation error:', error);
-      console.error('[WebGL2Renderer] Shader source:', source);
       this.gl.deleteShader(shader);
       throw new Error(`Failed to compile shader: ${error}`);
     }

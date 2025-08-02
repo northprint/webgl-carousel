@@ -245,19 +245,8 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     const fromImage = this.loadedImages.get(images[from]!);
     const toImage = this.loadedImages.get(images[to]!);
 
-    console.log('[startTransition] Debug info:', {
-      from,
-      to,
-      fromImageUrl: images[from],
-      toImageUrl: images[to],
-      fromImageLoaded: !!fromImage,
-      toImageLoaded: !!toImage,
-      totalLoadedImages: this.loadedImages.size,
-      totalTextures: this.textures.size,
-    });
 
     if (!fromImage || !toImage) {
-      console.error('[startTransition] Images not loaded:', { fromImage: !!fromImage, toImage: !!toImage });
       // Images not loaded yet, skip transition
       this.stateManager.endTransition(to);
       return;
@@ -272,14 +261,6 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       const fromTexture = this.textures.get(images[from]!);
       const toTexture = this.textures.get(images[to]!);
 
-      console.log('[startTransition] Texture info:', {
-        fromTextureExists: !!fromTexture,
-        toTextureExists: !!toTexture,
-        fromImageUrl: images[from],
-        toImageUrl: images[to],
-        textureMapSize: this.textures.size,
-        textureMapKeys: Array.from(this.textures.keys()),
-      });
 
       if (fromTexture && toTexture) {
         // Set effect if needed
