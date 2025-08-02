@@ -124,7 +124,13 @@ export const WebGLCarouselReact = forwardRef<WebGLCarouselReactRef, WebGLCarouse
       if (!carouselRef.current || !carouselRef.current.isReady()) return;
 
       if (carouselOptions.effect) {
-        carouselRef.current.setEffect(carouselOptions.effect);
+        if (typeof carouselOptions.effect === 'object') {
+          // Register and use custom effect
+          carouselRef.current.registerEffect(carouselOptions.effect);
+          carouselRef.current.setEffect(carouselOptions.effect.name);
+        } else {
+          carouselRef.current.setEffect(carouselOptions.effect);
+        }
       }
     }, [carouselOptions.effect]);
 

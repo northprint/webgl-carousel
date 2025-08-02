@@ -47,6 +47,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       container: options.container,
       images: options.images,
       effect: options.effect || 'fade',
+      effects: options.effects || [],
       autoplay: options.autoplay ?? false,
       autoplayInterval: options.autoplayInterval ?? 3000,
       navigation: options.navigation ?? true,
@@ -56,6 +57,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       fallbackToCanvas2D: options.fallbackToCanvas2D ?? true,
       transitionDuration: options.transitionDuration ?? 1000,
       startIndex: options.startIndex ?? 0,
+      easing: options.easing || ((t: number) => t),
       onImageChange: options.onImageChange || (() => {}),
       onTransitionStart: options.onTransitionStart || (() => {}),
       onTransitionEnd: options.onTransitionEnd || (() => {}),
@@ -99,10 +101,16 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
   }
 
   private createCore(): CarouselCore {
+    // Extract effect name if it's an IEffect object
+    const effectName =
+      typeof this.options.effect === 'string'
+        ? this.options.effect
+        : this.options.effect?.name || 'fade';
+
     return new CarouselCore({
       canvas: this.canvas,
       images: this.options.images,
-      effect: this.options.effect,
+      effect: effectName,
       autoplay: this.options.autoplay,
       autoplayInterval: this.options.autoplayInterval,
       transitionDuration: this.options.transitionDuration,
@@ -124,7 +132,20 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       await this.core.initialize();
 
       // Set initial effect
-      this.setEffect(this.options.effect);
+      if (typeof this.options.effect === 'object') {
+        // Register and use custom effect
+        this.registerEffect(this.options.effect);
+        this.setEffect(this.options.effect.name);
+      } else {
+        this.setEffect(this.options.effect);
+      }
+
+      // Register additional effects if provided
+      if (this.options.effects) {
+        this.options.effects.forEach((effect) => {
+          this.registerEffect(effect);
+        });
+      }
 
       // Set up autoplay
       if (this.options.autoplay) {
