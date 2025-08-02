@@ -72,8 +72,9 @@ describe('Effects', () => {
     it('should have custom vertex shader', () => {
       const effect = new FlipEffect();
       expect(effect.name).toBe('flipHorizontal');
-      expect(effect.vertexShader).toContain('rotationMatrix');
-      expect(effect.fragmentShader).toContain('vProgress');
+      expect(effect.vertexShader).toContain('uAxis');
+      expect(effect.vertexShader).toContain('position.x *= scale');
+      expect(effect.fragmentShader).toContain('uProgress');
     });
 
     it('should return correct uniforms for each axis', () => {

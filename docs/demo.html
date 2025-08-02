@@ -880,6 +880,9 @@ void main() {
       const CarouselClass = WebGLCarousel.default || WebGLCarousel.WebGLCarousel || WebGLCarousel;
       console.log('CarouselClass:', CarouselClass);
       
+      // Make createCustomEffect easily accessible
+      window.createCustomEffect = CarouselClass.createCustomEffect || (WebGLCarousel.createCustomEffect);
+      
       try {
         carousel = new CarouselClass({
           container: '#carousel',
@@ -1056,9 +1059,13 @@ void main() {
       });
       
       function applyCustomEffect(name, fragmentShader) {
-        const { createCustomEffect } = WebGLCarousel;
+        if (!window.createCustomEffect) {
+          console.error('createCustomEffect is not available');
+          alert('createCustomEffect関数が利用できません。ライブラリのビルドを確認してください。');
+          return;
+        }
         
-        const customEffect = createCustomEffect(
+        const customEffect = window.createCustomEffect(
           name,
           undefined, // Use default vertex shader
           fragmentShader

@@ -7,7 +7,11 @@ module.exports = {
     '**/?(*.)+(spec|test).+(ts|tsx|js)',
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react',
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -29,12 +33,5 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testEnvironmentOptions: {
     customExportConditions: ["node", "node-addons"],
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: {
-        jsx: 'react',
-      },
-    },
   },
 };
