@@ -11,7 +11,7 @@ playwright-report/
 test-results/
 
 # Production
-dist/
+/dist/
 
 # Development
 .tmp/
