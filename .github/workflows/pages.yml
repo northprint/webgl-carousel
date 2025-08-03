@@ -35,8 +35,8 @@ jobs:
     
     - name: Copy dist to docs
       run: |
-        # Remove existing symlink if it exists
-        rm -f docs/dist
+        # Remove existing directory if it exists
+        rm -rf docs/dist
         # Copy the actual dist directory
         cp -r dist docs/
     
