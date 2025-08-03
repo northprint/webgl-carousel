@@ -517,7 +517,7 @@ void main() {
 
     // Initialize carousel
     function initCarousel() {
-      carousel = new WebGLCarousel({
+      carousel = new WebGLCarousel.WebGLCarousel({
         container: '#carousel',
         images: demoImages,
         effect: currentEffect,
@@ -604,7 +604,7 @@ void main() {
       document.getElementById('apply-shader').addEventListener('click', () => {
         const shaderCode = document.getElementById('custom-shader').value;
         try {
-          const customEffect = WebGLCarousel.createCustomEffect('custom', null, shaderCode);
+          const customEffect = WebGLCarousel.WebGLCarousel.createCustomEffect('custom', null, shaderCode);
           carousel.registerEffect(customEffect);
           carousel.setEffect('custom');
           
