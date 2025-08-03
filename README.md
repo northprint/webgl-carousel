@@ -6,6 +6,9 @@ A high-performance image carousel library powered by WebGL with stunning visual 
 
 [![npm version](https://img.shields.io/npm/v/webgl-carousel.svg)](https://www.npmjs.com/package/webgl-carousel)
 [![License](https://img.shields.io/npm/l/webgl-carousel.svg)](https://github.com/northprint/webgl-carousel/blob/main/LICENSE)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/webgl-carousel)](https://bundlephobia.com/package/webgl-carousel)
+
+[Live Demo](https://northprint.github.io/webgl-carousel/demo.html) | [Documentation](https://northprint.github.io/webgl-carousel/)
 
 ## Features
 
@@ -18,15 +21,57 @@ A high-performance image carousel library powered by WebGL with stunning visual 
 - TypeScript support
 - Lightweight with zero dependencies
 
+## Demo
+
+Check out our [interactive demo](https://northprint.github.io/webgl-carousel/demo.html) to see all effects in action and experiment with custom shaders.
+
 ## Installation
 
 ```bash
 npm install webgl-carousel
 ```
 
+Or using yarn:
+
+```bash
+yarn add webgl-carousel
+```
+
+Or using pnpm:
+
+```bash
+pnpm add webgl-carousel
+```
+
 ## Quick Start
 
 ### Vanilla JavaScript
+
+#### ES Modules
+
+```javascript
+import { WebGLCarousel } from 'webgl-carousel';
+```
+
+#### UMD (Browser)
+
+```html
+<script src="https://unpkg.com/webgl-carousel/dist/webgl-carousel.umd.js"></script>
+<script>
+  const carousel = new WebGLCarousel.WebGLCarousel({
+    container: '#carousel',
+    images: [...]
+  });
+</script>
+```
+
+#### CommonJS
+
+```javascript
+const { WebGLCarousel } = require('webgl-carousel');
+```
+
+#### Basic Example
 
 ```javascript
 import { WebGLCarousel } from 'webgl-carousel';
@@ -261,6 +306,35 @@ carousel.setEffect('myEffect');
 
 The library automatically falls back to Canvas 2D rendering when WebGL is not available.
 
+## CDN Usage
+
+You can use WebGL Carousel directly from a CDN:
+
+```html
+<!-- Latest version -->
+<script src="https://unpkg.com/webgl-carousel"></script>
+
+<!-- Specific version -->
+<script src="https://unpkg.com/webgl-carousel@0.2.3"></script>
+```
+
+## TypeScript Support
+
+WebGL Carousel is written in TypeScript and includes type definitions out of the box.
+
+```typescript
+import { WebGLCarousel, WebGLCarouselOptions } from 'webgl-carousel';
+
+const options: WebGLCarouselOptions = {
+  container: '#carousel',
+  images: ['image1.jpg', 'image2.jpg'],
+  effect: 'fade',
+  autoplay: true
+};
+
+const carousel = new WebGLCarousel(options);
+```
+
 ## Performance Considerations
 
 1. **Image Optimization**: Use appropriately sized images for best performance
@@ -276,6 +350,22 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Examples
+
+Check out the [examples directory](https://github.com/northprint/webgl-carousel/tree/main/examples) for more usage examples:
+
+- [Basic Usage](https://github.com/northprint/webgl-carousel/tree/main/examples/basic)
+- [Custom Effects](https://github.com/northprint/webgl-carousel/tree/main/examples/custom-effects)
+- [React Integration](https://github.com/northprint/webgl-carousel/tree/main/examples/react)
+- [Vue Integration](https://github.com/northprint/webgl-carousel/tree/main/examples/vue)
+- [Svelte Integration](https://github.com/northprint/webgl-carousel/tree/main/examples/svelte)
+
 ## Acknowledgments
 
 This library uses WebGL for hardware-accelerated rendering and provides fallback support for broader compatibility.
+
+## Support
+
+- [GitHub Issues](https://github.com/northprint/webgl-carousel/issues) - Bug reports and feature requests
+- [GitHub Discussions](https://github.com/northprint/webgl-carousel/discussions) - General discussions and questions
+- [Stack Overflow](https://stackoverflow.com/questions/tagged/webgl-carousel) - Community support

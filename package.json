@@ -10,7 +10,7 @@
   "files": [
     "dist",
     "README.md",
-    "README.en.md",
+    "README.ja.md",
     "LICENSE"
   ],
   "exports": {
@@ -64,7 +64,7 @@
     "ui",
     "frontend"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Norihiro Narayama",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/northprint/webgl-carousel/issues"
