@@ -12,6 +12,7 @@ test-results/
 
 # Production
 /dist/
+docs/dist/
 
 # Development
 .tmp/
