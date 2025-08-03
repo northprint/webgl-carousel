@@ -1,41 +1,87 @@
-# Configuration for GitHub labeler
+# Configuration for PR labeler
+# https://github.com/actions/labeler
 
+# Add 'documentation' label to any changes within 'docs' folder or any .md files
 documentation:
   - changed-files:
     - any-glob-to-any-file:
-      - 'docs/**'
-      - '*.md'
+      - docs/**
+      - '**/*.md'
+      - README.*
 
-core:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/core/**'
-
-effects:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/effects/**'
-
-adapters:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'src/adapters/**'
-
-tests:
+# Add 'test' label to any changes in test files
+test:
   - changed-files:
     - any-glob-to-any-file:
       - '**/*.test.ts'
+      - '**/*.test.tsx'
       - '**/*.spec.ts'
-      - 'e2e/**'
+      - '**/*.spec.tsx'
+      - tests/**
+      - __tests__/**
+      - test/**
+      - e2e/**
+      - playwright/**
 
+# Add 'build' label to any changes in build configuration
 build:
   - changed-files:
     - any-glob-to-any-file:
-      - 'rollup.config.js'
-      - 'tsconfig.json'
-      - 'package.json'
+      - rollup.config.js
+      - tsconfig.json
+      - package.json
+      - package-lock.json
+      - .eslintrc.*
+      - .prettierrc.*
+      - vite.config.*
 
+# Add 'ci' label to any changes in GitHub Actions
 ci:
   - changed-files:
     - any-glob-to-any-file:
-      - '.github/**'
+      - .github/workflows/**
+      - .github/actions/**
+      - .github/**/*.yml
+      - .github/**/*.yaml
+
+# Add 'core' label to core library changes
+core:
+  - changed-files:
+    - any-glob-to-any-file:
+      - src/core/**
+      - src/WebGLCarousel.ts
+      - src/types/**
+
+# Add 'effects' label to effect-related changes
+effects:
+  - changed-files:
+    - any-glob-to-any-file:
+      - src/effects/**
+      - src/shaders/**
+
+# Add 'framework' label to framework adapter changes
+framework:
+  - changed-files:
+    - any-glob-to-any-file:
+      - src/adapters/**
+      - src/react/**
+      - src/vue/**
+      - src/svelte/**
+
+# Add 'demo' label to demo-related changes
+demo:
+  - changed-files:
+    - any-glob-to-any-file:
+      - demos/**
+      - examples/**
+      - docs/demo*.html
+      - docs/*.css
+
+# Add 'dependencies' label to dependency updates
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - package.json
+      - package-lock.json
+      - yarn.lock
+      - pnpm-lock.yaml
