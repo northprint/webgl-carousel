@@ -1,4 +1,4 @@
-import { EventEmitter } from './EventEmitter';
+import { BaseWebGLRenderer } from './BaseWebGLRenderer';
 
 export interface WebGL2RendererOptions {
   antialias?: boolean;
@@ -6,12 +6,6 @@ export interface WebGL2RendererOptions {
   premultipliedAlpha?: boolean;
   preserveDrawingBuffer?: boolean;
   powerPreference?: 'default' | 'high-performance' | 'low-power';
-}
-
-export interface WebGL2RendererEvents extends Record<string, unknown[]> {
-  contextLost: [];
-  contextRestored: [];
-  error: [Error];
 }
 
 export interface MeshData {
@@ -27,17 +21,10 @@ export interface TransformFeedbackData {
   varyings: string[];
 }
 
-export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
-  private canvas: HTMLCanvasElement | null = null;
-  private gl: WebGL2RenderingContext | null = null;
-  private program: WebGLProgram | null = null;
+export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
   private vertexArray: WebGLVertexArrayObject | null = null;
   private vertexBuffer: WebGLBuffer | null = null;
   private indexBuffer: WebGLBuffer | null = null;
-  private textures: Map<string, WebGLTexture> = new Map();
-  private imageSizes: Map<string, { width: number; height: number }> = new Map();
-  private uniforms: Map<string, WebGLUniformLocation> = new Map();
-  private attributes: Map<string, number> = new Map();
   private uniformBlockIndices: Map<string, number> = new Map();
   private options: WebGL2RendererOptions;
   private meshData: MeshData | null = null;
@@ -88,16 +75,6 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     this.canvas.addEventListener('webglcontextlost', this.handleContextLost);
     this.canvas.addEventListener('webglcontextrestored', this.handleContextRestored);
   }
-
-  private handleContextLost = (event: Event): void => {
-    event.preventDefault();
-    this.emit('contextLost');
-  };
-
-  private handleContextRestored = (): void => {
-    this.initialize(this.canvas!);
-    this.emit('contextRestored');
-  };
 
   private initializeDefaultMesh(): void {
     if (!this.gl) return;
@@ -263,6 +240,8 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       in vec2 aTexCoord;
       
       uniform vec2 uResolution;
+      uniform vec2 uImageSize0;
+      uniform vec2 uImageSize1;
       uniform mat4 uProjectionMatrix;
       uniform mat4 uModelViewMatrix;
       
@@ -280,13 +259,34 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       uniform sampler2D uTexture0;
       uniform sampler2D uTexture1;
       uniform float uProgress;
+      uniform vec2 uResolution;
+      uniform vec2 uImageSize0;
+      uniform vec2 uImageSize1;
       
       in vec2 vTexCoord;
       out vec4 fragColor;
       
+      // getCoverUV function for proper aspect ratio handling
+      vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+        float imageAspect = imageSize.x / imageSize.y;
+        float screenAspect = resolution.x / resolution.y;
+        vec2 scale;
+        
+        if (screenAspect > imageAspect) {
+          scale = vec2(1.0, imageAspect / screenAspect);
+        } else {
+          scale = vec2(screenAspect / imageAspect, 1.0);
+        }
+        
+        return (uv - 0.5) / scale + 0.5;
+      }
+      
       void main() {
-        vec4 color0 = texture(uTexture0, vTexCoord);
-        vec4 color1 = texture(uTexture1, vTexCoord);
+        vec2 uv0 = getCoverUV(vTexCoord, uImageSize0, uResolution);
+        vec2 uv1 = getCoverUV(vTexCoord, uImageSize1, uResolution);
+        
+        vec4 color0 = texture(uTexture0, uv0);
+        vec4 color1 = texture(uTexture1, uv1);
         fragColor = mix(color0, color1, uProgress);
       }
     `;
@@ -314,17 +314,16 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         fragmentShader = this.convertFragmentShaderToWebGL2(fragmentShader);
       }
 
-      const program = this.createProgram(
-        vertexShader,
-        fragmentShader,
-        effect.transformFeedbackVaryings,
-      );
+
+      const program = effect.transformFeedbackVaryings 
+        ? this.createProgram(vertexShader, fragmentShader, effect.transformFeedbackVaryings)
+        : super.createProgram(vertexShader, fragmentShader);
       if (program) {
         if (this.program) {
           this.gl.deleteProgram(this.program);
         }
         this.program = program;
-        this.cacheUniformsAndAttributes();
+        super.cacheUniformsAndAttributes();
 
         // Re-setup mesh attributes with new program
         if (this.vertexArray && this.meshData) {
@@ -340,7 +339,8 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     }
   }
 
-  private createProgram(
+  // Override to support transform feedback
+  protected createProgram(
     vertexSource: string,
     fragmentSource: string,
     transformFeedbackVaryings?: string[],
@@ -451,7 +451,8 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     }
   }
 
-  loadTexture(image: HTMLImageElement): WebGLTexture | null {
+  // Override to add WebGL2-specific texture features
+  protected createTexture(image: HTMLImageElement): WebGLTexture | null {
     if (!this.gl) return null;
 
     const texture = this.gl.createTexture();
@@ -469,7 +470,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
         image,
       );
     } catch (error) {
-      console.error('[WebGL2Renderer.loadTexture] Failed to create texture:', error);
+      console.error('[WebGL2Renderer.createTexture] Failed to create texture:', error);
       this.gl.deleteTexture(texture);
       return null;
     }
@@ -493,15 +494,6 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       const maxAnisotropy = this.gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
       this.gl.texParameterf(this.gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
     }
-
-    // Cache texture with image src as key
-    this.textures.set(image.src, texture);
-
-    // Cache image size
-    this.imageSizes.set(image.src, {
-      width: image.naturalWidth || image.width,
-      height: image.naturalHeight || image.height,
-    });
 
     return texture;
   }
@@ -601,18 +593,7 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     }
 
     // Set image size uniforms
-    const imageSize0Loc = this.uniforms.get('uImageSize0');
-    const imageSize1Loc = this.uniforms.get('uImageSize1');
-
-    if (imageSize0Loc && currentImageSrc) {
-      const size = this.imageSizes.get(currentImageSrc) || { width: 1, height: 1 };
-      this.gl.uniform2f(imageSize0Loc, size.width, size.height);
-    }
-
-    if (imageSize1Loc && nextImageSrc) {
-      const size = this.imageSizes.get(nextImageSrc) || { width: 1, height: 1 };
-      this.gl.uniform2f(imageSize1Loc, size.width, size.height);
-    }
+    super.setImageSizeUniforms(currentImageSrc, nextImageSrc);
 
     // Set additional uniforms
     if (additionalUniforms) {
@@ -732,23 +713,10 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
     this.gl.disable(this.gl.RASTERIZER_DISCARD);
   }
 
-  resize(width: number, height: number): void {
-    if (!this.gl || !this.canvas) return;
-
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.gl.viewport(0, 0, width, height);
-  }
-
   dispose(): void {
     if (!this.gl) return;
 
-    // Delete textures
-    this.textures.forEach((texture) => {
-      this.gl!.deleteTexture(texture);
-    });
-    this.textures.clear();
-
+    // Delete WebGL 2.0 specific resources
     this.computeTextures.forEach((texture) => {
       this.gl!.deleteTexture(texture);
     });
@@ -777,29 +745,12 @@ export class WebGL2Renderer extends EventEmitter<WebGL2RendererEvents> {
       this.transformFeedback = null;
     }
 
-    // Delete program
-    if (this.program) {
-      this.gl.deleteProgram(this.program);
-      this.program = null;
-    }
-
-    // Remove event listeners
-    if (this.canvas) {
-      this.canvas.removeEventListener('webglcontextlost', this.handleContextLost);
-      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestored);
-    }
-
-    this.gl = null;
-    this.canvas = null;
-    this.removeAllListeners();
+    // Call parent dispose
+    super.disposeCommon();
   }
 
   isInitialized(): boolean {
-    return this.gl !== null && this.program !== null;
-  }
-
-  getContext(): WebGL2RenderingContext | null {
-    return this.gl;
+    return super.isInitialized() && this.vertexArray !== null;
   }
 
   isWebGL2(): boolean {

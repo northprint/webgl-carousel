@@ -219,20 +219,35 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       this.isWebGL &&
       (this.renderer instanceof WebGLRenderer || this.renderer instanceof WebGL2Renderer)
     ) {
-      const texture = this.renderer.loadTexture(image.element);
+      const images = this.stateManager.get('images');
+      const index = imageIndex ?? this.stateManager.get('currentIndex');
+      const imageSrc = images[index]!;
+      
+      // Ensure the renderer has the image element to get size info
+      
+      // Load texture (this will also cache the image size)
+      let texture = this.renderer.loadTexture(image.element);
+      if (texture) {
+        this.textures.set(imageSrc, texture);
+      }
 
       if (texture) {
-        const images = this.stateManager.get('images');
-        const index = imageIndex ?? this.stateManager.get('currentIndex');
-        const imageSrc = images[index]!;
-        this.textures.set(imageSrc, texture);
-
         // Get current effect and its uniforms
         const effectName = this.stateManager.get('effect');
         const effect = this.effectManager.get(effectName);
         const uniforms = effect ? effect.getUniforms(0) : {};
 
-        this.renderer.render(texture, null, 0, uniforms, imageSrc);
+        
+        // Set the effect to renderer before initial render
+        if (effect) {
+          this.renderer.setEffect({
+            vertexShader: effect.vertexShader,
+            fragmentShader: effect.fragmentShader,
+          });
+        }
+        
+        // For initial render, pass the same image as both textures
+        this.renderer.render(texture, texture, 0, uniforms, imageSrc, imageSrc);
       }
     } else if (this.renderer instanceof Canvas2DFallback) {
       this.renderer.setImages(image.element, null);

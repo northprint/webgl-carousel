@@ -22,16 +22,26 @@ export class SlideEffect extends BaseEffect {
       // Calculate offset based on progress
       vec2 offset = uDirection * uProgress;
       
-      // Sample textures with offset
-      vec2 uv0 = uv + offset;
-      vec2 uv1 = uv + offset - uDirection;
+      // Calculate UVs for both images with proper aspect ratio
+      vec2 uv0 = getCoverUV(uv + offset, uImageSize0, uResolution);
+      vec2 uv1 = getCoverUV(uv + offset - uDirection, uImageSize1, uResolution);
       
+      // Sample textures
       vec4 color0 = texture2D(uTexture0, uv0);
       vec4 color1 = texture2D(uTexture1, uv1);
       
-      // Use step function to create hard edge
-      float mask = step(0.0, uv1.x) * step(uv1.x, 1.0) * 
-                   step(0.0, uv1.y) * step(uv1.y, 1.0);
+      // Calculate transition boundary
+      vec2 transitionUV = uv + offset - uDirection;
+      
+      // Create mask based on direction
+      float mask;
+      if (abs(uDirection.x) > 0.5) {
+        // Horizontal slide
+        mask = step(0.0, transitionUV.x) * step(transitionUV.x, 1.0);
+      } else {
+        // Vertical slide
+        mask = step(0.0, transitionUV.y) * step(transitionUV.y, 1.0);
+      }
       
       gl_FragColor = mix(color0, color1, mask);
     }
