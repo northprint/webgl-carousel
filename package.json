@@ -1,7 +1,7 @@
 {
   "name": "webgl-carousel",
   "type": "module",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A high-performance image carousel library powered by WebGL with stunning visual effects",
   "main": "dist/webgl-carousel.cjs.js",
   "module": "dist/webgl-carousel.esm.js",
@@ -10,6 +10,7 @@
   "files": [
     "dist",
     "README.md",
+    "README.en.md",
     "LICENSE"
   ],
   "exports": {

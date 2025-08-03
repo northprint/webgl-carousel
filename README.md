@@ -1,47 +1,32 @@
 # WebGL Carousel
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/webgl-carousel"><img src="https://img.shields.io/npm/v/webgl-carousel.svg" alt="npm version"></a>
-  <a href="https://github.com/northprint/webgl-carousel/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/webgl-carousel.svg" alt="license"></a>
-  <a href="https://www.npmjs.com/package/webgl-carousel"><img src="https://img.shields.io/npm/dm/webgl-carousel.svg" alt="downloads"></a>
-  <a href="https://github.com/northprint/webgl-carousel/actions/workflows/ci.yml"><img src="https://github.com/northprint/webgl-carousel/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://codecov.io/gh/northprint/webgl-carousel"><img src="https://codecov.io/gh/northprint/webgl-carousel/branch/main/graph/badge.svg" alt="codecov"></a>
-</p>
+[日本語](README.ja.md) | English
 
-高性能なWebGLベースの画像カルーセルライブラリ。GPU加速による滑らかなアニメーションと美しいトランジションエフェクトを提供します。
+A high-performance image carousel library powered by WebGL with stunning visual effects.
 
-[📖 ドキュメント](https://northprint.github.io/webgl-carousel/) | [🎮 デモ](https://northprint.github.io/webgl-carousel/demo.html) | [📦 NPM](https://www.npmjs.com/package/webgl-carousel)
+[![npm version](https://img.shields.io/npm/v/webgl-carousel.svg)](https://www.npmjs.com/package/webgl-carousel)
+[![License](https://img.shields.io/npm/l/webgl-carousel.svg)](https://github.com/northprint/webgl-carousel/blob/main/LICENSE)
 
-## 🌟 特徴
+## Features
 
-- 🚀 **高速パフォーマンス** - WebGL/WebGL2によるGPU加速
-- ✨ **豊富なエフェクト** - 15種類以上のビルトインエフェクト
-- 📱 **レスポンシブ対応** - モバイルフレンドリー、タッチジェスチャー対応
-- 🔧 **フレームワーク対応** - React、Vue、Svelte向けコンポーネント
-- 🎨 **カスタマイズ可能** - 独自のGLSLシェーダーでカスタムエフェクト作成
-- 🔄 **フォールバック** - WebGL非対応環境でCanvas 2D自動切り替え
-- 📦 **軽量** - 最小構成で約30KB（gzip圧縮時）
+- Hardware-accelerated rendering using WebGL/WebGL2
+- 20+ built-in transition effects
+- Framework adapters for React, Vue, and Svelte
+- Custom shader support
+- Responsive and touch-enabled
+- Automatic fallback to Canvas 2D
+- TypeScript support
+- Lightweight with zero dependencies
 
-## 📦 インストール
+## Installation
 
-### npm
 ```bash
 npm install webgl-carousel
 ```
 
-### yarn
-```bash
-yarn add webgl-carousel
-```
+## Quick Start
 
-### CDN
-```html
-<script src="https://unpkg.com/webgl-carousel/dist/webgl-carousel.umd.js"></script>
-```
-
-## 🚀 クイックスタート
-
-### 基本的な使い方
+### Vanilla JavaScript
 
 ```javascript
 import { WebGLCarousel } from 'webgl-carousel';
@@ -55,16 +40,9 @@ const carousel = new WebGLCarousel({
   ],
   effect: 'fade',
   autoplay: true,
-  transitionDuration: 2000
+  autoplayInterval: 3000
 });
 ```
-
-### HTML
-```html
-<div id="carousel" style="width: 100%; height: 400px;"></div>
-```
-
-## 🛠️ フレームワーク統合
 
 ### React
 
@@ -81,7 +59,7 @@ function App() {
   return (
     <ReactCarousel
       images={images}
-      effect="slideLeft"
+      effect="slide"
       autoplay
       transitionDuration={1500}
       style={{ width: '100%', height: '400px' }}
@@ -136,164 +114,168 @@ const images = [
 />
 ```
 
-## 🎨 利用可能なエフェクト
+## Available Effects
 
-### 基本エフェクト
-- `fade` - フェード効果
-- `slideLeft` / `slideRight` - 左右スライド
-- `slideUp` / `slideDown` - 上下スライド
+### Basic Effects
 
-### 3Dエフェクト
-- `flipHorizontal` / `flipVertical` - 3D回転
+- `fade` - Fade transition
+- `slideLeft` / `slideRight` - Horizontal slide
+- `slideUp` / `slideDown` - Vertical slide
 
-### クリエイティブエフェクト
-- `wave` / `gentleWave` / `intenseWave` - 波形アニメーション
-- `distortion` / `subtleDistortion` / `extremeDistortion` - 歪み効果
-- `dissolve` / `pixelDissolve` / `smoothDissolve` - ディゾルブ
-- `circle` / `circleFromCenter` / `circleFromCorner` - 円形トランジション
-- `morph` - モーフィング
-- `glitch` - グリッチエフェクト
+### 3D Effects
 
-## 📖 API
+- `flipHorizontal` / `flipVertical` - 3D flip rotation
 
-### オプション
+### Creative Effects
 
-| オプション | 型 | デフォルト | 説明 |
-|----------|------|----------|------|
-| `container` | string \| HTMLElement | 必須 | カルーセルコンテナ |
-| `images` | string[] | `[]` | 画像URLの配列 |
-| `effect` | string | `'fade'` | トランジションエフェクト |
-| `autoplay` | boolean | `false` | 自動再生 |
-| `interval` | number | `3000` | 自動再生間隔（ms） |
-| `transitionDuration` | number | `1000` | トランジション時間（ms） |
-| `loop` | boolean | `true` | ループ再生 |
-| `showControls` | boolean | `true` | コントロール表示 |
-| `showIndicators` | boolean | `true` | インジケーター表示 |
+- `wave` / `gentleWave` / `intenseWave` - Wave distortion
+- `distortion` / `subtleDistortion` / `extremeDistortion` - Lens distortion
+- `dissolve` / `smoothDissolve` - Dissolve transition
+- `pixelDissolve` - Pixelated dissolve
+- `circle` / `circleFromCenter` / `circleFromCorner` - Circular reveal
+- `morph` - Morphing transition
+- `glitch` - Glitch effect
 
-### メソッド
+## API Reference
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `container` | string \| HTMLElement | - | Container element or selector |
+| `images` | string[] | - | Array of image URLs |
+| `effect` | string | 'fade' | Transition effect name |
+| `autoplay` | boolean | false | Enable autoplay |
+| `autoplayInterval` | number | 3000 | Autoplay interval (ms) |
+| `transitionDuration` | number | 1000 | Transition duration (ms) |
+| `navigation` | boolean | true | Show navigation arrows |
+| `pagination` | boolean | true | Show pagination dots |
+| `loop` | boolean | true | Enable infinite loop |
+| `preload` | boolean | true | Preload all images |
+
+### Methods
+
+#### Navigation
+
+- `next()` - Go to next image
+- `previous()` - Go to previous image
+- `goTo(index)` - Go to specific image
+
+#### Effects
+
+- `setEffect(effectName)` - Change transition effect
+- `registerEffect(effect)` - Register custom effect
+- `getAvailableEffects()` - Get list of available effects
+
+#### Playback
+
+- `play()` - Start autoplay
+- `pause()` - Stop autoplay
+- `setAutoplay(enabled, interval?)` - Configure autoplay
+
+#### Status
+
+- `getCurrentIndex()` - Get current image index
+- `getImageCount()` - Get total image count
+- `isReady()` - Check if carousel is ready
+
+### Events
 
 ```javascript
-carousel.next();                 // 次の画像へ
-carousel.previous();             // 前の画像へ
-carousel.goTo(index);           // 特定のインデックスへ
-carousel.play();                // 自動再生開始
-carousel.pause();               // 自動再生停止
-carousel.setEffect(effectName); // エフェクト変更
-carousel.dispose();             // リソース解放
-```
+carousel.on('ready', () => {
+  console.log('Carousel is ready');
+});
 
-### イベント
-
-```javascript
-carousel.on('change', (index) => {
+carousel.on('imageChange', (index) => {
   console.log('Current image:', index);
 });
 
 carousel.on('transitionStart', (from, to) => {
-  console.log(`Transitioning from ${from} to ${to}`);
+  console.log('Transition started:', from, '->', to);
 });
 
 carousel.on('transitionEnd', (index) => {
-  console.log('Transition completed:', index);
+  console.log('Transition ended:', index);
 });
 ```
 
-## 🎯 カスタムエフェクト
+## Custom Effects
 
-独自のGLSLシェーダーを使用してカスタムエフェクトを作成できます：
+Create your own transition effects using GLSL shaders:
 
 ```javascript
 import { createCustomEffect } from 'webgl-carousel';
 
 const myEffect = createCustomEffect(
-  'myCustomEffect',
-  vertexShaderCode,   // optional
-  fragmentShaderCode
+  'myEffect',
+  null, // Use default vertex shader
+  `
+    precision mediump float;
+    
+    uniform sampler2D uTexture0;
+    uniform sampler2D uTexture1;
+    uniform float uProgress;
+    uniform vec2 uResolution;
+    uniform vec2 uImageSize0;
+    uniform vec2 uImageSize1;
+    
+    varying vec2 vTexCoord;
+    
+    vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
+      float imageAspect = imageSize.x / imageSize.y;
+      float screenAspect = resolution.x / resolution.y;
+      vec2 scale;
+      
+      if (screenAspect > imageAspect) {
+        scale = vec2(1.0, imageAspect / screenAspect);
+      } else {
+        scale = vec2(screenAspect / imageAspect, 1.0);
+      }
+      
+      return (uv - 0.5) / scale + 0.5;
+    }
+    
+    void main() {
+      vec2 uv0 = getCoverUV(vTexCoord, uImageSize0, uResolution);
+      vec2 uv1 = getCoverUV(vTexCoord, uImageSize1, uResolution);
+      
+      // Your custom transition logic here
+      vec4 color0 = texture2D(uTexture0, uv0);
+      vec4 color1 = texture2D(uTexture1, uv1);
+      
+      gl_FragColor = mix(color0, color1, uProgress);
+    }
+  `
 );
 
 carousel.registerEffect(myEffect);
-carousel.setEffect('myCustomEffect');
+carousel.setEffect('myEffect');
 ```
 
-外部ファイルからシェーダーを読み込む：
+## Browser Support
 
-```javascript
-const effect = await createCustomEffectFromFiles(
-  'ripple',
-  'shaders/ripple.vert',
-  'shaders/ripple.frag'
-);
-```
-
-## 🌐 ブラウザサポート
-
-- Chrome 60+
-- Firefox 55+
-- Safari 11+
+- Chrome 56+
+- Firefox 51+
+- Safari 15+
 - Edge 79+
 
-WebGL 2.0が利用可能な場合は自動的に使用され、そうでない場合はWebGL 1.0またはCanvas 2Dにフォールバックします。
+The library automatically falls back to Canvas 2D rendering when WebGL is not available.
 
-## 📁 プロジェクト構造
+## Performance Considerations
 
-```
-webgl-carousel/
-├── src/                # ソースコード
-│   ├── core/          # コア機能
-│   ├── effects/       # トランジションエフェクト
-│   ├── adapters/      # フレームワークアダプター
-│   └── index.ts       # メインエントリー
-├── demos/             # デモページ
-├── docs/              # ドキュメント（GitHub Pages）
-├── dist/              # ビルド済みファイル
-└── e2e/               # E2Eテスト
-```
+1. **Image Optimization**: Use appropriately sized images for best performance
+2. **Preloading**: Enable preloading for smooth transitions
+3. **Hardware Acceleration**: The library automatically uses GPU acceleration when available
+4. **Memory Management**: Images are automatically managed to optimize memory usage
 
-## 🧪 開発
+## Contributing
 
-```bash
-# 依存関係のインストール
-npm install
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-# 開発サーバー起動
-npm run dev
+## License
 
-# ビルド
-npm run build
+MIT License - see the [LICENSE](LICENSE) file for details.
 
-# テスト実行
-npm test
+## Acknowledgments
 
-# E2Eテスト
-npm run test:e2e
-
-# ドキュメントサーバー
-npm run demo
-```
-
-## 🤝 コントリビュート
-
-コントリビューションは大歓迎です！
-
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
-5. プルリクエストを作成
-
-## 📄 ライセンス
-
-MIT License - 詳細は[LICENSE](LICENSE)ファイルをご覧ください。
-
-## 🙏 謝辞
-
-このプロジェクトは以下のオープンソースプロジェクトを参考にしています：
-- Three.js
-- GSAP
-- Swiper.js
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/northprint">NorthPrint</a>
-</p>
+This library uses WebGL for hardware-accelerated rendering and provides fallback support for broader compatibility.
