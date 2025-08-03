@@ -382,7 +382,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     return program;
   }
 
-  private compileShader(source: string, type: number): WebGLShader | null {
+  protected compileShader(source: string, type: number): WebGLShader | null {
     if (!this.gl) return null;
 
     const shader = this.gl.createShader(type);
@@ -403,7 +403,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     return shader;
   }
 
-  private cacheUniformsAndAttributes(): void {
+  protected cacheUniformsAndAttributes(): void {
     if (!this.gl || !this.program) return;
 
     this.uniforms.clear();

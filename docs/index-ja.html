@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WebGL Carousel - High-Performance Image Carousel Library</title>
-  <meta name="description" content="A high-performance image carousel library powered by WebGL with stunning visual effects and smooth animations.">
+  <title>WebGL Carousel - 高性能画像カルーセルライブラリ</title>
+  <meta name="description" content="WebGLを使用した高性能な画像カルーセルライブラリ。美しいトランジションエフェクトとスムーズなアニメーションを実現。">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles-cyber.css">
@@ -16,64 +16,64 @@
         <h1>WebGL Carousel</h1>
       </div>
       <ul class="nav-menu">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#demo">Demo</a></li>
-        <li><a href="#installation">Installation</a></li>
-        <li><a href="#usage">Usage</a></li>
+        <li><a href="#features">特徴</a></li>
+        <li><a href="#demo">デモ</a></li>
+        <li><a href="#installation">インストール</a></li>
+        <li><a href="#usage">使い方</a></li>
         <li><a href="#api">API</a></li>
         <li><a href="https://github.com/northprint/webgl-carousel" target="_blank">GitHub</a></li>
       </ul>
       <div class="language-switch">
-        <a href="index-en.html" class="active">EN</a>
-        <a href="index.html">JA</a>
+        <a href="index.html">EN</a>
+        <a href="index-ja.html" class="active">JA</a>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="container">
-      <h2>High-Performance WebGL Image Carousel</h2>
-      <p class="subtitle">GPU-accelerated smooth animations with stunning transition effects</p>
+      <h2>WebGLで実現する高性能画像カルーセル</h2>
+      <p class="subtitle">GPU加速による滑らかなアニメーションと美しいトランジションエフェクト</p>
       <div class="hero-buttons">
-        <a href="#installation" class="btn btn-primary">Get Started</a>
-        <a href="demo.html" class="btn btn-secondary">View Demo</a>
+        <a href="#installation" class="btn btn-primary">はじめる</a>
+        <a href="demo.html" class="btn btn-secondary">デモを見る</a>
       </div>
     </div>
   </header>
 
   <section id="features" class="section">
     <div class="container">
-      <h2>Key Features</h2>
+      <h2>主な特徴</h2>
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
-          <h3>High Performance</h3>
-          <p>GPU-accelerated rendering with WebGL delivers 60fps smooth animations</p>
+          <h3>高速パフォーマンス</h3>
+          <p>WebGLによるGPU加速で60fpsの滑らかなアニメーションを実現</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🎨</div>
-          <h3>Rich Effects</h3>
-          <p>20+ built-in effects with custom shader support for creative transitions</p>
+          <h3>豊富なエフェクト</h3>
+          <p>15種類以上のビルトインエフェクトとカスタムシェーダーサポート</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📱</div>
-          <h3>Responsive Design</h3>
-          <p>Mobile-friendly with touch gesture support for seamless user experience</p>
+          <h3>レスポンシブ対応</h3>
+          <p>モバイルデバイスでも快適に動作するタッチジェスチャー対応</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔧</div>
-          <h3>Framework Support</h3>
-          <p>Native components for React, Vue, and Svelte frameworks</p>
+          <h3>フレームワーク対応</h3>
+          <p>React、Vue、Svelteなど主要フレームワークをサポート</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🎯</div>
-          <h3>Customizable</h3>
-          <p>Create unique effects with custom GLSL shaders</p>
+          <h3>カスタマイズ可能</h3>
+          <p>独自のGLSLシェーダーを使用してオリジナルエフェクトを作成</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔄</div>
-          <h3>Fallback Support</h3>
-          <p>Automatic Canvas 2D fallback for non-WebGL environments</p>
+          <h3>フォールバック</h3>
+          <p>WebGL非対応環境でもCanvas 2Dによる代替表示</p>
         </div>
       </div>
     </div>
@@ -81,12 +81,12 @@
 
   <section id="demo" class="section section-dark">
     <div class="container">
-      <h2>Live Demo</h2>
-      <p class="demo-description">Experience all WebGL Carousel features in our interactive demo. Try various transition effects and custom shaders in real-time.</p>
+      <h2>デモ</h2>
+      <p class="demo-description">WebGL Carouselの全機能をインタラクティブなデモページでお試しください。様々なトランジションエフェクトやカスタムシェーダーを実際に体験できます。</p>
       <div class="demo-actions">
         <a href="demo.html" class="btn btn-primary btn-large" target="_blank">
           <span class="btn-icon">▶</span>
-          Launch Interactive Demo
+          インタラクティブデモを開く
         </a>
       </div>
     </div>
@@ -94,7 +94,7 @@
 
   <section id="installation" class="section">
     <div class="container">
-      <h2>Installation</h2>
+      <h2>インストール</h2>
       
       <h3>npm</h3>
       <pre><code class="language-bash">npm install webgl-carousel</code></pre>
@@ -109,9 +109,9 @@
 
   <section id="usage" class="section section-light">
     <div class="container">
-      <h2>Usage</h2>
+      <h2>使い方</h2>
       
-      <h3>Basic Usage</h3>
+      <h3>基本的な使い方</h3>
       <pre><code class="language-javascript">import { WebGLCarousel } from 'webgl-carousel';
 
 const carousel = new WebGLCarousel({
@@ -126,7 +126,7 @@ const carousel = new WebGLCarousel({
   transitionDuration: 2000
 });</code></pre>
 
-      <h3>React Usage</h3>
+      <h3>Reactでの使い方</h3>
       <pre><code class="language-jsx">import { ReactCarousel } from 'webgl-carousel/react';
 
 function App() {
@@ -147,7 +147,7 @@ function App() {
   );
 }</code></pre>
 
-      <h3>Vue Usage</h3>
+      <h3>Vueでの使い方</h3>
       <pre><code class="language-vue">&lt;template&gt;
   &lt;VueCarousel
     :images="images"
@@ -168,7 +168,7 @@ const images = [
 ];
 &lt;/script&gt;</code></pre>
 
-      <h3>Svelte Usage</h3>
+      <h3>Svelteでの使い方</h3>
       <pre><code class="language-javascript">&lt;script&gt;
   import { SvelteCarousel } from 'webgl-carousel/svelte';
   
@@ -191,51 +191,51 @@ const images = [
 
   <section id="effects" class="section">
     <div class="container">
-      <h2>Available Effects</h2>
+      <h2>利用可能なエフェクト</h2>
       <div class="effects-grid">
         <div class="effect-item">
           <h4>fade</h4>
-          <p>Simple fade transition</p>
+          <p>シンプルなフェード効果</p>
         </div>
         <div class="effect-item">
           <h4>slideLeft / slideRight</h4>
-          <p>Horizontal slide transitions</p>
+          <p>左右へのスライド</p>
         </div>
         <div class="effect-item">
           <h4>slideUp / slideDown</h4>
-          <p>Vertical slide transitions</p>
+          <p>上下へのスライド</p>
         </div>
         <div class="effect-item">
           <h4>flipHorizontal / flipVertical</h4>
-          <p>3D rotation effects</p>
+          <p>3D回転エフェクト</p>
         </div>
         <div class="effect-item">
           <h4>wave</h4>
-          <p>Wave animation effect</p>
+          <p>波形アニメーション</p>
         </div>
         <div class="effect-item">
           <h4>distortion</h4>
-          <p>Lens distortion effect</p>
+          <p>歪みエフェクト</p>
         </div>
         <div class="effect-item">
           <h4>dissolve</h4>
-          <p>Dissolve transition</p>
+          <p>ディゾルブ効果</p>
         </div>
         <div class="effect-item">
           <h4>pixelDissolve</h4>
-          <p>Pixelated dissolve effect</p>
+          <p>ピクセル単位のディゾルブ</p>
         </div>
         <div class="effect-item">
           <h4>circle</h4>
-          <p>Circular reveal transition</p>
+          <p>円形トランジション</p>
         </div>
         <div class="effect-item">
           <h4>morph</h4>
-          <p>Morphing effect</p>
+          <p>モーフィング効果</p>
         </div>
         <div class="effect-item">
           <h4>glitch</h4>
-          <p>Digital glitch effect</p>
+          <p>グリッチエフェクト</p>
         </div>
       </div>
     </div>
@@ -243,118 +243,118 @@ const images = [
 
   <section id="api" class="section section-light">
     <div class="container">
-      <h2>API Reference</h2>
+      <h2>API リファレンス</h2>
       
-      <h3>Constructor Options</h3>
+      <h3>コンストラクタオプション</h3>
       <div class="api-table">
         <table>
           <thead>
             <tr>
-              <th>Option</th>
-              <th>Type</th>
-              <th>Default</th>
-              <th>Description</th>
+              <th>オプション</th>
+              <th>型</th>
+              <th>デフォルト</th>
+              <th>説明</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>container</td>
               <td>string | HTMLElement</td>
-              <td>required</td>
-              <td>Container element or selector</td>
+              <td>必須</td>
+              <td>カルーセルを表示するコンテナ</td>
             </tr>
             <tr>
               <td>images</td>
               <td>string[]</td>
               <td>[]</td>
-              <td>Array of image URLs</td>
+              <td>表示する画像のURL配列</td>
             </tr>
             <tr>
               <td>effect</td>
               <td>string</td>
               <td>'fade'</td>
-              <td>Transition effect name</td>
+              <td>使用するトランジションエフェクト</td>
             </tr>
             <tr>
               <td>autoplay</td>
               <td>boolean</td>
               <td>false</td>
-              <td>Enable automatic playback</td>
+              <td>自動再生の有効/無効</td>
             </tr>
             <tr>
               <td>interval</td>
               <td>number</td>
               <td>3000</td>
-              <td>Autoplay interval in milliseconds</td>
+              <td>自動再生の間隔（ミリ秒）</td>
             </tr>
             <tr>
               <td>transitionDuration</td>
               <td>number</td>
               <td>1000</td>
-              <td>Transition duration in milliseconds</td>
+              <td>トランジションの長さ（ミリ秒）</td>
             </tr>
             <tr>
               <td>loop</td>
               <td>boolean</td>
               <td>true</td>
-              <td>Loop back to first image after last</td>
+              <td>最後の画像の後に最初に戻るか</td>
             </tr>
             <tr>
               <td>showControls</td>
               <td>boolean</td>
               <td>true</td>
-              <td>Show navigation controls</td>
+              <td>ナビゲーションコントロールの表示</td>
             </tr>
             <tr>
               <td>showIndicators</td>
               <td>boolean</td>
               <td>true</td>
-              <td>Show position indicators</td>
+              <td>インジケーターの表示</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <h3>Methods</h3>
-      <pre><code class="language-javascript">// Navigate to next image
+      <h3>メソッド</h3>
+      <pre><code class="language-javascript">// 次の画像へ
 carousel.next();
 
-// Navigate to previous image
+// 前の画像へ
 carousel.previous();
 
-// Jump to specific index
+// 特定のインデックスへ
 carousel.goTo(2);
 
-// Start/stop autoplay
+// 自動再生の開始/停止
 carousel.play();
 carousel.pause();
 
-// Change effect
+// エフェクトの変更
 carousel.setEffect('wave');
 
-// Handle resize
+// リサイズ
 carousel.resize();
 
-// Cleanup
+// 破棄
 carousel.dispose();</code></pre>
 
-      <h3>Events</h3>
-      <pre><code class="language-javascript">// Image change event
+      <h3>イベント</h3>
+      <pre><code class="language-javascript">// 画像変更時
 carousel.on('change', (index) => {
   console.log('Current image:', index);
 });
 
-// Transition start event
+// トランジション開始時
 carousel.on('transitionStart', (from, to) => {
   console.log(`Transitioning from ${from} to ${to}`);
 });
 
-// Transition end event
+// トランジション完了時
 carousel.on('transitionEnd', (index) => {
   console.log('Transition completed:', index);
 });
 
-// Error event
+// エラー時
 carousel.on('error', (error) => {
   console.error('Carousel error:', error);
 });</code></pre>
@@ -363,8 +363,8 @@ carousel.on('error', (error) => {
 
   <section id="custom-effects" class="section">
     <div class="container">
-      <h2>Creating Custom Effects</h2>
-      <p>Create unique transition effects using custom GLSL shaders.</p>
+      <h2>カスタムエフェクトの作成</h2>
+      <p>独自のGLSLシェーダーを使用してカスタムエフェクトを作成できます。</p>
       
       <pre><code class="language-javascript">import { createCustomEffect } from 'webgl-carousel';
 
@@ -395,7 +395,7 @@ const myEffect = createCustomEffect(
   void main() {
     vec2 uv = vTexCoord;
     
-    // Custom effect logic
+    // カスタムエフェクトロジック
     float wave = sin(uv.y * 10.0 + uProgress * 3.14159) * 0.05;
     vec2 distortedUV = vec2(uv.x + wave * uProgress, uv.y);
     
@@ -407,7 +407,7 @@ const myEffect = createCustomEffect(
   `
 );
 
-// Register custom effect
+// カスタムエフェクトを登録
 carousel.registerEffect(myEffect);
 carousel.setEffect('myCustomEffect');</code></pre>
     </div>
@@ -416,11 +416,24 @@ carousel.setEffect('myCustomEffect');</code></pre>
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
-        <div class="footer-links">
-          <a href="https://github.com/northprint/webgl-carousel">GitHub</a>
-          <a href="https://www.npmjs.com/package/webgl-carousel">npm</a>
-          <a href="#api">API Docs</a>
-          <a href="https://github.com/northprint/webgl-carousel/issues">Support</a>
+        <div class="footer-section">
+          <h4>WebGL Carousel</h4>
+          <p>高性能な画像カルーセルライブラリ</p>
+        </div>
+        <div class="footer-section">
+          <h4>リンク</h4>
+          <ul>
+            <li><a href="https://github.com/northprint/webgl-carousel">GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/webgl-carousel">npm</a></li>
+            <li><a href="#api">API ドキュメント</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>サポート</h4>
+          <ul>
+            <li><a href="https://github.com/northprint/webgl-carousel/issues">Issues</a></li>
+            <li><a href="https://github.com/northprint/webgl-carousel/discussions">Discussions</a></li>
+          </ul>
         </div>
       </div>
       <div class="footer-bottom">

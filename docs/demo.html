@@ -1,757 +1,446 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebGL Carousel - Interactive Demo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles-cyber.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    /* Demo specific styles */
+    .demo-container {
+      min-height: 100vh;
+      padding-top: 100px;
     }
     
-    :root {
-      --primary: #5B5FFF;
-      --primary-dark: #4448E3;
-      --secondary: #FF5B8F;
-      --bg-dark: #0F0F14;
-      --bg-card: #1A1A24;
-      --bg-card-hover: #22222E;
-      --text-primary: #FFFFFF;
-      --text-secondary: #A0A0B8;
-      --border: #2A2A3E;
-      --success: #4ADE80;
-      --warning: #FCD34D;
-      --error: #F87171;
-    }
-    
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* Background Effects */
-    .bg-gradient {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 20% 50%, rgba(91, 95, 255, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 80%, rgba(255, 91, 143, 0.1) 0%, transparent 50%),
-                  var(--bg-dark);
-      z-index: -1;
-    }
-
-    /* Navigation */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: rgba(15, 15, 20, 0.8);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      padding: 1rem 0;
-    }
-
-    .nav-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .nav-brand {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.3s;
-    }
-
-    .nav-links a:hover {
-      color: var(--text-primary);
-    }
-
-    /* Main Container */
-    .main-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 7rem 2rem 2rem;
-    }
-
-    /* Hero Section */
-    .hero-section {
-      text-align: center;
-      margin-bottom: 4rem;
-    }
-
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-subtitle {
-      font-size: 1.25rem;
-      color: var(--text-secondary);
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Carousel Section */
-    .carousel-section {
-      margin-bottom: 4rem;
-    }
-
-    .carousel-container {
-      background: var(--bg-card);
-      border-radius: 24px;
-      padding: 2rem;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      position: relative;
+    #carousel-wrapper {
+      width: 100%;
+      max-width: 1200px;
+      height: 600px;
+      margin: 0 auto 40px;
+      background: var(--bg-darker);
+      border: 1px solid var(--primary-color);
+      border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 0 50px var(--glow-primary);
+      position: relative;
     }
-
-    .carousel-container::before {
+    
+    #carousel-wrapper::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      animation: shimmer 3s infinite;
+      background: var(--gradient-primary);
+      animation: scan 3s linear infinite;
     }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+    
+    @keyframes scan {
+      from { transform: translateY(0); }
+      to { transform: translateY(600px); }
     }
-
+    
     #carousel {
       width: 100%;
-      height: 600px;
-      background: #000;
-      border-radius: 16px;
+      height: 100%;
+    }
+    
+    /* Control Panel */
+    .control-panel {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 40px;
+      position: relative;
       overflow: hidden;
-      position: relative;
-      cursor: grab;
     }
-
-    #carousel:active {
-      cursor: grabbing;
-    }
-
-    /* Custom Navigation Buttons */
-    .carousel-nav {
+    
+    .control-panel::before {
+      content: '';
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      background: rgba(26, 26, 36, 0.9);
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: all 0.3s;
-      z-index: 10;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+      animation: sweep 8s linear infinite;
     }
-
-    .carousel-nav:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      transform: translateY(-50%) scale(1.1);
+    
+    @keyframes sweep {
+      to { left: 100%; }
     }
-
-    .carousel-nav.prev {
-      left: 2rem;
-    }
-
-    .carousel-nav.next {
-      right: 2rem;
-    }
-
-    .carousel-nav svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    /* Pagination Dots */
-    .carousel-pagination {
-      position: absolute;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 0.5rem;
-      z-index: 10;
-    }
-
-    .pagination-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .pagination-dot:hover {
-      background: rgba(255, 255, 255, 0.6);
-      transform: scale(1.2);
-    }
-
-    .pagination-dot.active {
-      background: var(--primary);
-      width: 24px;
-      border-radius: 4px;
-    }
-
-    /* Controls Section */
-    .controls-section {
+    
+    .control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-      margin-bottom: 4rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      position: relative;
+      z-index: 1;
     }
-
-    .control-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      transition: all 0.3s;
-    }
-
-    .control-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--primary);
-      transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(91, 95, 255, 0.2);
-    }
-
-    .control-title {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .control-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--primary);
+    
+    .control-group {
+      background: var(--bg-darker);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 20px;
+      transition: all 0.3s ease;
     }
-
-    .control-icon svg {
-      width: 20px;
-      height: 20px;
-      color: white;
+    
+    .control-group:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
     }
-
-    /* Form Elements */
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-label {
+    
+    .control-label {
       display: block;
-      margin-bottom: 0.5rem;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
-
-    .select-wrapper {
-      position: relative;
-    }
-
-    select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-primary);
-      font-size: 1rem;
-      cursor: pointer;
-      appearance: none;
-      transition: all 0.3s;
-    }
-
-    select:hover {
-      border-color: var(--primary);
-    }
-
-    select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(91, 95, 255, 0.1);
-    }
-
-    .select-wrapper::after {
-      content: '▼';
-      position: absolute;
-      right: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      color: var(--text-secondary);
-      font-size: 0.75rem;
-    }
-
-    /* Range Slider */
-    .range-container {
-      position: relative;
-    }
-
-    .range-value {
-      position: absolute;
-      right: 0;
-      top: -1.5rem;
-      color: var(--primary);
+      margin-bottom: 10px;
+      color: var(--primary-color);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       font-weight: 600;
-      font-size: 0.875rem;
     }
-
-    input[type="range"] {
+    
+    .control-select,
+    .control-input {
       width: 100%;
-      height: 6px;
+      padding: 10px 15px;
       background: var(--bg-dark);
-      border-radius: 3px;
-      outline: none;
-      cursor: pointer;
-      -webkit-appearance: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      background: var(--primary);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(91, 95, 255, 0.3);
-    }
-
-    input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
-      box-shadow: 0 4px 12px rgba(91, 95, 255, 0.5);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      background: var(--primary);
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-      transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(91, 95, 255, 0.3);
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(91, 95, 255, 0.3);
-    }
-
-    .btn-secondary {
-      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
       color: var(--text-primary);
-      border: 1px solid var(--border);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
     }
-
-    .btn-secondary:hover {
-      background: var(--bg-card);
-      border-color: var(--primary);
+    
+    .control-select:hover,
+    .control-input:hover,
+    .control-select:focus,
+    .control-input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
     }
-
-    .btn-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    /* Info Card */
-    .info-card {
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .info-item {
+    
+    .control-checkbox {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      cursor: pointer;
     }
-
-    .info-item:last-child {
-      border-bottom: none;
+    
+    .control-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary-color);
     }
-
-    .info-label {
+    
+    .control-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .control-btn {
+      flex: 1;
+      padding: 12px 20px;
+      background: var(--bg-dark);
+      border: 1px solid var(--primary-color);
+      border-radius: 5px;
+      color: var(--primary-color);
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .control-btn:hover {
+      background: var(--primary-color);
+      color: var(--bg-dark);
+      box-shadow: 0 0 20px var(--glow-primary);
+    }
+    
+    /* Effects Grid */
+    .effects-section {
+      margin-bottom: 40px;
+    }
+    
+    .effects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+    
+    .effect-btn {
+      padding: 15px;
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       color: var(--text-secondary);
-      font-weight: 500;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
     }
-
-    .info-value {
-      color: var(--text-primary);
+    
+    .effect-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(0, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .effect-btn:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .effect-btn:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      transform: translateY(-2px);
+      z-index: 1;
+    }
+    
+    .effect-btn.active {
+      background: var(--gradient-primary);
+      color: var(--bg-dark);
+      border-color: var(--primary-color);
       font-weight: 600;
     }
-
-    .status-indicator {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 0.5rem;
+    
+    /* Stats Display */
+    .stats-display {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
     }
-
-    .status-indicator.active {
-      background: var(--success);
-      box-shadow: 0 0 10px var(--success);
+    
+    .stat-item {
+      text-align: center;
     }
-
-    .status-indicator.inactive {
-      background: var(--error);
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 20px var(--glow-primary);
     }
-
-    /* Loading State */
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Custom Shader Section */
+    .shader-section {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+    
+    .shader-editor {
+      margin-top: 20px;
+    }
+    
+    .shader-textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 20px;
+      background: var(--bg-darker);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--accent-color);
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all 0.3s ease;
+    }
+    
+    .shader-textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+    
+    .shader-controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    /* Loading Spinner */
     .loading-overlay {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(15, 15, 20, 0.9);
+      background: rgba(10, 10, 10, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 16px;
       z-index: 100;
     }
-
-    .loading-spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
+    
     /* Responsive */
     @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
+      .hero h2 {
+        font-size: 2rem;
       }
-
-      #carousel {
+      
+      #carousel-wrapper {
         height: 400px;
       }
-
-      .carousel-nav {
-        width: 40px;
-        height: 40px;
-      }
-
-      .carousel-nav.prev {
-        left: 1rem;
-      }
-
-      .carousel-nav.next {
-        right: 1rem;
-      }
-
-      .controls-section {
+      
+      .control-grid {
         grid-template-columns: 1fr;
       }
-
-      .nav-links {
-        display: none;
+      
+      .effects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       }
-    }
-
-    /* Effect Preview Grid */
-    .effect-preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    .effect-preview-btn {
-      padding: 0.5rem;
-      background: var(--bg-dark);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      color: var(--text-secondary);
-    }
-
-    .effect-preview-btn:hover {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-
-    .effect-preview-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
+      
+      .stats-display {
+        flex-direction: column;
+        gap: 20px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="bg-gradient"></div>
-  
   <nav class="navbar">
-    <div class="nav-container">
-      <div class="nav-brand">WebGL Carousel</div>
-      <ul class="nav-links">
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="#demo">デモ</a></li>
-        <li><a href="index.html#api">API</a></li>
+    <div class="container">
+      <div class="nav-brand">
+        <h1>WebGL Carousel Demo</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Documentation</a></li>
         <li><a href="https://github.com/northprint/webgl-carousel" target="_blank">GitHub</a></li>
+        <li><a href="https://www.npmjs.com/package/webgl-carousel" target="_blank">npm</a></li>
       </ul>
+      <div class="language-switch">
+        <a href="demo.html" class="active">EN</a>
+        <a href="demo-ja.html">JA</a>
+      </div>
     </div>
   </nav>
 
-  <div class="main-container">
-    <section class="hero-section">
-      <h1 class="hero-title">Interactive Demo</h1>
-      <p class="hero-subtitle">WebGL Carouselの全機能を体験してください。美しいトランジションエフェクトとスムーズなアニメーションをお試しください。</p>
-    </section>
+  <div class="demo-container">
+    <div class="container">
+      <header class="hero">
+        <h2>Interactive Demo</h2>
+        <p class="subtitle">Experience the power of WebGL-accelerated image transitions</p>
+      </header>
 
-    <section class="carousel-section">
-      <div class="carousel-container">
-        <div id="carousel">
-          <div class="loading-overlay">
-            <div class="loading-spinner"></div>
-          </div>
+      <!-- Stats Display -->
+      <div class="stats-display">
+        <div class="stat-item">
+          <div class="stat-value" id="fps-counter">60</div>
+          <div class="stat-label">FPS</div>
         </div>
-      </div>
-    </section>
-
-    <section class="controls-section">
-      <!-- Effects Control -->
-      <div class="control-card">
-        <div class="control-title">
-          <div class="control-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-            </svg>
-          </div>
-          エフェクト設定
+        <div class="stat-item">
+          <div class="stat-value" id="effect-counter">fade</div>
+          <div class="stat-label">Current Effect</div>
         </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="effectSelect">トランジションエフェクト</label>
-          <div class="select-wrapper">
-            <select id="effectSelect">
-              <option value="fade">Fade - フェード</option>
-              <option value="slideLeft">Slide Left - 左スライド</option>
-              <option value="slideRight">Slide Right - 右スライド</option>
-              <option value="slideUp">Slide Up - 上スライド</option>
-              <option value="slideDown">Slide Down - 下スライド</option>
-              <option value="flipHorizontal">Flip Horizontal - 横回転</option>
-              <option value="flipVertical">Flip Vertical - 縦回転</option>
-              <option value="wave">Wave - 波</option>
-              <option value="distortion">Distortion - 歪み</option>
-              <option value="dissolve">Dissolve - ディゾルブ</option>
-              <option value="pixelDissolve">Pixel Dissolve - ピクセル分解</option>
-              <option value="circle">Circle - サークル</option>
-              <option value="morph">Morph - モーフィング</option>
-              <option value="glitch">Glitch - グリッチ</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">クイック選択</label>
-          <div class="effect-preview-grid" id="effectPreviewGrid"></div>
+        <div class="stat-item">
+          <div class="stat-value" id="image-counter">1/5</div>
+          <div class="stat-label">Image</div>
         </div>
       </div>
 
-      <!-- Timing Control -->
-      <div class="control-card">
-        <div class="control-title">
-          <div class="control-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          タイミング設定
+      <!-- Carousel -->
+      <div id="carousel-wrapper">
+        <div id="carousel"></div>
+        <div class="loading-overlay" id="loading">
+          <div class="loading">Loading...</div>
         </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="durationSlider">トランジション時間</label>
-          <div class="range-container">
-            <span class="range-value" id="durationValue">2000ms</span>
-            <input type="range" id="durationSlider" min="500" max="5000" step="100" value="2000">
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label" for="intervalSlider">自動再生間隔</label>
-          <div class="range-container">
-            <span class="range-value" id="intervalValue">4000ms</span>
-            <input type="range" id="intervalSlider" min="1000" max="10000" step="500" value="4000">
-          </div>
-        </div>
-
-        <button class="btn btn-primary" id="autoplayBtn">
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-          </svg>
-          自動再生を開始
-        </button>
       </div>
 
-      <!-- Playback Control -->
-      <div class="control-card">
-        <div class="control-title">
-          <div class="control-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v14l-8-7z"></path>
-            </svg>
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <h3 style="margin-bottom: 20px; color: var(--primary-color);">CONTROL PANEL</h3>
+        <div class="control-grid">
+          <div class="control-group">
+            <label class="control-label">Transition Duration</label>
+            <input type="range" class="control-input" id="duration-slider" min="500" max="5000" value="2000" step="100">
+            <div style="text-align: center; margin-top: 5px; color: var(--text-secondary);">
+              <span id="duration-value">2000</span>ms
+            </div>
           </div>
-          再生コントロール
-        </div>
-        
-        <div class="btn-group">
-          <button class="btn btn-secondary" id="prevBtnAlt">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
-            </svg>
-            前へ
-          </button>
-          <button class="btn btn-secondary" id="nextBtnAlt">
-            次へ
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-            </svg>
-          </button>
-        </div>
-
-        <div class="info-card">
-          <div class="info-item">
-            <span class="info-label">現在の画像</span>
-            <span class="info-value"><span id="currentIndex">1</span> / <span id="totalImages">5</span></span>
+          
+          <div class="control-group">
+            <label class="control-label">Autoplay Interval</label>
+            <input type="range" class="control-input" id="interval-slider" min="1000" max="10000" value="3000" step="500">
+            <div style="text-align: center; margin-top: 5px; color: var(--text-secondary);">
+              <span id="interval-value">3000</span>ms
+            </div>
           </div>
-          <div class="info-item">
-            <span class="info-label">WebGL サポート</span>
-            <span class="info-value">
-              <span class="status-indicator" id="webglIndicator"></span>
-              <span id="webglSupport">確認中...</span>
-            </span>
+          
+          <div class="control-group">
+            <label class="control-label">Options</label>
+            <label class="control-checkbox">
+              <input type="checkbox" id="autoplay-checkbox">
+              <span>Autoplay</span>
+            </label>
+            <label class="control-checkbox" style="margin-top: 10px;">
+              <input type="checkbox" id="loop-checkbox" checked>
+              <span>Loop</span>
+            </label>
           </div>
-          <div class="info-item">
-            <span class="info-label">レンダラー</span>
-            <span class="info-value" id="rendererType">-</span>
+          
+          <div class="control-group">
+            <label class="control-label">Navigation</label>
+            <div class="control-buttons">
+              <button class="control-btn" id="prev-btn">← PREV</button>
+              <button class="control-btn" id="next-btn">NEXT →</button>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Custom Shader Control -->
-      <div class="control-card">
-        <div class="control-title">
-          <div class="control-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-            </svg>
-          </div>
-          カスタムシェーダー
+      <!-- Effects Selection -->
+      <div class="effects-section">
+        <h3 style="margin-bottom: 20px; color: var(--primary-color);">TRANSITION EFFECTS</h3>
+        <div class="effects-grid" id="effects-grid">
+          <!-- Effects will be populated by JavaScript -->
         </div>
-        
-        <div class="form-group">
-          <label class="form-label">サンプルカスタムエフェクト</label>
-          <button class="btn btn-secondary" id="customEffectBtn">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-              <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
-            </svg>
-            カスタムエフェクトを適用
-          </button>
-        </div>
+      </div>
 
-        <div class="form-group">
-          <label class="form-label">シェーダーエディタ</label>
-          <div style="display: none;" id="shaderEditor">
-            <label class="form-label" style="font-size: 0.875rem; margin-top: 1rem;">Fragment Shader</label>
-            <textarea id="customShaderCode" style="width: 100%; height: 200px; background: var(--bg-dark); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.875rem; resize: vertical;">
-precision mediump float;
+      <!-- Custom Shader Section -->
+      <div class="shader-section">
+        <h3 style="color: var(--primary-color);">CUSTOM SHADER LAB</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Create your own transition effect using GLSL</p>
+        
+        <div class="shader-editor">
+          <label class="control-label">Fragment Shader Code</label>
+          <textarea class="shader-textarea" id="custom-shader">precision mediump float;
 
 uniform sampler2D uTexture0;
 uniform sampler2D uTexture1;
@@ -762,415 +451,208 @@ uniform vec2 uImageSize1;
 
 varying vec2 vTexCoord;
 
-// Calculate UV coordinates for cover fit
 vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
-  if (imageSize.x <= 0.0 || imageSize.y <= 0.0 || resolution.x <= 0.0 || resolution.y <= 0.0) {
-    return uv;
-  }
-  
   float imageAspect = imageSize.x / imageSize.y;
-  float canvasAspect = resolution.x / resolution.y;
+  float screenAspect = resolution.x / resolution.y;
+  vec2 scale;
   
-  vec2 scale = vec2(1.0);
-  if (imageAspect > canvasAspect) {
-    scale.x = imageAspect / canvasAspect;
+  if (screenAspect > imageAspect) {
+    scale = vec2(1.0, imageAspect / screenAspect);
   } else {
-    scale.y = canvasAspect / imageAspect;
+    scale = vec2(screenAspect / imageAspect, 1.0);
   }
   
-  vec2 scaledUV = (uv - 0.5) / scale + 0.5;
-  return scaledUV;
+  return (uv - 0.5) / scale + 0.5;
 }
 
-// リップルエフェクト
 void main() {
-  vec2 center = vec2(0.5, 0.5);
-  float dist = distance(vTexCoord, center);
-  
-  // リップルの波を作成（複数の波）
-  float wave1 = sin(dist * 30.0 - uProgress * 15.0) * 0.5 + 0.5;
-  float wave2 = sin(dist * 20.0 - uProgress * 10.0) * 0.3;
-  float ripple = wave1 + wave2;
-  
-  // プログレスに基づいて波が広がる
-  float waveRadius = uProgress * 1.5;
-  
-  // 波の強さを距離に基づいて減衰
-  float waveStrength = (1.0 - smoothstep(0.0, waveRadius, dist)) * ripple * 0.02;
-  
-  // UV座標を波で歪める
-  vec2 distortion = vec2(sin(vTexCoord.y * 20.0 + uProgress * 5.0), cos(vTexCoord.x * 20.0 + uProgress * 5.0)) * waveStrength;
-  vec2 uv0 = getCoverUV(vTexCoord + distortion, uImageSize0, uResolution);
+  vec2 uv0 = getCoverUV(vTexCoord, uImageSize0, uResolution);
   vec2 uv1 = getCoverUV(vTexCoord, uImageSize1, uResolution);
   
+  // Custom ripple effect
+  vec2 center = vec2(0.5);
+  float dist = distance(vTexCoord, center);
+  float ripple = sin(dist * 20.0 - uProgress * 10.0) * 0.5 + 0.5;
+  float mask = smoothstep(0.0, 1.0, (uProgress * 2.0 - dist));
+  
   vec4 color0 = texture2D(uTexture0, uv0);
-  vec4 color1 = texture2D(uTexture1, uv1);
+  vec4 color1 = texture2D(uTexture1, uv1 + ripple * 0.02 * (1.0 - mask));
   
-  // より滑らかな遷移のための調整
-  float transition = smoothstep(0.0, 1.0, uProgress);
-  float mixer = smoothstep(dist - 0.2, dist + 0.2, waveRadius * transition);
-  
-  gl_FragColor = mix(color0, color1, mixer);
+  gl_FragColor = mix(color0, color1, mask);
 }</textarea>
-            <button class="btn btn-primary" id="applyCustomShader" style="margin-top: 1rem;">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
-              </svg>
-              シェーダーを適用
-            </button>
+          
+          <div class="shader-controls">
+            <button class="btn btn-primary" id="apply-shader">Apply Custom Shader</button>
+            <button class="btn btn-secondary" id="reset-shader">Reset to Default</button>
           </div>
-          <button class="btn btn-secondary" id="toggleShaderEditor" style="width: 100%;">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
-            </svg>
-            シェーダーエディタを開く
-          </button>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 
-  <script src="./dist/webgl-carousel.umd.js?v=20250803"></script>
+  <script src="dist/webgl-carousel.umd.js"></script>
   <script>
-    // Configuration
-    // Generate sample images dynamically to avoid CORS issues
-    const generateSampleImage = (text, bgColor, index) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1200;
-      canvas.height = 800;
-      const ctx = canvas.getContext('2d');
-      
-      // Background
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, 1200, 800);
-      
-      // Gradient overlay
-      const gradient = ctx.createLinearGradient(0, 0, 1200, 800);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1200, 800);
-      
-      // Pattern
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 2;
-      for (let i = 0; i < 20; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * 60, 0);
-        ctx.lineTo(i * 60, 800);
-        ctx.stroke();
-      }
-      
-      // Text
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 72px Inter, -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-      ctx.shadowBlur = 10;
-      ctx.fillText(text, 600, 350);
-      
-      // Subtitle
-      ctx.font = '36px Inter, -apple-system, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.fillText(`Sample Image ${index}`, 600, 450);
-      
-      return canvas.toDataURL('image/png');
-    };
-    
-    const images = [
-      generateSampleImage('WebGL Carousel', '#5B5FFF', 1),
-      generateSampleImage('Beautiful Effects', '#FF5B8F', 2),
-      generateSampleImage('Smooth Transitions', '#4ADE80', 3),
-      generateSampleImage('High Performance', '#FCD34D', 4),
-      generateSampleImage('Easy to Use', '#F87171', 5),
+    // Demo images
+    const demoImages = [
+      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=800&fit=crop'
     ];
-    
+
+    // Available effects
     const effects = [
       'fade', 'slideLeft', 'slideRight', 'slideUp', 'slideDown',
-      'flipHorizontal', 'flipVertical', 'wave', 'distortion',
-      'dissolve', 'pixelDissolve', 'circle', 'morph', 'glitch'
+      'flipHorizontal', 'flipVertical', 'wave', 'gentleWave', 'intenseWave',
+      'distortion', 'subtleDistortion', 'extremeDistortion',
+      'dissolve', 'smoothDissolve', 'pixelDissolve',
+      'circle', 'circleFromCenter', 'circleFromCorner',
+      'morph', 'glitch'
     ];
-    
+
     let carousel;
-    let isAutoplay = false;
     let currentEffect = 'fade';
-    
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      // Set initial values
-      document.getElementById('totalImages').textContent = images.length;
-      
-      initializeCarousel();
-      setupEventListeners();
-      createEffectPreviews();
-      updateWebGLStatus();
-    });
-    
-    function initializeCarousel() {
-      console.log('Initializing carousel...');
-      console.log('WebGLCarousel object:', WebGLCarousel);
-      
-      const CarouselClass = WebGLCarousel.default || WebGLCarousel.WebGLCarousel || WebGLCarousel;
-      console.log('CarouselClass:', CarouselClass);
-      
-      // Make createCustomEffect easily accessible
-      window.createCustomEffect = CarouselClass.createCustomEffect || (WebGLCarousel.createCustomEffect);
-      
-      try {
-        carousel = new CarouselClass({
-          container: '#carousel',
-          images: images,
-          effect: currentEffect,
-          autoplay: false,
-          transitionDuration: 2000,
-          autoplayInterval: 4000,
-          onImageChange: (index) => {
-            updateCurrentIndex(index);
-            updatePagination(index);
-          }
-        });
-        
-        console.log('Carousel instance created:', carousel);
-        
-        // Listen for ready event
-        carousel.on('ready', () => {
-          console.log('Carousel ready event fired');
-          document.querySelector('.loading-overlay').style.display = 'none';
-          updateRendererInfo();
-        });
-        
-        // Also add error handling
-        carousel.on('error', (error) => {
-          console.error('Carousel error:', error);
-          document.querySelector('.loading-overlay').style.display = 'none';
-          alert('Error initializing carousel: ' + error.message);
-        });
-        
-        // Set a timeout fallback in case ready event doesn't fire
-        setTimeout(() => {
-          const overlay = document.querySelector('.loading-overlay');
-          if (overlay && overlay.style.display !== 'none') {
-            console.warn('Ready event not fired after 5 seconds, hiding loading overlay');
-            overlay.style.display = 'none';
-            updateRendererInfo();
-          }
-        }, 5000);
-      } catch (error) {
-        console.error('Error creating carousel instance:', error);
-        document.querySelector('.loading-overlay').style.display = 'none';
-        alert('Failed to initialize carousel: ' + error.message);
-      }
+    let fpsInterval;
+
+    // Initialize carousel
+    function initCarousel() {
+      carousel = new WebGLCarousel({
+        container: '#carousel',
+        images: demoImages,
+        effect: currentEffect,
+        autoplay: false,
+        transitionDuration: 2000,
+        loop: true,
+        preload: true
+      });
+
+      // Hide loading overlay when ready
+      carousel.on('ready', () => {
+        document.getElementById('loading').style.display = 'none';
+        startFPSCounter();
+      });
+
+      // Update image counter
+      carousel.on('imageChange', (index) => {
+        document.getElementById('image-counter').textContent = `${index + 1}/${demoImages.length}`;
+      });
+
+      setupControls();
+      setupEffects();
+      setupCustomShader();
     }
-    
-    function setupEventListeners() {
-      // Navigation
-      document.getElementById('prevBtnAlt').addEventListener('click', () => {
-        console.log('Previous alt button clicked');
-        carousel.previous();
-      });
-      document.getElementById('nextBtnAlt').addEventListener('click', () => {
-        console.log('Next alt button clicked');
-        carousel.next();
-      });
-      
-      // Effect selector
-      document.getElementById('effectSelect').addEventListener('change', (e) => {
-        console.log(`Effect selector changed to: ${e.target.value}`);
-        currentEffect = e.target.value;
-        carousel.setEffect(currentEffect);
-        updateEffectPreviews();
-        console.log(`Current effect is now: ${currentEffect}`);
-      });
-      
-      // Sliders
-      document.getElementById('durationSlider').addEventListener('input', (e) => {
+
+    // Setup control panel
+    function setupControls() {
+      // Duration slider
+      const durationSlider = document.getElementById('duration-slider');
+      const durationValue = document.getElementById('duration-value');
+      durationSlider.addEventListener('input', (e) => {
         const value = e.target.value;
-        document.getElementById('durationValue').textContent = value + 'ms';
+        durationValue.textContent = value;
         carousel.setTransitionDuration(parseInt(value));
       });
-      
-      document.getElementById('intervalSlider').addEventListener('input', (e) => {
+
+      // Interval slider
+      const intervalSlider = document.getElementById('interval-slider');
+      const intervalValue = document.getElementById('interval-value');
+      intervalSlider.addEventListener('input', (e) => {
         const value = e.target.value;
-        document.getElementById('intervalValue').textContent = value + 'ms';
-        carousel.setAutoplay(isAutoplay, parseInt(value));
+        intervalValue.textContent = value;
+        carousel.setAutoplayInterval(parseInt(value));
       });
-      
-      // Autoplay
-      const autoplayBtn = document.getElementById('autoplayBtn');
-      autoplayBtn.addEventListener('click', () => {
-        isAutoplay = !isAutoplay;
-        if (isAutoplay) {
-          carousel.play();
-          autoplayBtn.innerHTML = `
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>
-            </svg>
-            自動再生を停止
-          `;
-        } else {
-          carousel.pause();
-          autoplayBtn.innerHTML = `
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M10.804 8L5 4.633v6.734L10.804 8zm.792-.696a.802.802 0 0 1 0 1.392l-6.363 3.692C4.713 12.69 4 12.345 4 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692z"/>
-            </svg>
-            自動再生を開始
-          `;
-        }
+
+      // Autoplay checkbox
+      const autoplayCheckbox = document.getElementById('autoplay-checkbox');
+      autoplayCheckbox.addEventListener('change', (e) => {
+        carousel.setAutoplay(e.target.checked);
       });
-      
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') carousel.previous();
-        else if (e.key === 'ArrowRight') carousel.next();
-        else if (e.key === ' ') {
-          e.preventDefault();
-          document.getElementById('autoplayBtn').click();
-        }
+
+      // Loop checkbox
+      const loopCheckbox = document.getElementById('loop-checkbox');
+      loopCheckbox.addEventListener('change', (e) => {
+        carousel.setLoop(e.target.checked);
       });
-      
-      // Touch/swipe support
-      let touchStartX = 0;
-      const carouselEl = document.getElementById('carousel');
-      
-      carouselEl.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-      });
-      
-      carouselEl.addEventListener('touchend', (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const diff = touchStartX - touchEndX;
-        
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) carousel.next();
-          else carousel.previous();
-        }
-      });
-      
-      // Custom shader functionality
-      const toggleEditorBtn = document.getElementById('toggleShaderEditor');
-      const shaderEditor = document.getElementById('shaderEditor');
-      const customEffectBtn = document.getElementById('customEffectBtn');
-      const applyShaderBtn = document.getElementById('applyCustomShader');
-      const shaderCodeTextarea = document.getElementById('customShaderCode');
-      
-      toggleEditorBtn.addEventListener('click', () => {
-        const isHidden = shaderEditor.style.display === 'none';
-        shaderEditor.style.display = isHidden ? 'block' : 'none';
-        toggleEditorBtn.innerHTML = isHidden ? `
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
-          </svg>
-          シェーダーエディタを閉じる
-        ` : `
-          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/>
-          </svg>
-          シェーダーエディタを開く
-        `;
-      });
-      
-      // Sample ripple effect
-      customEffectBtn.addEventListener('click', () => {
-        applyCustomEffect('ripple', shaderCodeTextarea.value);
-        currentEffect = 'customRipple';
-        document.getElementById('effectSelect').value = '';
-        updateEffectPreviews();
-      });
-      
-      // Apply custom shader from editor
-      applyShaderBtn.addEventListener('click', () => {
-        try {
-          applyCustomEffect('custom', shaderCodeTextarea.value);
-          currentEffect = 'custom';
-          document.getElementById('effectSelect').value = '';
-          updateEffectPreviews();
-          alert('カスタムシェーダーが適用されました！');
-        } catch (error) {
-          console.error('Shader error:', error);
-          alert('シェーダーエラー: ' + error.message);
-        }
-      });
-      
-      function applyCustomEffect(name, fragmentShader) {
-        if (!window.createCustomEffect) {
-          console.error('createCustomEffect is not available');
-          alert('createCustomEffect関数が利用できません。ライブラリのビルドを確認してください。');
-          return;
-        }
-        
-        const customEffect = window.createCustomEffect(
-          name,
-          undefined, // Use default vertex shader
-          fragmentShader
-        );
-        
-        carousel.registerEffect(customEffect);
-        carousel.setEffect(name);
-      }
+
+      // Navigation buttons
+      document.getElementById('prev-btn').addEventListener('click', () => carousel.previous());
+      document.getElementById('next-btn').addEventListener('click', () => carousel.next());
     }
-    
-    function createEffectPreviews() {
-      const grid = document.getElementById('effectPreviewGrid');
+
+    // Setup effects grid
+    function setupEffects() {
+      const effectsGrid = document.getElementById('effects-grid');
       
       effects.forEach(effect => {
         const btn = document.createElement('button');
-        btn.className = 'effect-preview-btn';
-        btn.textContent = effect.charAt(0).toUpperCase() + effect.slice(1);
-        btn.dataset.effect = effect;
-        
-        if (effect === currentEffect) {
-          btn.classList.add('active');
-        }
-        
+        btn.className = `effect-btn ${effect === currentEffect ? 'active' : ''}`;
+        btn.textContent = effect;
         btn.addEventListener('click', () => {
-          console.log(`Setting effect: ${effect}`);
+          document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
           currentEffect = effect;
           carousel.setEffect(effect);
-          document.getElementById('effectSelect').value = effect;
-          updateEffectPreviews();
-          console.log(`Effect set to: ${effect}`);
+          document.getElementById('effect-counter').textContent = effect;
         });
-        
-        grid.appendChild(btn);
+        effectsGrid.appendChild(btn);
       });
     }
-    
-    function updateEffectPreviews() {
-      document.querySelectorAll('.effect-preview-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.effect === currentEffect);
+
+    // Setup custom shader
+    function setupCustomShader() {
+      document.getElementById('apply-shader').addEventListener('click', () => {
+        const shaderCode = document.getElementById('custom-shader').value;
+        try {
+          const customEffect = WebGLCarousel.createCustomEffect('custom', null, shaderCode);
+          carousel.registerEffect(customEffect);
+          carousel.setEffect('custom');
+          
+          // Update UI
+          document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+          currentEffect = 'custom';
+          document.getElementById('effect-counter').textContent = 'custom';
+        } catch (error) {
+          alert('Shader compilation error: ' + error.message);
+        }
+      });
+
+      document.getElementById('reset-shader').addEventListener('click', () => {
+        carousel.setEffect('fade');
+        currentEffect = 'fade';
+        document.getElementById('effect-counter').textContent = 'fade';
+        document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.effect-btn').classList.add('active');
       });
     }
-    
-    function updateCurrentIndex(index) {
-      document.getElementById('currentIndex').textContent = index + 1;
-    }
-    
-    function updatePagination(index) {
-      document.querySelectorAll('.pagination-dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-      });
-    }
-    
-    function updateWebGLStatus() {
-      const canvas = document.createElement('canvas');
-      const webgl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      const isSupported = !!webgl;
+
+    // FPS Counter
+    function startFPSCounter() {
+      let lastTime = performance.now();
+      let frames = 0;
       
-      document.getElementById('webglSupport').textContent = isSupported ? '有効' : '無効';
-      const indicator = document.getElementById('webglIndicator');
-      indicator.classList.add(isSupported ? 'active' : 'inactive');
-    }
-    
-    function updateRendererInfo() {
-      try {
-        const isWebGL = carousel && carousel.isUsingWebGL && carousel.isUsingWebGL();
-        const rendererType = isWebGL ? 'WebGL' : 'Canvas 2D';
-        document.getElementById('rendererType').textContent = rendererType;
-      } catch (error) {
-        console.error('Error updating renderer info:', error);
-        document.getElementById('rendererType').textContent = 'Unknown';
+      function updateFPS() {
+        frames++;
+        const currentTime = performance.now();
+        
+        if (currentTime >= lastTime + 1000) {
+          const fps = Math.round((frames * 1000) / (currentTime - lastTime));
+          document.getElementById('fps-counter').textContent = fps;
+          frames = 0;
+          lastTime = currentTime;
+        }
+        
+        requestAnimationFrame(updateFPS);
       }
+      
+      updateFPS();
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCarousel);
+    } else {
+      initCarousel();
     }
   </script>
 </body>
