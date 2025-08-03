@@ -152,10 +152,6 @@ export class WebGLRenderer extends BaseWebGLRenderer<WebGLRenderingContext> {
     }
   }
 
-
-
-
-
   render(
     currentTexture: WebGLTexture | null,
     nextTexture: WebGLTexture | null,
@@ -254,7 +250,6 @@ export class WebGLRenderer extends BaseWebGLRenderer<WebGLRenderingContext> {
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
   }
 
-
   dispose(): void {
     if (!this.gl) return;
 
@@ -267,5 +262,4 @@ export class WebGLRenderer extends BaseWebGLRenderer<WebGLRenderingContext> {
     // Call parent dispose
     super.disposeCommon();
   }
-
 }

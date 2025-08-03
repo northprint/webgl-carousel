@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Carousel - High-Performance Image Carousel Library</title>
+  <meta name="description" content="A high-performance image carousel library powered by WebGL with stunning visual effects and smooth animations.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles-cyber.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <h1>WebGL Carousel</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#usage">Usage</a></li>
+        <li><a href="#api">API</a></li>
+        <li><a href="https://github.com/northprint/webgl-carousel" target="_blank">GitHub</a></li>
+      </ul>
+      <div class="language-switch">
+        <a href="index-en.html" class="active">EN</a>
+        <a href="index.html">JA</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container">
+      <h2>High-Performance WebGL Image Carousel</h2>
+      <p class="subtitle">GPU-accelerated smooth animations with stunning transition effects</p>
+      <div class="hero-buttons">
+        <a href="#installation" class="btn btn-primary">Get Started</a>
+        <a href="demo.html" class="btn btn-secondary">View Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="section">
+    <div class="container">
+      <h2>Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>High Performance</h3>
+          <p>GPU-accelerated rendering with WebGL delivers 60fps smooth animations</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>Rich Effects</h3>
+          <p>20+ built-in effects with custom shader support for creative transitions</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Responsive Design</h3>
+          <p>Mobile-friendly with touch gesture support for seamless user experience</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>Framework Support</h3>
+          <p>Native components for React, Vue, and Svelte frameworks</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Customizable</h3>
+          <p>Create unique effects with custom GLSL shaders</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Fallback Support</h3>
+          <p>Automatic Canvas 2D fallback for non-WebGL environments</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="section section-dark">
+    <div class="container">
+      <h2>Live Demo</h2>
+      <p class="demo-description">Experience all WebGL Carousel features in our interactive demo. Try various transition effects and custom shaders in real-time.</p>
+      <div class="demo-actions">
+        <a href="demo.html" class="btn btn-primary btn-large" target="_blank">
+          <span class="btn-icon">▶</span>
+          Launch Interactive Demo
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="installation" class="section">
+    <div class="container">
+      <h2>Installation</h2>
+      
+      <h3>npm</h3>
+      <pre><code class="language-bash">npm install webgl-carousel</code></pre>
+      
+      <h3>yarn</h3>
+      <pre><code class="language-bash">yarn add webgl-carousel</code></pre>
+      
+      <h3>CDN</h3>
+      <pre><code class="language-html">&lt;script src="https://unpkg.com/webgl-carousel/dist/webgl-carousel.umd.js"&gt;&lt;/script&gt;</code></pre>
+    </div>
+  </section>
+
+  <section id="usage" class="section section-light">
+    <div class="container">
+      <h2>Usage</h2>
+      
+      <h3>Basic Usage</h3>
+      <pre><code class="language-javascript">import { WebGLCarousel } from 'webgl-carousel';
+
+const carousel = new WebGLCarousel({
+  container: '#carousel',
+  images: [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ],
+  effect: 'fade',
+  autoplay: true,
+  transitionDuration: 2000
+});</code></pre>
+
+      <h3>React Usage</h3>
+      <pre><code class="language-jsx">import { ReactCarousel } from 'webgl-carousel/react';
+
+function App() {
+  const images = [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ];
+
+  return (
+    &lt;ReactCarousel
+      images={images}
+      effect="slideLeft"
+      autoplay
+      transitionDuration={1500}
+      style={{ width: '100%', height: '400px' }}
+    /&gt;
+  );
+}</code></pre>
+
+      <h3>Vue Usage</h3>
+      <pre><code class="language-vue">&lt;template&gt;
+  &lt;VueCarousel
+    :images="images"
+    effect="wave"
+    :autoplay="true"
+    :transition-duration="2000"
+    style="width: 100%; height: 400px;"
+  /&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { VueCarousel } from 'webgl-carousel/vue';
+
+const images = [
+  'path/to/image1.jpg',
+  'path/to/image2.jpg',
+  'path/to/image3.jpg'
+];
+&lt;/script&gt;</code></pre>
+
+      <h3>Svelte Usage</h3>
+      <pre><code class="language-javascript">&lt;script&gt;
+  import { SvelteCarousel } from 'webgl-carousel/svelte';
+  
+  const images = [
+    'path/to/image1.jpg',
+    'path/to/image2.jpg',
+    'path/to/image3.jpg'
+  ];
+&lt;/script&gt;
+
+&lt;SvelteCarousel
+  {images}
+  effect="flip"
+  autoplay={true}
+  transitionDuration={1800}
+  style="width: 100%; height: 400px;"
+/&gt;</code></pre>
+    </div>
+  </section>
+
+  <section id="effects" class="section">
+    <div class="container">
+      <h2>Available Effects</h2>
+      <div class="effects-grid">
+        <div class="effect-item">
+          <h4>fade</h4>
+          <p>Simple fade transition</p>
+        </div>
+        <div class="effect-item">
+          <h4>slideLeft / slideRight</h4>
+          <p>Horizontal slide transitions</p>
+        </div>
+        <div class="effect-item">
+          <h4>slideUp / slideDown</h4>
+          <p>Vertical slide transitions</p>
+        </div>
+        <div class="effect-item">
+          <h4>flipHorizontal / flipVertical</h4>
+          <p>3D rotation effects</p>
+        </div>
+        <div class="effect-item">
+          <h4>wave</h4>
+          <p>Wave animation effect</p>
+        </div>
+        <div class="effect-item">
+          <h4>distortion</h4>
+          <p>Lens distortion effect</p>
+        </div>
+        <div class="effect-item">
+          <h4>dissolve</h4>
+          <p>Dissolve transition</p>
+        </div>
+        <div class="effect-item">
+          <h4>pixelDissolve</h4>
+          <p>Pixelated dissolve effect</p>
+        </div>
+        <div class="effect-item">
+          <h4>circle</h4>
+          <p>Circular reveal transition</p>
+        </div>
+        <div class="effect-item">
+          <h4>morph</h4>
+          <p>Morphing effect</p>
+        </div>
+        <div class="effect-item">
+          <h4>glitch</h4>
+          <p>Digital glitch effect</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="api" class="section section-light">
+    <div class="container">
+      <h2>API Reference</h2>
+      
+      <h3>Constructor Options</h3>
+      <div class="api-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>container</td>
+              <td>string | HTMLElement</td>
+              <td>required</td>
+              <td>Container element or selector</td>
+            </tr>
+            <tr>
+              <td>images</td>
+              <td>string[]</td>
+              <td>[]</td>
+              <td>Array of image URLs</td>
+            </tr>
+            <tr>
+              <td>effect</td>
+              <td>string</td>
+              <td>'fade'</td>
+              <td>Transition effect name</td>
+            </tr>
+            <tr>
+              <td>autoplay</td>
+              <td>boolean</td>
+              <td>false</td>
+              <td>Enable automatic playback</td>
+            </tr>
+            <tr>
+              <td>interval</td>
+              <td>number</td>
+              <td>3000</td>
+              <td>Autoplay interval in milliseconds</td>
+            </tr>
+            <tr>
+              <td>transitionDuration</td>
+              <td>number</td>
+              <td>1000</td>
+              <td>Transition duration in milliseconds</td>
+            </tr>
+            <tr>
+              <td>loop</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>Loop back to first image after last</td>
+            </tr>
+            <tr>
+              <td>showControls</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>Show navigation controls</td>
+            </tr>
+            <tr>
+              <td>showIndicators</td>
+              <td>boolean</td>
+              <td>true</td>
+              <td>Show position indicators</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Methods</h3>
+      <pre><code class="language-javascript">// Navigate to next image
+carousel.next();
+
+// Navigate to previous image
+carousel.previous();
+
+// Jump to specific index
+carousel.goTo(2);
+
+// Start/stop autoplay
+carousel.play();
+carousel.pause();
+
+// Change effect
+carousel.setEffect('wave');
+
+// Handle resize
+carousel.resize();
+
+// Cleanup
+carousel.dispose();</code></pre>
+
+      <h3>Events</h3>
+      <pre><code class="language-javascript">// Image change event
+carousel.on('change', (index) => {
+  console.log('Current image:', index);
+});
+
+// Transition start event
+carousel.on('transitionStart', (from, to) => {
+  console.log(`Transitioning from ${from} to ${to}`);
+});
+
+// Transition end event
+carousel.on('transitionEnd', (index) => {
+  console.log('Transition completed:', index);
+});
+
+// Error event
+carousel.on('error', (error) => {
+  console.error('Carousel error:', error);
+});</code></pre>
+    </div>
+  </section>
+
+  <section id="custom-effects" class="section">
+    <div class="container">
+      <h2>Creating Custom Effects</h2>
+      <p>Create unique transition effects using custom GLSL shaders.</p>
+      
+      <pre><code class="language-javascript">import { createCustomEffect } from 'webgl-carousel';
+
+const myEffect = createCustomEffect(
+  'myCustomEffect',
+  // Vertex shader (optional)
+  `
+  attribute vec2 aPosition;
+  attribute vec2 aTexCoord;
+  varying vec2 vTexCoord;
+  
+  void main() {
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+    vTexCoord = aTexCoord;
+  }
+  `,
+  // Fragment shader
+  `
+  precision mediump float;
+  
+  uniform sampler2D uTexture0;
+  uniform sampler2D uTexture1;
+  uniform float uProgress;
+  uniform vec2 uResolution;
+  
+  varying vec2 vTexCoord;
+  
+  void main() {
+    vec2 uv = vTexCoord;
+    
+    // Custom effect logic
+    float wave = sin(uv.y * 10.0 + uProgress * 3.14159) * 0.05;
+    vec2 distortedUV = vec2(uv.x + wave * uProgress, uv.y);
+    
+    vec4 color0 = texture2D(uTexture0, distortedUV);
+    vec4 color1 = texture2D(uTexture1, uv);
+    
+    gl_FragColor = mix(color0, color1, uProgress);
+  }
+  `
+);
+
+// Register custom effect
+carousel.registerEffect(myEffect);
+carousel.setEffect('myCustomEffect');</code></pre>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-links">
+          <a href="https://github.com/northprint/webgl-carousel">GitHub</a>
+          <a href="https://www.npmjs.com/package/webgl-carousel">npm</a>
+          <a href="#api">API Docs</a>
+          <a href="https://github.com/northprint/webgl-carousel/issues">Support</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 WebGL Carousel. MIT License.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script>
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

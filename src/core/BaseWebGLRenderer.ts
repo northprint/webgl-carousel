@@ -7,7 +7,7 @@ export interface WebGLRendererEvents extends Record<string, unknown[]> {
 }
 
 export abstract class BaseWebGLRenderer<
-  TContext extends WebGLRenderingContext | WebGL2RenderingContext = WebGLRenderingContext
+  TContext extends WebGLRenderingContext | WebGL2RenderingContext = WebGLRenderingContext,
 > extends EventEmitter<WebGLRendererEvents> {
   protected canvas: HTMLCanvasElement | null = null;
   protected gl: TContext | null = null;
@@ -34,8 +34,6 @@ export abstract class BaseWebGLRenderer<
   loadTexture(image: HTMLImageElement): WebGLTexture | null {
     if (!this.gl) return null;
 
-    const srcPreview = image.src.substring(0, 50) + '...';
-    
     // Cache image size first (before checking for existing texture)
     if (!this.imageSizes.has(image.src)) {
       const imageSize = {
@@ -43,8 +41,6 @@ export abstract class BaseWebGLRenderer<
         height: image.naturalHeight || image.height,
       };
       this.imageSizes.set(image.src, imageSize);
-    } else {
-      const cachedSize = this.imageSizes.get(image.src);
     }
 
     // Check if texture already exists
@@ -194,10 +190,7 @@ export abstract class BaseWebGLRenderer<
   };
 
   // Common image size uniform setting logic
-  protected setImageSizeUniforms(
-    currentImageSrc?: string,
-    nextImageSrc?: string,
-  ): void {
+  protected setImageSizeUniforms(currentImageSrc?: string, nextImageSrc?: string): void {
     if (!this.gl || !this.canvas) return;
 
     const imageSize0Loc = this.uniforms.get('uImageSize0');
@@ -222,7 +215,7 @@ export abstract class BaseWebGLRenderer<
         // For initial render, use the same image size for both textures
         size = this.imageSizes.get(currentImageSrc);
       }
-      
+
       if (size && size.width > 0 && size.height > 0) {
         this.gl.uniform2f(imageSize1Loc, size.width, size.height);
       } else {

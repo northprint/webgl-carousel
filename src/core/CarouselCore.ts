@@ -222,11 +222,9 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       const images = this.stateManager.get('images');
       const index = imageIndex ?? this.stateManager.get('currentIndex');
       const imageSrc = images[index]!;
-      
-      // Ensure the renderer has the image element to get size info
-      
+
       // Load texture (this will also cache the image size)
-      let texture = this.renderer.loadTexture(image.element);
+      const texture = this.renderer.loadTexture(image.element);
       if (texture) {
         this.textures.set(imageSrc, texture);
       }
@@ -237,7 +235,6 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
         const effect = this.effectManager.get(effectName);
         const uniforms = effect ? effect.getUniforms(0) : {};
 
-        
         // Set the effect to renderer before initial render
         if (effect) {
           this.renderer.setEffect({
@@ -245,7 +242,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
             fragmentShader: effect.fragmentShader,
           });
         }
-        
+
         // For initial render, pass the same image as both textures
         this.renderer.render(texture, texture, 0, uniforms, imageSrc, imageSrc);
       }

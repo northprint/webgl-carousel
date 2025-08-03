@@ -314,8 +314,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
         fragmentShader = this.convertFragmentShaderToWebGL2(fragmentShader);
       }
 
-
-      const program = effect.transformFeedbackVaryings 
+      const program = effect.transformFeedbackVaryings
         ? this.createProgram(vertexShader, fragmentShader, effect.transformFeedbackVaryings)
         : super.createProgram(vertexShader, fragmentShader);
       if (program) {
