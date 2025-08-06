@@ -1,6 +1,7 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 // Mock Svelte component before importing
-jest.mock('../../src/adapters/svelte/WebGLCarouselSvelte.svelte', () => ({
-  default: jest.fn(),
+vi.mock('../../src/adapters/svelte/WebGLCarouselSvelte.svelte', () => ({
+  default: vi.fn(),
 }));
 
 import { WebGLCarousel, VERSION } from '../../src/index';

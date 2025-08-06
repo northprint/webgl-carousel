@@ -1,10 +1,11 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ImageLoader } from '../../../src/core/ImageLoader';
 
 // Mock Image behavior in tests
 const mockImageLoad = (shouldSucceed = true, delay = 0) => {
   const originalImage = global.Image;
 
-  global.Image = jest.fn().mockImplementation(function (this: HTMLImageElement) {
+  global.Image = vi.fn().mockImplementation(function (this: HTMLImageElement) {
     this.naturalWidth = 100;
     this.naturalHeight = 100;
     this.width = 100;
@@ -38,7 +39,7 @@ describe('ImageLoader', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('load', () => {
@@ -110,7 +111,7 @@ describe('ImageLoader', () => {
       const restore = mockImageLoad(true);
 
       let createdImage: any;
-      global.Image = jest.fn().mockImplementation(function (this: HTMLImageElement) {
+      global.Image = vi.fn().mockImplementation(function (this: HTMLImageElement) {
         createdImage = this;
         this.naturalWidth = 100;
         this.naturalHeight = 100;
@@ -146,7 +147,7 @@ describe('ImageLoader', () => {
     it('should reject if any image fails in preload', async () => {
       let callCount = 0;
       const originalImage = global.Image;
-      global.Image = jest.fn().mockImplementation(function (this: HTMLImageElement) {
+      global.Image = vi.fn().mockImplementation(function (this: HTMLImageElement) {
         const currentCount = ++callCount;
         this.naturalWidth = 100;
         this.naturalHeight = 100;
@@ -177,7 +178,7 @@ describe('ImageLoader', () => {
   describe('preloadWithProgress', () => {
     it('should preload with progress callback', async () => {
       const restore = mockImageLoad(true);
-      const progressCallback = jest.fn();
+      const progressCallback = vi.fn();
 
       const urls = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
       const results = await imageLoader.preloadWithProgress(urls, progressCallback);
@@ -194,7 +195,7 @@ describe('ImageLoader', () => {
     it('should continue loading if some images fail', async () => {
       let callCount = 0;
       const originalImage = global.Image;
-      global.Image = jest.fn().mockImplementation(function (this: HTMLImageElement) {
+      global.Image = vi.fn().mockImplementation(function (this: HTMLImageElement) {
         const currentCount = ++callCount;
         this.naturalWidth = 100;
         this.naturalHeight = 100;
@@ -214,8 +215,8 @@ describe('ImageLoader', () => {
         return this;
       }) as any;
 
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      const progressCallback = jest.fn();
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation();
+      const progressCallback = vi.fn();
 
       const urls = ['img1.jpg', 'img2.jpg', 'img3.jpg'];
       const results = await imageLoader.preloadWithProgress(urls, progressCallback);

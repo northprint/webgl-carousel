@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { StyleManager } from '../../../src/ui/StyleManager';
 import { STYLE_IDS } from '../../../src/styles/carouselStyles';
 

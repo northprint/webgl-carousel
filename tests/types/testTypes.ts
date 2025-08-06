@@ -27,61 +27,61 @@ export interface CarouselCoreTestable extends CarouselCore {
  */
 export interface MockWebGLContext extends Partial<WebGLRenderingContext> {
   // Add commonly used methods
-  createShader: jest.Mock;
-  shaderSource: jest.Mock;
-  compileShader: jest.Mock;
-  getShaderParameter: jest.Mock;
-  getShaderInfoLog: jest.Mock;
-  deleteShader: jest.Mock;
-  createProgram: jest.Mock;
-  attachShader: jest.Mock;
-  linkProgram: jest.Mock;
-  getProgramParameter: jest.Mock;
-  getProgramInfoLog: jest.Mock;
-  deleteProgram: jest.Mock;
-  useProgram: jest.Mock;
-  createBuffer: jest.Mock;
-  bindBuffer: jest.Mock;
-  bufferData: jest.Mock;
-  createTexture: jest.Mock;
-  bindTexture: jest.Mock;
-  texImage2D: jest.Mock;
-  texParameteri: jest.Mock;
-  generateMipmap: jest.Mock;
-  getUniformLocation: jest.Mock;
-  getAttribLocation: jest.Mock;
-  uniform1f: jest.Mock;
-  uniform2f: jest.Mock;
-  uniform1i: jest.Mock;
-  uniformMatrix4fv: jest.Mock;
-  enableVertexAttribArray: jest.Mock;
-  vertexAttribPointer: jest.Mock;
-  activeTexture: jest.Mock;
-  viewport: jest.Mock;
-  clear: jest.Mock;
-  clearColor: jest.Mock;
-  drawArrays: jest.Mock;
-  drawElements: jest.Mock;
-  enable: jest.Mock;
-  disable: jest.Mock;
-  blendFunc: jest.Mock;
-  getError: jest.Mock;
+  createShader: vi.Mock;
+  shaderSource: vi.Mock;
+  compileShader: vi.Mock;
+  getShaderParameter: vi.Mock;
+  getShaderInfoLog: vi.Mock;
+  deleteShader: vi.Mock;
+  createProgram: vi.Mock;
+  attachShader: vi.Mock;
+  linkProgram: vi.Mock;
+  getProgramParameter: vi.Mock;
+  getProgramInfoLog: vi.Mock;
+  deleteProgram: vi.Mock;
+  useProgram: vi.Mock;
+  createBuffer: vi.Mock;
+  bindBuffer: vi.Mock;
+  bufferData: vi.Mock;
+  createTexture: vi.Mock;
+  bindTexture: vi.Mock;
+  texImage2D: vi.Mock;
+  texParameteri: vi.Mock;
+  generateMipmap: vi.Mock;
+  getUniformLocation: vi.Mock;
+  getAttribLocation: vi.Mock;
+  uniform1f: vi.Mock;
+  uniform2f: vi.Mock;
+  uniform1i: vi.Mock;
+  uniformMatrix4fv: vi.Mock;
+  enableVertexAttribArray: vi.Mock;
+  vertexAttribPointer: vi.Mock;
+  activeTexture: vi.Mock;
+  viewport: vi.Mock;
+  clear: vi.Mock;
+  clearColor: vi.Mock;
+  drawArrays: vi.Mock;
+  drawElements: vi.Mock;
+  enable: vi.Mock;
+  disable: vi.Mock;
+  blendFunc: vi.Mock;
+  getError: vi.Mock;
 }
 
 /**
  * Mock Canvas 2D context for testing
  */
 export interface MockCanvas2DContext extends Partial<CanvasRenderingContext2D> {
-  clearRect: jest.Mock;
-  drawImage: jest.Mock;
-  save: jest.Mock;
-  restore: jest.Mock;
+  clearRect: vi.Mock;
+  drawImage: vi.Mock;
+  save: vi.Mock;
+  restore: vi.Mock;
   globalAlpha: number;
   fillStyle: string | CanvasGradient | CanvasPattern;
-  fillRect: jest.Mock;
-  translate: jest.Mock;
-  scale: jest.Mock;
-  rotate: jest.Mock;
+  fillRect: vi.Mock;
+  translate: vi.Mock;
+  scale: vi.Mock;
+  rotate: vi.Mock;
 }
 
 /**
@@ -90,10 +90,10 @@ export interface MockCanvas2DContext extends Partial<CanvasRenderingContext2D> {
 export interface MockHTMLCanvasElement extends Partial<HTMLCanvasElement> {
   width: number;
   height: number;
-  getContext: jest.Mock;
-  addEventListener: jest.Mock;
-  removeEventListener: jest.Mock;
-  getBoundingClientRect: jest.Mock;
+  getContext: vi.Mock;
+  addEventListener: vi.Mock;
+  removeEventListener: vi.Mock;
+  getBoundingClientRect: vi.Mock;
 }
 
 /**
@@ -116,45 +116,45 @@ export interface MockHTMLImageElement extends Partial<HTMLImageElement> {
  */
 export function createMockWebGLContext(overrides?: Partial<MockWebGLContext>): MockWebGLContext {
   return {
-    createShader: jest.fn(() => ({})),
-    shaderSource: jest.fn(),
-    compileShader: jest.fn(),
-    getShaderParameter: jest.fn(() => true),
-    getShaderInfoLog: jest.fn(() => ''),
-    deleteShader: jest.fn(),
-    createProgram: jest.fn(() => ({})),
-    attachShader: jest.fn(),
-    linkProgram: jest.fn(),
-    getProgramParameter: jest.fn(() => true),
-    getProgramInfoLog: jest.fn(() => ''),
-    deleteProgram: jest.fn(),
-    useProgram: jest.fn(),
-    createBuffer: jest.fn(() => ({})),
-    bindBuffer: jest.fn(),
-    bufferData: jest.fn(),
-    createTexture: jest.fn(() => ({})),
-    bindTexture: jest.fn(),
-    texImage2D: jest.fn(),
-    texParameteri: jest.fn(),
-    generateMipmap: jest.fn(),
-    getUniformLocation: jest.fn(() => ({})),
-    getAttribLocation: jest.fn(() => 0),
-    uniform1f: jest.fn(),
-    uniform2f: jest.fn(),
-    uniform1i: jest.fn(),
-    uniformMatrix4fv: jest.fn(),
-    enableVertexAttribArray: jest.fn(),
-    vertexAttribPointer: jest.fn(),
-    activeTexture: jest.fn(),
-    viewport: jest.fn(),
-    clear: jest.fn(),
-    clearColor: jest.fn(),
-    drawArrays: jest.fn(),
-    drawElements: jest.fn(),
-    enable: jest.fn(),
-    disable: jest.fn(),
-    blendFunc: jest.fn(),
-    getError: jest.fn(() => 0),
+    createShader: vi.fn(() => ({})),
+    shaderSource: vi.fn(),
+    compileShader: vi.fn(),
+    getShaderParameter: vi.fn(() => true),
+    getShaderInfoLog: vi.fn(() => ''),
+    deleteShader: vi.fn(),
+    createProgram: vi.fn(() => ({})),
+    attachShader: vi.fn(),
+    linkProgram: vi.fn(),
+    getProgramParameter: vi.fn(() => true),
+    getProgramInfoLog: vi.fn(() => ''),
+    deleteProgram: vi.fn(),
+    useProgram: vi.fn(),
+    createBuffer: vi.fn(() => ({})),
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    createTexture: vi.fn(() => ({})),
+    bindTexture: vi.fn(),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+    generateMipmap: vi.fn(),
+    getUniformLocation: vi.fn(() => ({})),
+    getAttribLocation: vi.fn(() => 0),
+    uniform1f: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform1i: vi.fn(),
+    uniformMatrix4fv: vi.fn(),
+    enableVertexAttribArray: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+    activeTexture: vi.fn(),
+    viewport: vi.fn(),
+    clear: vi.fn(),
+    clearColor: vi.fn(),
+    drawArrays: vi.fn(),
+    drawElements: vi.fn(),
+    enable: vi.fn(),
+    disable: vi.fn(),
+    blendFunc: vi.fn(),
+    getError: vi.fn(() => 0),
     ...overrides,
   };
 }
@@ -166,16 +166,16 @@ export function createMockCanvas2DContext(
   overrides?: Partial<MockCanvas2DContext>,
 ): MockCanvas2DContext {
   return {
-    clearRect: jest.fn(),
-    drawImage: jest.fn(),
-    save: jest.fn(),
-    restore: jest.fn(),
+    clearRect: vi.fn(),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
     globalAlpha: 1,
     fillStyle: '#000000',
-    fillRect: jest.fn(),
-    translate: jest.fn(),
-    scale: jest.fn(),
-    rotate: jest.fn(),
+    fillRect: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
+    rotate: vi.fn(),
     ...overrides,
   };
 }
@@ -188,10 +188,10 @@ export function createMockCanvas(overrides?: Partial<MockHTMLCanvasElement>): Mo
   return {
     width: 800,
     height: 600,
-    getContext: jest.fn(() => mockContext),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    getBoundingClientRect: jest.fn(() => ({
+    getContext: vi.fn(() => mockContext),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    getBoundingClientRect: vi.fn(() => ({
       left: 0,
       top: 0,
       right: 800,

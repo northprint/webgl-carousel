@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
   ErrorHandler,
   ErrorCategory,
@@ -9,15 +10,15 @@ import {
 import { Logger, LogLevel } from '../../../src/utils/Logger';
 
 describe('ErrorHandler', () => {
-  let consoleLogSpy: jest.SpyInstance;
-  let consoleWarnSpy: jest.SpyInstance;
-  let consoleErrorSpy: jest.SpyInstance;
+  let consoleLogSpy: vi.SpyInstance;
+  let consoleWarnSpy: vi.SpyInstance;
+  let consoleErrorSpy: vi.SpyInstance;
   let errorHandler: ErrorHandler;
 
   beforeEach(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation();
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
     
     // Note: ErrorHandler is a singleton, so we can't reset it completely
     // We can only clear its history
@@ -236,8 +237,8 @@ describe('ErrorHandler', () => {
     describe('recovery strategies', () => {
       it('should register and use recovery strategy', async () => {
         const mockStrategy: RecoveryStrategy = {
-          canRecover: jest.fn().mockReturnValue(true),
-          recover: jest.fn().mockResolvedValue(undefined),
+          canRecover: vi.fn().mockReturnValue(true),
+          recover: vi.fn().mockResolvedValue(undefined),
         };
 
         errorHandler.registerRecoveryStrategy(ErrorCategory.NETWORK, mockStrategy);
@@ -256,8 +257,8 @@ describe('ErrorHandler', () => {
 
       it('should retry with delay', async () => {
         const mockStrategy: RecoveryStrategy = {
-          canRecover: jest.fn().mockReturnValue(true),
-          recover: jest.fn()
+          canRecover: vi.fn().mockReturnValue(true),
+          recover: vi.fn()
             .mockRejectedValueOnce(new Error('First failure'))
             .mockResolvedValueOnce(undefined),
         };
@@ -284,8 +285,8 @@ describe('ErrorHandler', () => {
 
       it('should respect max retries', async () => {
         const mockStrategy: RecoveryStrategy = {
-          canRecover: jest.fn().mockReturnValue(true),
-          recover: jest.fn().mockRejectedValue(new Error('Always fails')),
+          canRecover: vi.fn().mockReturnValue(true),
+          recover: vi.fn().mockRejectedValue(new Error('Always fails')),
         };
 
         // Clear any previous strategies

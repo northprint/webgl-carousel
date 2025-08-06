@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 // Simplified test for Svelte adapter that focuses on TypeScript compilation
 // Full Svelte testing requires additional setup with svelte-jester
 
@@ -6,7 +7,7 @@ import { WebGLCarousel } from '../../../../src/WebGLCarousel';
 import type { BaseEffect } from '../../../../src/effects/BaseEffect';
 
 // Mock WebGLCarousel
-jest.mock('../../../../src/WebGLCarousel');
+vi.mock('../../../../src/WebGLCarousel');
 
 describe('WebGLCarouselSvelte', () => {
   // Type testing for Svelte component props
@@ -37,7 +38,7 @@ describe('WebGLCarouselSvelte', () => {
       name: 'custom',
       vertexShader: 'vertex',
       fragmentShader: 'fragment',
-      getUniforms: jest.fn(),
+      getUniforms: vi.fn(),
     };
 
     const propsWithEffect: WebGLCarouselSvelteProps = {

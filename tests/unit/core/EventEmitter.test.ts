@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { EventEmitter } from '../../../src/core/EventEmitter';
 
 interface TestEvents {
@@ -15,7 +16,7 @@ describe('EventEmitter', () => {
 
   describe('on/emit', () => {
     it('should register and call event handlers', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       emitter.on('test', handler);
       emitter.emit('test', 'hello', 42);
 
@@ -24,8 +25,8 @@ describe('EventEmitter', () => {
     });
 
     it('should handle multiple handlers for the same event', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
 
       emitter.on('test', handler1);
       emitter.on('test', handler2);
@@ -36,7 +37,7 @@ describe('EventEmitter', () => {
     });
 
     it('should handle events with no arguments', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       emitter.on('noArgs', handler);
       emitter.emit('noArgs');
 
@@ -48,11 +49,11 @@ describe('EventEmitter', () => {
     });
 
     it('should catch and log handler errors', () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       const errorHandler = () => {
         throw new Error('Handler error');
       };
-      const normalHandler = jest.fn();
+      const normalHandler = vi.fn();
 
       emitter.on('test', errorHandler);
       emitter.on('test', normalHandler);
@@ -70,7 +71,7 @@ describe('EventEmitter', () => {
 
   describe('off', () => {
     it('should remove event handler', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       emitter.on('test', handler);
       emitter.off('test', handler);
       emitter.emit('test', 'hello', 42);
@@ -79,8 +80,8 @@ describe('EventEmitter', () => {
     });
 
     it('should only remove the specified handler', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
 
       emitter.on('test', handler1);
       emitter.on('test', handler2);
@@ -92,14 +93,14 @@ describe('EventEmitter', () => {
     });
 
     it('should handle removing non-existent handler', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       expect(() => emitter.off('test', handler)).not.toThrow();
     });
   });
 
   describe('once', () => {
     it('should call handler only once', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       emitter.once('test', handler);
 
       emitter.emit('test', 'first', 1);
@@ -112,8 +113,8 @@ describe('EventEmitter', () => {
 
   describe('removeAllListeners', () => {
     it('should remove all listeners for a specific event', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
 
       emitter.on('test', handler1);
       emitter.on('test', handler2);
@@ -125,8 +126,8 @@ describe('EventEmitter', () => {
     });
 
     it('should remove all listeners for all events', () => {
-      const testHandler = jest.fn();
-      const errorHandler = jest.fn();
+      const testHandler = vi.fn();
+      const errorHandler = vi.fn();
 
       emitter.on('test', testHandler);
       emitter.on('error', errorHandler);
@@ -142,8 +143,8 @@ describe('EventEmitter', () => {
 
   describe('listenerCount', () => {
     it('should return correct listener count', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
 
       expect(emitter.listenerCount('test')).toBe(0);
 
@@ -160,7 +161,7 @@ describe('EventEmitter', () => {
 
   describe('method chaining', () => {
     it('should support method chaining', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
 
       const result = emitter
         .on('test', handler)

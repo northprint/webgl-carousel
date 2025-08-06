@@ -44,39 +44,39 @@ export const createMockWebGLContext = () => {
     UNPACK_PREMULTIPLY_ALPHA_WEBGL: 0x9241,
 
     // Methods
-    createTexture: jest.fn(() => mockTexture),
-    bindTexture: jest.fn(),
-    texImage2D: jest.fn(),
-    texParameteri: jest.fn(),
-    texParameterf: jest.fn(),
-    pixelStorei: jest.fn(),
-    generateMipmap: jest.fn(),
-    getExtension: jest.fn(() => null),
-    createBuffer: jest.fn(() => mockBuffer),
-    bindBuffer: jest.fn(),
-    bufferData: jest.fn(),
-    createProgram: jest.fn(() => mockProgram),
-    createShader: jest.fn(() => mockShader),
-    shaderSource: jest.fn(),
-    compileShader: jest.fn(),
-    getShaderParameter: jest.fn(() => true),
-    getShaderInfoLog: jest.fn(() => ''),
-    attachShader: jest.fn(),
-    linkProgram: jest.fn(),
-    getProgramParameter: jest.fn((program: any, param: number) => {
+    createTexture: vi.fn(() => mockTexture),
+    bindTexture: vi.fn(),
+    texImage2D: vi.fn(),
+    texParameteri: vi.fn(),
+    texParameterf: vi.fn(),
+    pixelStorei: vi.fn(),
+    generateMipmap: vi.fn(),
+    getExtension: vi.fn(() => null),
+    createBuffer: vi.fn(() => mockBuffer),
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    createProgram: vi.fn(() => mockProgram),
+    createShader: vi.fn(() => mockShader),
+    shaderSource: vi.fn(),
+    compileShader: vi.fn(),
+    getShaderParameter: vi.fn(() => true),
+    getShaderInfoLog: vi.fn(() => ''),
+    attachShader: vi.fn(),
+    linkProgram: vi.fn(),
+    getProgramParameter: vi.fn((program: any, param: number) => {
       if (param === 0x8b86) return 5; // ACTIVE_UNIFORMS
       if (param === 0x8b89) return 2; // ACTIVE_ATTRIBUTES
       return true;
     }),
-    getProgramInfoLog: jest.fn(() => ''),
-    useProgram: jest.fn(),
-    getUniformLocation: jest.fn(() => mockUniformLocation),
-    getAttribLocation: jest.fn((program: any, name: string) => {
+    getProgramInfoLog: vi.fn(() => ''),
+    useProgram: vi.fn(),
+    getUniformLocation: vi.fn(() => mockUniformLocation),
+    getAttribLocation: vi.fn((program: any, name: string) => {
       if (name === 'aPosition') return 0;
       if (name === 'aTexCoord') return 1;
       return -1;
     }),
-    getActiveUniform: jest.fn((program: any, index: number) => {
+    getActiveUniform: vi.fn((program: any, index: number) => {
       const uniforms = [
         { name: 'uTexture0', type: 0x8b5e, size: 1 },
         { name: 'uTexture1', type: 0x8b5e, size: 1 },
@@ -86,42 +86,42 @@ export const createMockWebGLContext = () => {
       ];
       return uniforms[index] || null;
     }),
-    getActiveAttrib: jest.fn((program: any, index: number) => {
+    getActiveAttrib: vi.fn((program: any, index: number) => {
       const attribs = [
         { name: 'aPosition', type: 0x8b50, size: 1 },
         { name: 'aTexCoord', type: 0x8b50, size: 1 },
       ];
       return attribs[index] || null;
     }),
-    uniform1i: jest.fn(),
-    uniform1f: jest.fn(),
-    uniform2f: jest.fn(),
-    uniform2fv: jest.fn(),
-    uniform3fv: jest.fn(),
-    uniform4fv: jest.fn(),
-    enableVertexAttribArray: jest.fn(),
-    vertexAttribPointer: jest.fn(),
-    clearColor: jest.fn(),
-    clear: jest.fn(),
-    viewport: jest.fn(),
-    drawArrays: jest.fn(),
-    deleteTexture: jest.fn(),
-    deleteBuffer: jest.fn(),
-    deleteProgram: jest.fn(),
-    deleteShader: jest.fn(),
-    activeTexture: jest.fn(),
-    createFramebuffer: jest.fn(() => mockFramebuffer),
-    bindFramebuffer: jest.fn(),
-    framebufferTexture2D: jest.fn(),
-    createRenderbuffer: jest.fn(() => mockRenderbuffer),
-    bindRenderbuffer: jest.fn(),
-    renderbufferStorage: jest.fn(),
-    framebufferRenderbuffer: jest.fn(),
-    checkFramebufferStatus: jest.fn(() => 0x8cd5), // FRAMEBUFFER_COMPLETE
-    readPixels: jest.fn(),
-    getExtension: jest.fn(() => null),
-    getParameter: jest.fn(() => 1024),
-    isContextLost: jest.fn(() => false),
+    uniform1i: vi.fn(),
+    uniform1f: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform2fv: vi.fn(),
+    uniform3fv: vi.fn(),
+    uniform4fv: vi.fn(),
+    enableVertexAttribArray: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+    clearColor: vi.fn(),
+    clear: vi.fn(),
+    viewport: vi.fn(),
+    drawArrays: vi.fn(),
+    deleteTexture: vi.fn(),
+    deleteBuffer: vi.fn(),
+    deleteProgram: vi.fn(),
+    deleteShader: vi.fn(),
+    activeTexture: vi.fn(),
+    createFramebuffer: vi.fn(() => mockFramebuffer),
+    bindFramebuffer: vi.fn(),
+    framebufferTexture2D: vi.fn(),
+    createRenderbuffer: vi.fn(() => mockRenderbuffer),
+    bindRenderbuffer: vi.fn(),
+    renderbufferStorage: vi.fn(),
+    framebufferRenderbuffer: vi.fn(),
+    checkFramebufferStatus: vi.fn(() => 0x8cd5), // FRAMEBUFFER_COMPLETE
+    readPixels: vi.fn(),
+    getExtension: vi.fn(() => null),
+    getParameter: vi.fn(() => 1024),
+    isContextLost: vi.fn(() => false),
   };
 
   return gl;

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { StateManager } from '../../../src/core/StateManager';
 
 describe('StateManager', () => {
@@ -46,8 +47,8 @@ describe('StateManager', () => {
     });
 
     it('should set state value and emit event', () => {
-      const stateChangeHandler = jest.fn();
-      const indexChangeHandler = jest.fn();
+      const stateChangeHandler = vi.fn();
+      const indexChangeHandler = vi.fn();
 
       stateManager.on('stateChange', stateChangeHandler);
       stateManager.on('indexChange', indexChangeHandler);
@@ -60,7 +61,7 @@ describe('StateManager', () => {
     });
 
     it('should not emit event if value unchanged', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('stateChange', handler);
 
       stateManager.set('currentIndex', 0);
@@ -68,7 +69,7 @@ describe('StateManager', () => {
     });
 
     it('should emit playStateChange event', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('playStateChange', handler);
 
       stateManager.set('isPlaying', true);
@@ -78,7 +79,7 @@ describe('StateManager', () => {
 
   describe('update', () => {
     it('should update multiple state values', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('stateChange', handler);
 
       stateManager.update({
@@ -150,7 +151,7 @@ describe('StateManager', () => {
 
   describe('transitions', () => {
     it('should handle transition start', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('transitionStart', handler);
 
       stateManager.startTransition(2);
@@ -160,7 +161,7 @@ describe('StateManager', () => {
     });
 
     it('should not start transition if already transitioning', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('transitionStart', handler);
 
       stateManager.set('isTransitioning', true);
@@ -170,7 +171,7 @@ describe('StateManager', () => {
     });
 
     it('should handle transition end', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('transitionEnd', handler);
 
       stateManager.set('isTransitioning', true);
@@ -182,7 +183,7 @@ describe('StateManager', () => {
     });
 
     it('should not end transition if not transitioning', () => {
-      const handler = jest.fn();
+      const handler = vi.fn();
       stateManager.on('transitionEnd', handler);
 
       stateManager.endTransition(2);

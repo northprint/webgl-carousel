@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Canvas2DFallback } from '../../../src/core/Canvas2DFallback';
 
 describe('Canvas2DFallback', () => {
@@ -25,7 +26,7 @@ describe('Canvas2DFallback', () => {
 
     it('should return false when 2D context is not available', () => {
       const originalGetContext = HTMLCanvasElement.prototype.getContext;
-      HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue(null);
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null);
 
       const result = fallback.initialize(canvas);
       expect(result).toBe(false);
@@ -61,8 +62,8 @@ describe('Canvas2DFallback', () => {
     });
 
     it('should render current image only at progress 0', () => {
-      const clearRectSpy = jest.spyOn(ctx, 'clearRect');
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const clearRectSpy = vi.spyOn(ctx, 'clearRect');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       fallback.setImages(mockImage1, mockImage2);
       fallback.render(0);
@@ -72,7 +73,7 @@ describe('Canvas2DFallback', () => {
     });
 
     it('should render both images during transition', () => {
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       fallback.setImages(mockImage1, mockImage2);
       fallback.render(0.5);
@@ -81,7 +82,7 @@ describe('Canvas2DFallback', () => {
     });
 
     it('should render next image only at progress 1', () => {
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       fallback.setImages(mockImage1, mockImage2);
       fallback.render(1);
@@ -98,7 +99,7 @@ describe('Canvas2DFallback', () => {
 
     it('should not render if not initialized', () => {
       const uninitializedFallback = new Canvas2DFallback();
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       uninitializedFallback.setImages(mockImage1, mockImage2);
       uninitializedFallback.render(0.5);
@@ -116,7 +117,7 @@ describe('Canvas2DFallback', () => {
       wideImage.width = 1600; // 2:1 ratio
       wideImage.height = 800;
 
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       fallback.setImages(wideImage, null);
       fallback.render(0);
@@ -133,7 +134,7 @@ describe('Canvas2DFallback', () => {
       tallImage.width = 400; // 1:2 ratio
       tallImage.height = 800;
 
-      const drawImageSpy = jest.spyOn(ctx, 'drawImage');
+      const drawImageSpy = vi.spyOn(ctx, 'drawImage');
 
       fallback.setImages(tallImage, null);
       fallback.render(0);
@@ -154,7 +155,7 @@ describe('Canvas2DFallback', () => {
 
       fallback.setImages(mockImage, null);
 
-      const renderSpy = jest.spyOn(fallback, 'render');
+      const renderSpy = vi.spyOn(fallback, 'render');
 
       fallback.resize(1024, 768);
 

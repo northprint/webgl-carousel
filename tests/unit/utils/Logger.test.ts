@@ -1,14 +1,15 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { Logger, LogLevel, ContextLogger } from '../../../src/utils/Logger';
 
 describe('Logger', () => {
-  let consoleLogSpy: jest.SpyInstance;
-  let consoleWarnSpy: jest.SpyInstance;
-  let consoleErrorSpy: jest.SpyInstance;
+  let consoleLogSpy: vi.SpyInstance;
+  let consoleWarnSpy: vi.SpyInstance;
+  let consoleErrorSpy: vi.SpyInstance;
 
   beforeEach(() => {
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation();
+    consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
+    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
     
     // Reset logger to default state
     const logger = Logger.getInstance();
@@ -191,7 +192,7 @@ describe('Logger', () => {
 
   describe('custom handler', () => {
     it('should use custom handler when provided', () => {
-      const customHandler = jest.fn();
+      const customHandler = vi.fn();
       const logger = Logger.getInstance({
         level: LogLevel.INFO,
         customHandler,
@@ -228,7 +229,7 @@ describe('Logger', () => {
       
       // Recreate spies to ensure they're fresh
       consoleLogSpy.mockRestore();
-      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+      consoleLogSpy = vi.spyOn(console, 'log').mockImplementation();
       
       logger.setLevel(LogLevel.INFO);
       const childLogger = logger.createChild('ChildContext');
@@ -257,9 +258,9 @@ describe('Logger', () => {
       consoleLogSpy.mockRestore();
       consoleWarnSpy.mockRestore();
       consoleErrorSpy.mockRestore();
-      consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-      consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      consoleLogSpy = vi.spyOn(console, 'log').mockImplementation();
+      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
+      consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
       
       logger.setLevel(LogLevel.DEBUG);
       const childLogger = logger.createChild('ChildContext');

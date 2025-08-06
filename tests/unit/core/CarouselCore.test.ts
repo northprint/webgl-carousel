@@ -1,10 +1,11 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { CarouselCore } from '../../../src/core/CarouselCore';
 import { MockWebGLRenderingContext } from '../../setup';
 
 // Mock dependencies
-jest.mock('../../../src/core/WebGLRenderer');
-jest.mock('../../../src/core/Canvas2DFallback');
-jest.mock('../../../src/core/ImageLoader');
+vi.mock('../../../src/core/WebGLRenderer');
+vi.mock('../../../src/core/Canvas2DFallback');
+vi.mock('../../../src/core/ImageLoader');
 
 describe('CarouselCore', () => {
   let canvas: HTMLCanvasElement;
@@ -16,7 +17,7 @@ describe('CarouselCore', () => {
     canvas.height = 600;
     
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -42,21 +43,21 @@ describe('CarouselCore', () => {
     });
 
     it('should initialize successfully', async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
       // Mock WebGL initialization success
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(true);
-      WebGLRenderer.prototype.loadTexture = jest.fn().mockReturnValue({});
-      WebGLRenderer.prototype.render = jest.fn();
-      WebGLRenderer.prototype.on = jest.fn();
-      WebGLRenderer.prototype.dispose = jest.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(true);
+      WebGLRenderer.prototype.loadTexture = vi.fn().mockReturnValue({});
+      WebGLRenderer.prototype.render = vi.fn();
+      WebGLRenderer.prototype.on = vi.fn();
+      WebGLRenderer.prototype.dispose = vi.fn();
 
       // Mock image loading
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue([
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue([
         { url: 'img1.jpg', element: new Image(), width: 100, height: 100 },
       ]);
-      ImageLoader.prototype.getFromCache = jest.fn().mockReturnValue({
+      ImageLoader.prototype.getFromCache = vi.fn().mockReturnValue({
         url: 'img1.jpg',
         element: new Image(),
         width: 100,
@@ -68,7 +69,7 @@ describe('CarouselCore', () => {
         images: ['img1.jpg'],
       });
 
-      const readyHandler = jest.fn();
+      const readyHandler = vi.fn();
       carousel.on('ready', readyHandler);
 
       await carousel.initialize();
@@ -79,24 +80,24 @@ describe('CarouselCore', () => {
     });
 
     it('should fallback to Canvas2D when WebGL fails', async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { Canvas2DFallback } = require('../../../src/core/Canvas2DFallback');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { Canvas2DFallback } = await import('../../../src/core/Canvas2DFallback');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
       // Mock WebGL initialization failure
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(false);
-      WebGLRenderer.prototype.dispose = jest.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(false);
+      WebGLRenderer.prototype.dispose = vi.fn();
 
       // Mock Canvas2D initialization success
-      Canvas2DFallback.prototype.initialize = jest.fn().mockReturnValue(true);
-      Canvas2DFallback.prototype.setImages = jest.fn();
-      Canvas2DFallback.prototype.render = jest.fn();
+      Canvas2DFallback.prototype.initialize = vi.fn().mockReturnValue(true);
+      Canvas2DFallback.prototype.setImages = vi.fn();
+      Canvas2DFallback.prototype.render = vi.fn();
 
       // Mock image loading
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue([
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue([
         { url: 'img1.jpg', element: new Image(), width: 100, height: 100 },
       ]);
-      ImageLoader.prototype.getFromCache = jest.fn().mockReturnValue({
+      ImageLoader.prototype.getFromCache = vi.fn().mockReturnValue({
         url: 'img1.jpg',
         element: new Image(),
         width: 100,
@@ -115,20 +116,20 @@ describe('CarouselCore', () => {
     });
 
     it('should emit error when initialization fails', async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { Canvas2DFallback } = require('../../../src/core/Canvas2DFallback');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { Canvas2DFallback } = await import('../../../src/core/Canvas2DFallback');
 
       // Mock both renderers failing
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(false);
-      WebGLRenderer.prototype.dispose = jest.fn();
-      Canvas2DFallback.prototype.initialize = jest.fn().mockReturnValue(false);
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(false);
+      WebGLRenderer.prototype.dispose = vi.fn();
+      Canvas2DFallback.prototype.initialize = vi.fn().mockReturnValue(false);
 
       carousel = new CarouselCore({
         canvas,
         images: ['img1.jpg'],
       });
 
-      const errorHandler = jest.fn();
+      const errorHandler = vi.fn();
       carousel.on('error', errorHandler);
 
       await expect(carousel.initialize()).rejects.toThrow('Failed to initialize renderer');
@@ -138,15 +139,15 @@ describe('CarouselCore', () => {
 
   describe('navigation', () => {
     beforeEach(async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
       // Setup mocks
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(true);
-      WebGLRenderer.prototype.loadTexture = jest.fn().mockReturnValue({});
-      WebGLRenderer.prototype.render = jest.fn();
-      WebGLRenderer.prototype.on = jest.fn();
-      WebGLRenderer.prototype.setEffect = jest.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(true);
+      WebGLRenderer.prototype.loadTexture = vi.fn().mockReturnValue({});
+      WebGLRenderer.prototype.render = vi.fn();
+      WebGLRenderer.prototype.on = vi.fn();
+      WebGLRenderer.prototype.setEffect = vi.fn();
 
       const mockImages = [
         { url: 'img1.jpg', element: new Image(), width: 100, height: 100 },
@@ -154,8 +155,8 @@ describe('CarouselCore', () => {
         { url: 'img3.jpg', element: new Image(), width: 100, height: 100 },
       ];
 
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue(mockImages);
-      ImageLoader.prototype.getFromCache = jest.fn().mockImplementation((url) => {
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue(mockImages);
+      ImageLoader.prototype.getFromCache = vi.fn().mockImplementation((url) => {
         return mockImages.find((img) => img.url === url);
       });
 
@@ -169,7 +170,7 @@ describe('CarouselCore', () => {
     });
 
     it('should navigate to next image', () => {
-      const transitionStartHandler = jest.fn();
+      const transitionStartHandler = vi.fn();
       carousel.on('transitionStart', transitionStartHandler);
 
       expect(carousel.getCurrentIndex()).toBe(0);
@@ -180,7 +181,7 @@ describe('CarouselCore', () => {
     });
 
     it('should navigate to previous image', () => {
-      const transitionStartHandler = jest.fn();
+      const transitionStartHandler = vi.fn();
       carousel.on('transitionStart', transitionStartHandler);
 
       // Navigate forward first
@@ -201,7 +202,7 @@ describe('CarouselCore', () => {
     });
 
     it('should navigate to specific index', () => {
-      const transitionStartHandler = jest.fn();
+      const transitionStartHandler = vi.fn();
       carousel.on('transitionStart', transitionStartHandler);
 
       carousel.goTo(2);
@@ -210,7 +211,7 @@ describe('CarouselCore', () => {
     });
 
     it('should not navigate during transition', () => {
-      const transitionStartHandler = jest.fn();
+      const transitionStartHandler = vi.fn();
       carousel.on('transitionStart', transitionStartHandler);
 
       carousel.next();
@@ -222,20 +223,20 @@ describe('CarouselCore', () => {
 
   describe('autoplay', () => {
     beforeEach(async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
       // Setup mocks
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(true);
-      WebGLRenderer.prototype.loadTexture = jest.fn().mockReturnValue({});
-      WebGLRenderer.prototype.render = jest.fn();
-      WebGLRenderer.prototype.on = jest.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(true);
+      WebGLRenderer.prototype.loadTexture = vi.fn().mockReturnValue({});
+      WebGLRenderer.prototype.render = vi.fn();
+      WebGLRenderer.prototype.on = vi.fn();
 
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue([
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue([
         { url: 'img1.jpg', element: new Image(), width: 100, height: 100 },
         { url: 'img2.jpg', element: new Image(), width: 100, height: 100 },
       ]);
-      ImageLoader.prototype.getFromCache = jest.fn().mockReturnValue({
+      ImageLoader.prototype.getFromCache = vi.fn().mockReturnValue({
         url: 'img1.jpg',
         element: new Image(),
         width: 100,
@@ -244,9 +245,9 @@ describe('CarouselCore', () => {
     });
 
     it('should start autoplay when initialized with autoplay option', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
-      const playHandler = jest.fn();
+      const playHandler = vi.fn();
 
       carousel = new CarouselCore({
         canvas,
@@ -267,8 +268,8 @@ describe('CarouselCore', () => {
 
       expect(playHandler).toHaveBeenCalled();
 
-      jest.clearAllTimers();
-      jest.useRealTimers();
+      vi.clearAllTimers();
+      vi.useRealTimers();
     });
 
     it('should handle play/pause', async () => {
@@ -280,8 +281,8 @@ describe('CarouselCore', () => {
 
       await carousel.initialize();
 
-      const playHandler = jest.fn();
-      const pauseHandler = jest.fn();
+      const playHandler = vi.fn();
+      const pauseHandler = vi.fn();
       carousel.on('play', playHandler);
       carousel.on('pause', pauseHandler);
 
@@ -295,19 +296,19 @@ describe('CarouselCore', () => {
 
   describe('effects', () => {
     beforeEach(async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(true);
-      WebGLRenderer.prototype.loadTexture = jest.fn().mockReturnValue({});
-      WebGLRenderer.prototype.render = jest.fn();
-      WebGLRenderer.prototype.on = jest.fn();
-      WebGLRenderer.prototype.setEffect = jest.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(true);
+      WebGLRenderer.prototype.loadTexture = vi.fn().mockReturnValue({});
+      WebGLRenderer.prototype.render = vi.fn();
+      WebGLRenderer.prototype.on = vi.fn();
+      WebGLRenderer.prototype.setEffect = vi.fn();
 
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue([
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue([
         { url: 'img1.jpg', element: new Image(), width: 100, height: 100 },
       ]);
-      ImageLoader.prototype.getFromCache = jest.fn().mockReturnValue({
+      ImageLoader.prototype.getFromCache = vi.fn().mockReturnValue({
         url: 'img1.jpg',
         element: new Image(),
         width: 100,
@@ -340,18 +341,18 @@ describe('CarouselCore', () => {
 
   describe('disposal', () => {
     it('should clean up resources', async () => {
-      const { WebGLRenderer } = require('../../../src/core/WebGLRenderer');
-      const { ImageLoader } = require('../../../src/core/ImageLoader');
+      const { WebGLRenderer } = await import('../../../src/core/WebGLRenderer');
+      const { ImageLoader } = await import('../../../src/core/ImageLoader');
 
-      const disposeSpy = jest.fn();
-      WebGLRenderer.prototype.initialize = jest.fn().mockReturnValue(true);
+      const disposeSpy = vi.fn();
+      WebGLRenderer.prototype.initialize = vi.fn().mockReturnValue(true);
       WebGLRenderer.prototype.dispose = disposeSpy;
-      WebGLRenderer.prototype.on = jest.fn();
-      WebGLRenderer.prototype.loadTexture = jest.fn().mockReturnValue({});
-      WebGLRenderer.prototype.render = jest.fn();
+      WebGLRenderer.prototype.on = vi.fn();
+      WebGLRenderer.prototype.loadTexture = vi.fn().mockReturnValue({});
+      WebGLRenderer.prototype.render = vi.fn();
 
-      const clearCacheSpy = jest.fn();
-      ImageLoader.prototype.preloadWithProgress = jest.fn().mockResolvedValue([]);
+      const clearCacheSpy = vi.fn();
+      ImageLoader.prototype.preloadWithProgress = vi.fn().mockResolvedValue([]);
       ImageLoader.prototype.clearCache = clearCacheSpy;
 
       carousel = new CarouselCore({

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
   DEFAULT_CONFIG,
   DEFAULT_CALLBACKS,
@@ -84,10 +85,10 @@ describe('defaults constants', () => {
         transitionDuration: 2000,
         startIndex: 1,
         easing: (t: number) => t * t,
-        onImageChange: jest.fn(),
-        onTransitionStart: jest.fn(),
-        onTransitionEnd: jest.fn(),
-        onError: jest.fn(),
+        onImageChange: vi.fn(),
+        onTransitionStart: vi.fn(),
+        onTransitionEnd: vi.fn(),
+        onError: vi.fn(),
       };
 
       const result = getDefaultOptions(customOptions);
