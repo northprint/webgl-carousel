@@ -302,6 +302,10 @@ beforeAll(() => {
     if (args[0]?.includes('[WebGLCarousel]')) {
       return;
     }
+    // Suppress Test logger outputs in CI
+    if (args[0]?.includes('[Test]')) {
+      return;
+    }
     // Only show in non-CI environments
     if (!process.env.CI) {
       originalLog(...args);
