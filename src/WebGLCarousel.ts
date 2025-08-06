@@ -1,36 +1,55 @@
 import { CarouselCore } from './core/CarouselCore';
+import { UIController } from './ui/UIController';
+import { getDefaultOptions, VALIDATION_RULES } from './constants/defaults';
+import { DIMENSION_CONSTANTS } from './constants/magic-numbers';
+import { Logger, ContextLogger } from './utils/Logger';
+import {
+  ErrorHandler,
+  ErrorCategory,
+  ErrorSeverity,
+  ContextErrorHandler,
+} from './utils/ErrorHandler';
 import { EventEmitter } from './core/EventEmitter';
 import type { IEffect } from './core/EffectManager';
+import { EventManager } from './utils/EventManager';
+import { ResizeObserverManager } from './utils/ResizeObserverManager';
+import { PromiseUtils } from './utils/PromiseUtils';
+import type { IWebGLCarousel } from './interfaces/IWebGLCarousel';
 
 import type { WebGLCarouselOptions, WebGLCarouselEvents } from './types';
 
 export type { WebGLCarouselOptions, WebGLCarouselEvents };
 
-export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
+export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> implements IWebGLCarousel {
   private core: CarouselCore;
   private container: HTMLElement;
   private canvas: HTMLCanvasElement;
   private options: Required<WebGLCarouselOptions>;
   private isInitialized = false;
   private images: string[];
+  private uiController?: UIController;
+  private logger: ContextLogger;
+  private errorHandler: ContextErrorHandler;
+  private eventManager: EventManager;
+  private resizeObserver: ResizeObserverManager;
 
   constructor(options: WebGLCarouselOptions) {
     super();
 
-    // Validate and set options
+    this.logger = Logger.getInstance().createChild('WebGLCarousel');
+    this.errorHandler = ErrorHandler.getInstance().createContextHandler('WebGLCarousel');
+    this.eventManager = new EventManager();
+    this.resizeObserver = new ResizeObserverManager();
+
     this.options = this.validateOptions(options);
     this.images = this.options.images;
 
-    // Get container element
     this.container = this.getContainer(this.options.container);
 
-    // Create canvas
     this.canvas = this.createCanvas();
 
-    // Initialize core
     this.core = this.createCore();
 
-    // Initialize
     void this.initialize();
   }
 
@@ -39,30 +58,40 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       throw new Error('Container is required');
     }
 
-    if (!options.images || options.images.length === 0) {
-      throw new Error('At least one image is required');
+    if (!options.images || options.images.length < VALIDATION_RULES.MIN_IMAGES) {
+      throw new Error(`At least ${VALIDATION_RULES.MIN_IMAGES} image is required`);
     }
 
-    return {
-      container: options.container,
-      images: options.images,
-      effect: options.effect || 'fade',
-      effects: options.effects || [],
-      autoplay: options.autoplay ?? false,
-      autoplayInterval: options.autoplayInterval ?? 3000,
-      navigation: options.navigation ?? true,
-      pagination: options.pagination ?? true,
-      loop: options.loop ?? true,
-      preload: options.preload ?? true,
-      fallbackToCanvas2D: options.fallbackToCanvas2D ?? true,
-      transitionDuration: options.transitionDuration ?? 1000,
-      startIndex: options.startIndex ?? 0,
-      easing: options.easing || ((t: number) => t),
-      onImageChange: options.onImageChange || (() => {}),
-      onTransitionStart: options.onTransitionStart || (() => {}),
-      onTransitionEnd: options.onTransitionEnd || (() => {}),
-      onError: options.onError || (() => {}),
-    };
+    // Validate numeric values if provided
+    if (
+      options.autoplayInterval !== undefined &&
+      options.autoplayInterval < VALIDATION_RULES.MIN_AUTOPLAY_INTERVAL
+    ) {
+      throw new Error(
+        `Autoplay interval must be at least ${VALIDATION_RULES.MIN_AUTOPLAY_INTERVAL}ms`,
+      );
+    }
+
+    if (options.transitionDuration !== undefined) {
+      if (options.transitionDuration < VALIDATION_RULES.MIN_TRANSITION_DURATION) {
+        throw new Error(
+          `Transition duration must be at least ${VALIDATION_RULES.MIN_TRANSITION_DURATION}ms`,
+        );
+      }
+      if (options.transitionDuration > VALIDATION_RULES.MAX_TRANSITION_DURATION) {
+        throw new Error(
+          `Transition duration must be at most ${VALIDATION_RULES.MAX_TRANSITION_DURATION}ms`,
+        );
+      }
+    }
+
+    if (options.startIndex !== undefined) {
+      if (options.startIndex < 0 || options.startIndex >= options.images.length) {
+        throw new Error(`Start index must be between 0 and ${options.images.length - 1}`);
+      }
+    }
+
+    return getDefaultOptions(options);
   }
 
   private getContainer(container: string | HTMLElement): HTMLElement {
@@ -77,15 +106,14 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
   }
 
   private createCanvas(): HTMLCanvasElement {
-    // Ensure container has position for absolute children
     const containerPosition = window.getComputedStyle(this.container).position;
     if (containerPosition === 'static') {
       this.container.style.position = 'relative';
     }
 
     const canvas = document.createElement('canvas');
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.width = DIMENSION_CONSTANTS.FULL_WIDTH;
+    canvas.style.height = DIMENSION_CONSTANTS.FULL_HEIGHT;
     canvas.style.display = 'block';
     this.container.appendChild(canvas);
 
@@ -101,53 +129,37 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
   }
 
   private createCore(): CarouselCore {
-    // Extract effect name if it's an IEffect object
-    const effectName =
-      typeof this.options.effect === 'string'
-        ? this.options.effect
-        : this.options.effect?.name || 'fade';
-
     return new CarouselCore({
       canvas: this.canvas,
       images: this.options.images,
-      effect: effectName,
+      effect: this.options.effect || 'fade',
       autoplay: this.options.autoplay,
       autoplayInterval: this.options.autoplayInterval,
       transitionDuration: this.options.transitionDuration,
       loop: this.options.loop,
       fallbackToCanvas: this.options.fallbackToCanvas2D,
-      // Remove callbacks here to avoid duplicate events
     });
   }
 
   private async initialize(): Promise<void> {
     try {
-      // Resize canvas before initialization
+      // Setup initial canvas size
       this.resizeCanvas();
 
-      // Set up event listeners
+      // Setup event listeners before core initialization
       this.setupEventListeners();
 
-      // Initialize core
-      await this.core.initialize();
+      // Initialize core with timeout
+      await PromiseUtils.withTimeout(
+        this.core.initialize(),
+        30000, // 30 second timeout
+        { message: 'Core initialization timed out' },
+      );
 
-      // Set initial effect
-      if (typeof this.options.effect === 'object') {
-        // Register and use custom effect
-        this.registerEffect(this.options.effect);
-        this.setEffect(this.options.effect.name);
-      } else {
-        this.setEffect(this.options.effect);
-      }
+      // Register effects
+      await this.registerEffects();
 
-      // Register additional effects if provided
-      if (this.options.effects) {
-        this.options.effects.forEach((effect) => {
-          this.registerEffect(effect);
-        });
-      }
-
-      // Set up autoplay
+      // Configure autoplay if enabled
       if (this.options.autoplay) {
         this.core.setAutoplay(true, this.options.autoplayInterval);
       }
@@ -155,37 +167,86 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
       // Set transition duration
       this.core.setTransitionDuration(this.options.transitionDuration);
 
-      // Create UI controls
-      if (this.options.navigation) {
-        this.createNavigationControls();
-      }
+      // Setup UI controller
+      this.setupUIController();
 
-      if (this.options.pagination) {
-        this.createPaginationControls();
-        // Set initial active state
-        this.updatePagination(this.options.startIndex || 0);
-      }
-
-      // Set initial canvas size
+      // Final resize to ensure proper dimensions
       this.resizeCanvas();
 
-      // Handle window resize
-      window.addEventListener('resize', this.handleResize);
+      // Setup resize observer with debouncing
+      this.setupResizeObserver();
 
       this.isInitialized = true;
       this.emit('ready');
     } catch (error) {
-      this.handleError(error as Error);
+      await this.handleError(error as Error);
+      throw error; // Re-throw for consumer to handle
     }
   }
 
+  private async registerEffects(): Promise<void> {
+    // Register custom effect if provided
+    if (typeof this.options.effect === 'object') {
+      this.registerEffect(this.options.effect);
+      this.setEffect(this.options.effect.name);
+    } else {
+      this.setEffect(this.options.effect);
+    }
+
+    // Register additional effects if provided
+    if (this.options.effects) {
+      // Register effects in parallel for better performance
+      await Promise.all(
+        this.options.effects.map((effect) => {
+          return Promise.resolve(this.registerEffect(effect));
+        }),
+      );
+    }
+  }
+
+  private setupResizeObserver(): void {
+    const debouncedResize = this.eventManager.debounce(() => {
+      this.handleResize();
+    }, 100);
+
+    // Try to use ResizeObserver, fallback to window resize if not available
+    const cleanup = this.resizeObserver.observe(this.container, debouncedResize);
+
+    // If ResizeObserver is not available, use window resize as fallback
+    if (!cleanup || typeof cleanup !== 'function') {
+      this.eventManager.addEventListener(window, 'resize', debouncedResize);
+    }
+  }
+
+  private setupUIController(): void {
+    this.uiController = new UIController({
+      container: this.container,
+      imageCount: this.images.length,
+      navigation: this.options.navigation,
+      pagination: this.options.pagination,
+      startIndex: this.options.startIndex,
+    });
+
+    this.uiController.on('navigationClick', (direction) => {
+      if (direction === 'prev') {
+        this.previous();
+      } else {
+        this.next();
+      }
+    });
+
+    this.uiController.on('paginationClick', (index) => {
+      this.goTo(index);
+    });
+  }
+
   private setupEventListeners(): void {
-    // Forward core events
+    // Setup core event listeners
     this.core.on('imageChange', (...args: unknown[]) => {
       const index = args[0] as number;
       this.emit('imageChange', index);
       this.options.onImageChange?.(index);
-      this.updatePagination(index);
+      this.uiController?.updatePagination(index);
     });
 
     this.core.on('transitionStart', (from: number, to: number) => {
@@ -205,10 +266,15 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
     this.core.on('ready', () => {});
   }
 
-  private handleError(error: Error): void {
+  private async handleError(error: Error): Promise<void> {
     this.emit('error', error);
     this.options.onError?.(error);
-    console.error('WebGLCarousel error:', error);
+
+    // Use error handler for proper logging and potential recovery
+    await this.errorHandler.handleError(error, ErrorCategory.UNKNOWN, ErrorSeverity.HIGH, {
+      component: 'WebGLCarousel',
+      isInitialized: this.isInitialized,
+    });
   }
 
   private handleResize = (): void => {
@@ -216,151 +282,22 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
     this.core.resize(this.canvas.width, this.canvas.height);
   };
 
-  private createNavigationControls(): void {
-    const prevButton = document.createElement('button');
-    prevButton.className = 'webgl-carousel-prev';
-    prevButton.innerHTML = '&lsaquo;';
-    prevButton.setAttribute('aria-label', 'Previous image');
-    prevButton.addEventListener('click', () => this.previous());
-
-    const nextButton = document.createElement('button');
-    nextButton.className = 'webgl-carousel-next';
-    nextButton.innerHTML = '&rsaquo;';
-    nextButton.setAttribute('aria-label', 'Next image');
-    nextButton.addEventListener('click', () => this.next());
-
-    this.container.appendChild(prevButton);
-    this.container.appendChild(nextButton);
-
-    // Add default styles
-    this.addNavigationStyles();
-  }
-
-  private createPaginationControls(): void {
-    const pagination = document.createElement('div');
-    pagination.className = 'webgl-carousel-pagination';
-
-    const imageCount = this.options.images.length;
-    for (let i = 0; i < imageCount; i++) {
-      const dot = document.createElement('button');
-      dot.className = 'webgl-carousel-dot';
-      dot.setAttribute('aria-label', `Go to image ${i + 1}`);
-      dot.addEventListener('click', () => this.goTo(i));
-
-      if (i === 0) {
-        dot.classList.add('active');
-      }
-
-      pagination.appendChild(dot);
-    }
-
-    this.container.appendChild(pagination);
-
-    // Add default styles
-    this.addPaginationStyles();
-  }
-
-  private updatePagination(index: number): void {
-    const dots = this.container.querySelectorAll('.webgl-carousel-dot');
-    dots.forEach((dot, i) => {
-      dot.classList.toggle('active', i === index);
-    });
-  }
-
-  private addNavigationStyles(): void {
-    if (document.getElementById('webgl-carousel-nav-styles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'webgl-carousel-nav-styles';
-    style.textContent = `
-      .webgl-carousel-prev,
-      .webgl-carousel-next {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        font-size: 2rem;
-        padding: 0.5rem 1rem;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        z-index: 10;
-      }
-      
-      .webgl-carousel-prev:hover,
-      .webgl-carousel-next:hover {
-        background: rgba(0, 0, 0, 0.7);
-      }
-      
-      .webgl-carousel-prev {
-        left: 1rem;
-      }
-      
-      .webgl-carousel-next {
-        right: 1rem;
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
-  private addPaginationStyles(): void {
-    if (document.getElementById('webgl-carousel-pagination-styles')) return;
-
-    const style = document.createElement('style');
-    style.id = 'webgl-carousel-pagination-styles';
-    style.textContent = `
-      .webgl-carousel-pagination {
-        position: absolute;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 0.5rem;
-        z-index: 10;
-      }
-      
-      .webgl-carousel-dot {
-        width: 0.75rem;
-        height: 0.75rem;
-        border-radius: 50%;
-        border: 2px solid white;
-        background: transparent;
-        cursor: pointer;
-        transition: background-color 0.3s;
-      }
-      
-      .webgl-carousel-dot:hover {
-        background: rgba(255, 255, 255, 0.5);
-      }
-      
-      .webgl-carousel-dot.active {
-        background: white;
-      }
-    `;
-
-    document.head.appendChild(style);
-  }
-
-  // Public API methods
-
-  next(): void {
+  public next(): void {
     if (!this.isInitialized) return;
     this.core.next();
   }
 
-  previous(): void {
+  public previous(): void {
     if (!this.isInitialized) return;
     this.core.previous();
   }
 
-  goTo(index: number): void {
+  public goTo(index: number): void {
     if (!this.isInitialized) return;
     this.core.goTo(index);
   }
 
-  setEffect(effectName: string): void {
+  public setEffect(effectName: string): void {
     if (!this.isInitialized) return;
 
     const success = this.core.setEffect(effectName);
@@ -369,8 +306,7 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
     }
   }
 
-  getAvailableEffects(): string[] {
-    // Return list of available effects
+  public getAvailableEffects(): string[] {
     return [
       'fade',
       'slideLeft',
@@ -390,83 +326,82 @@ export class WebGLCarousel extends EventEmitter<WebGLCarouselEvents> {
     ];
   }
 
-  registerEffect(effect: IEffect): void {
+  public registerEffect(effect: IEffect): void {
     if (!this.isInitialized) return;
     this.core.registerEffect(effect);
   }
 
-  play(): void {
+  public play(): void {
     if (!this.isInitialized) return;
     this.core.setAutoplay(true, this.options.autoplayInterval);
   }
 
-  pause(): void {
+  public pause(): void {
     if (!this.isInitialized) return;
     this.core.setAutoplay(false);
   }
 
-  setAutoplay(enabled: boolean, interval?: number): void {
+  public setAutoplay(enabled: boolean, interval?: number): void {
     if (!this.isInitialized) return;
     this.core.setAutoplay(enabled, interval);
   }
 
-  setTransitionDuration(duration: number): void {
+  public setTransitionDuration(duration: number): void {
     if (!this.isInitialized) return;
     this.core.setTransitionDuration(duration);
   }
 
-  getCurrentIndex(): number {
+  public getCurrentIndex(): number {
     return this.core.getCurrentIndex();
   }
 
-  getImageCount(): number {
-    // Return the actual number of successfully loaded images
+  public getImageCount(): number {
     return this.images.length;
   }
 
-  destroy(): void {
+  public destroy(): void {
     if (!this.isInitialized) return;
 
-    // Remove event listener
-    window.removeEventListener('resize', this.handleResize);
+    // Clean up all event listeners and resources
+    this.eventManager.destroy();
+    this.resizeObserver.destroy();
 
-    // Destroy core
+    this.uiController?.destroy();
+
     this.core.dispose();
 
-    // Remove canvas
     if (this.canvas && this.canvas.parentNode) {
       this.canvas.parentNode.removeChild(this.canvas);
     }
 
-    // Remove controls
-    const controls = this.container.querySelectorAll(
-      '.webgl-carousel-prev, .webgl-carousel-next, .webgl-carousel-pagination',
-    );
-    controls.forEach((control) => control.remove());
-
-    // Clear container styles if needed
     this.container.style.position = '';
 
     this.isInitialized = false;
     this.removeAllListeners();
   }
 
-  isReady(): boolean {
+  public isReady(): boolean {
     return this.isInitialized;
   }
 
-  isUsingWebGL(): boolean {
+  public isUsingWebGL(): boolean {
     return this.core.isUsingWebGL();
   }
 
-  updateImages(images: string[]): void {
+  public async updateImages(images: string[]): Promise<void> {
     if (!this.isInitialized) return;
+
     this.options.images = images;
-    // Note: This would need to be implemented in CarouselCore
-    // For now, this is a placeholder
+    this.images = images;
+
+    // Update UI controller
+    this.uiController?.updateImageCount(images.length);
+
+    // Reload images in core if needed
+    // This would require implementing updateImages in CarouselCore
   }
 
-  getImages(): string[] {
+  public getImages(): string[] {
     return this.options.images;
   }
 }

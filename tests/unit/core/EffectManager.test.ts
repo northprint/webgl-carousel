@@ -52,7 +52,7 @@ describe('EffectManager', () => {
       manager.register(effect1);
       manager.register(effect2);
 
-      expect(warnSpy).toHaveBeenCalledWith('Effect "test" is already registered. Overwriting...');
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Effect "test" is already registered. Overwriting...'));
       expect(manager.get('test')).toBe(effect2);
 
       warnSpy.mockRestore();

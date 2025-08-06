@@ -1,5 +1,7 @@
 import { EventEmitter } from './EventEmitter';
+import { Logger } from '../utils/Logger';
 import { StateManager } from './StateManager';
+import { EventManager } from '../utils/EventManager';
 import { ImageLoader, LoadedImage } from './ImageLoader';
 import { WebGLRenderer } from './WebGLRenderer';
 import { WebGL2Renderer } from './WebGL2Renderer';
@@ -7,10 +9,12 @@ import { Canvas2DFallback } from './Canvas2DFallback';
 import { EffectManager, IEffect } from './EffectManager';
 import { registerDefaultEffects } from '../effects';
 
+import type { ICarouselCore } from '../interfaces/ICarouselCore';
+
 export interface CarouselCoreOptions {
   canvas: HTMLCanvasElement;
   images: string[];
-  effect?: string;
+  effect?: string | IEffect;
   autoplay?: boolean;
   autoplayInterval?: number;
   transitionDuration?: number;
@@ -31,7 +35,7 @@ export interface CarouselCoreEvents extends Record<string, unknown[]> {
   pause: [];
 }
 
-export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
+export class CarouselCore extends EventEmitter<CarouselCoreEvents> implements ICarouselCore {
   private stateManager: StateManager;
   private imageLoader: ImageLoader;
   private renderer: WebGLRenderer | WebGL2Renderer | Canvas2DFallback | null = null;
@@ -45,6 +49,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
   private autoplayTimer: NodeJS.Timeout | null = null;
   private isWebGL = false;
   private validImageIndices: number[] = []; // Track which image indices loaded successfully
+  private eventManager: EventManager;
 
   constructor(options: CarouselCoreOptions) {
     super();
@@ -52,10 +57,12 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     this.canvas = options.canvas;
 
     // Initialize components
+    const effectName =
+      typeof options.effect === 'string' ? options.effect : options.effect?.name || 'fade';
     this.stateManager = new StateManager({
       images: options.images,
       currentIndex: 0,
-      effect: options.effect || 'fade',
+      effect: effectName,
       autoplayInterval: options.autoplayInterval || 3000,
       transitionDuration: options.transitionDuration || 1000,
       loop: options.loop !== false,
@@ -66,9 +73,15 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
       crossOrigin: 'anonymous', // Enable CORS for images
     });
     this.effectManager = new EffectManager();
+    this.eventManager = new EventManager();
 
     // Register default effects
     registerDefaultEffects(this.effectManager);
+
+    // Register custom effect if provided
+    if (typeof options.effect === 'object' && options.effect) {
+      this.effectManager.register(options.effect);
+    }
 
     // Setup state event listeners
     this.setupStateListeners();
@@ -82,10 +95,12 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     }
   }
 
-  async initialize(): Promise<void> {
+  public async initialize(): Promise<void> {
     try {
       // Initialize renderer
-      if (!this.initializeRenderer()) {
+      const rendererInitialized = this.initializeRenderer();
+
+      if (!rendererInitialized) {
         throw new Error('Failed to initialize renderer');
       }
 
@@ -179,19 +194,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     const images = this.stateManager.get('images');
 
     const loadedImages = await this.imageLoader.preloadWithProgress(images, (loaded, _total) => {
-      if (loaded === 1 && this.loadedImages.size === 0) {
-        // First image loaded, can start rendering
-        const startIndex = this.stateManager.get('currentIndex');
-        const imageUrl = images[startIndex];
-        if (imageUrl) {
-          const initialImage = this.imageLoader.getFromCache(imageUrl);
-          if (initialImage) {
-            this.loadedImages.set(imageUrl, initialImage);
-            this.emit('imageLoaded', startIndex, initialImage);
-            this.prepareInitialRender(initialImage, startIndex);
-          }
-        }
-      }
+      // Progress callback - no initial render here anymore
     });
 
     // Store all loaded images
@@ -212,6 +215,16 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     });
 
     this.emit('allImagesLoaded', loadedImages);
+
+    // Ensure initial render happens after all images are loaded
+    const currentIndex = this.stateManager.get('currentIndex');
+    const currentImageUrl = images[currentIndex];
+    if (currentImageUrl) {
+      const currentImage = this.loadedImages.get(currentImageUrl);
+      if (currentImage && !this.stateManager.get('isTransitioning')) {
+        this.prepareInitialRender(currentImage, currentIndex);
+      }
+    }
   }
 
   private prepareInitialRender(image: LoadedImage, imageIndex?: number): void {
@@ -233,6 +246,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
         // Get current effect and its uniforms
         const effectName = this.stateManager.get('effect');
         const effect = this.effectManager.get(effectName);
+        // For initial render, use progress=0 to show the first image fully
         const uniforms = effect ? effect.getUniforms(0) : {};
 
         // Set the effect to renderer before initial render
@@ -243,8 +257,8 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
           });
         }
 
-        // For initial render, pass the same image as both textures
-        this.renderer.render(texture, texture, 0, uniforms, imageSrc, imageSrc);
+        // For initial render, pass the same image as both textures with progress=1 to show the image fully
+        this.renderer.render(texture, texture, 1, uniforms, imageSrc, imageSrc);
       }
     } else if (this.renderer instanceof Canvas2DFallback) {
       this.renderer.setImages(image.element, null);
@@ -253,6 +267,15 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
   }
 
   private startTransition(from: number, to: number): void {
+    // Execute transition directly
+    this.executeTransition(from, to).catch((error) => {
+      Logger.getInstance().createChild('CarouselCore').error('Transition failed', error);
+      this.stateManager.endTransition(to);
+      this.emit('error', error as Error);
+    });
+  }
+
+  private async executeTransition(from: number, to: number): Promise<void> {
     const images = this.stateManager.get('images');
     const fromImage = this.loadedImages.get(images[from]!);
     const toImage = this.loadedImages.get(images[to]!);
@@ -284,9 +307,9 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
             if (this.renderer instanceof WebGL2Renderer && effect.requiresCustomMesh) {
               const mesh = effect.getMesh?.();
               if (!mesh || !mesh.positions || !mesh.indices) {
-                console.error(
-                  '[CarouselCore.startTransition] TrianglePeelV2 mesh is invalid, falling back to fade',
-                );
+                Logger.getInstance()
+                  .createChild('CarouselCore')
+                  .error('TrianglePeelV2 mesh is invalid, falling back to fade');
                 effect = this.effectManager.get('fade');
                 this.stateManager.set('effect', 'fade');
               } else {
@@ -300,7 +323,9 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
               }
             }
           } catch (error) {
-            console.error('[CarouselCore.startTransition] Error setting up TrianglePeelV2:', error);
+            Logger.getInstance()
+              .createChild('CarouselCore')
+              .error('Error setting up TrianglePeelV2', error as Error);
             effect = this.effectManager.get('fade');
             this.stateManager.set('effect', 'fade');
           }
@@ -313,16 +338,16 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
           });
         }
 
-        this.animateTransition(fromTexture, toTexture, to);
+        await this.animateTransition(fromTexture, toTexture, to);
       } else {
-        console.error('[CarouselCore.startTransition] Missing texture:', {
+        Logger.getInstance().createChild('CarouselCore').error('Missing texture', {
           fromTexture: !!fromTexture,
           toTexture: !!toTexture,
         });
       }
     } else if (this.renderer instanceof Canvas2DFallback) {
       this.renderer.setImages(fromImage.element, toImage.element);
-      this.animateTransition(null, null, to);
+      await this.animateTransition(null, null, to);
     }
   }
 
@@ -330,79 +355,86 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     fromTexture: WebGLTexture | null,
     toTexture: WebGLTexture | null,
     toIndex: number,
-  ): void {
-    const animate = () => {
-      if (!this.transitionStartTime) {
-        return;
-      }
+  ): Promise<void> {
+    return new Promise<void>((resolve) => {
+      const animate = () => {
+        if (!this.transitionStartTime) {
+          return;
+        }
 
-      const elapsed = performance.now() - this.transitionStartTime;
-      const duration = this.stateManager.get('transitionDuration');
-      const progress = Math.min(elapsed / duration, 1);
+        const elapsed = performance.now() - this.transitionStartTime;
+        const duration = this.stateManager.get('transitionDuration');
+        const progress = Math.min(elapsed / duration, 1);
 
-      try {
-        if (
-          this.isWebGL &&
-          (this.renderer instanceof WebGLRenderer || this.renderer instanceof WebGL2Renderer) &&
-          fromTexture &&
-          toTexture
-        ) {
-          const effect = this.effectManager.get(this.stateManager.get('effect'));
-          const uniforms = effect ? effect.getUniforms(progress) : {};
-          const images = this.stateManager.get('images');
-          const currentIndex = this.stateManager.get('currentIndex');
-          const fromSrc = images[currentIndex];
-          const toSrc = images[toIndex];
+        try {
+          if (
+            this.isWebGL &&
+            (this.renderer instanceof WebGLRenderer || this.renderer instanceof WebGL2Renderer) &&
+            fromTexture &&
+            toTexture
+          ) {
+            const effect = this.effectManager.get(this.stateManager.get('effect'));
+            const uniforms = effect ? effect.getUniforms(progress) : {};
+            const images = this.stateManager.get('images');
+            const currentIndex = this.stateManager.get('currentIndex');
+            const fromSrc = images[currentIndex];
+            const toSrc = images[toIndex];
 
-          if (this.renderer instanceof WebGL2Renderer && effect?.getInstanceData) {
-            const instanceData = effect.getInstanceData();
-            const instanceCount = instanceData?.positions
-              ? instanceData.positions.length / 12
-              : undefined;
-            // Only use instanced rendering if we actually have instance data
-            if (instanceCount && instanceCount > 0) {
-              this.renderer.render(
-                fromTexture,
-                toTexture,
-                progress,
-                uniforms,
-                fromSrc,
-                toSrc,
-                instanceCount,
-              );
+            if (this.renderer instanceof WebGL2Renderer && effect?.getInstanceData) {
+              const instanceData = effect.getInstanceData();
+              const instanceCount = instanceData?.positions
+                ? instanceData.positions.length / 12
+                : undefined;
+              // Only use instanced rendering if we actually have instance data
+              if (instanceCount && instanceCount > 0) {
+                this.renderer.render(
+                  fromTexture,
+                  toTexture,
+                  progress,
+                  uniforms,
+                  fromSrc,
+                  toSrc,
+                  instanceCount,
+                );
+              } else {
+                this.renderer.render(fromTexture, toTexture, progress, uniforms, fromSrc, toSrc);
+              }
             } else {
               this.renderer.render(fromTexture, toTexture, progress, uniforms, fromSrc, toSrc);
             }
-          } else {
-            this.renderer.render(fromTexture, toTexture, progress, uniforms, fromSrc, toSrc);
+          } else if (this.renderer instanceof Canvas2DFallback) {
+            this.renderer.render(progress);
           }
-        } else if (this.renderer instanceof Canvas2DFallback) {
-          this.renderer.render(progress);
+        } catch (error) {
+          Logger.getInstance()
+            .createChild('CarouselCore')
+            .error('Error during render', error as Error);
+          // End transition on error
+          this.animationId = null;
+          this.transitionStartTime = null;
+          this.stateManager.endTransition(toIndex);
+          resolve();
+          return;
         }
-      } catch (error) {
-        console.error('[CarouselCore.animate] Error during render:', error);
-        // End transition on error
-        this.animationId = null;
-        this.transitionStartTime = null;
-        this.stateManager.endTransition(toIndex);
-        return;
-      }
 
-      if (progress < 1) {
-        this.animationId = requestAnimationFrame(animate);
-      } else {
-        this.animationId = null;
-        this.transitionStartTime = null;
-        this.stateManager.endTransition(toIndex);
+        if (progress < 1) {
+          this.animationId = requestAnimationFrame(animate);
+        } else {
+          this.animationId = null;
+          this.transitionStartTime = null;
+          this.stateManager.endTransition(toIndex);
 
-        // Schedule next transition if autoplay
-        if (this.stateManager.get('isPlaying')) {
-          this.scheduleNextTransition();
+          // Schedule next transition if autoplay
+          if (this.stateManager.get('isPlaying')) {
+            this.scheduleNextTransition();
+          }
+
+          resolve();
         }
-      }
-    };
+      };
 
-    animate();
+      animate();
+    });
   }
 
   private handleContextLost(): void {
@@ -447,7 +479,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
 
   private stopAutoplay(): void {
     if (this.autoplayTimer) {
-      clearTimeout(this.autoplayTimer);
+      this.eventManager.clearTimeout(this.autoplayTimer);
       this.autoplayTimer = null;
     }
   }
@@ -459,7 +491,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     this.stopAutoplay();
 
     const interval = this.stateManager.get('autoplayInterval');
-    this.autoplayTimer = setTimeout(() => {
+    this.autoplayTimer = this.eventManager.setTimeout(() => {
       if (this.stateManager.get('isPlaying') && !this.stateManager.get('isTransitioning')) {
         this.next();
       }
@@ -467,21 +499,21 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
   }
 
   // Public API
-  next(): void {
+  public next(): void {
     if (!this.stateManager.get('isTransitioning') && this.stateManager.canGoNext()) {
       const nextIndex = this.stateManager.getNextIndex();
       this.stateManager.startTransition(nextIndex);
     }
   }
 
-  previous(): void {
+  public previous(): void {
     if (!this.stateManager.get('isTransitioning') && this.stateManager.canGoPrevious()) {
       const prevIndex = this.stateManager.getPreviousIndex();
       this.stateManager.startTransition(prevIndex);
     }
   }
 
-  goTo(index: number): void {
+  public goTo(index: number): void {
     const images = this.stateManager.get('images');
     if (
       index >= 0 &&
@@ -493,35 +525,37 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     }
   }
 
-  play(): void {
+  public play(): void {
     this.stateManager.set('isPlaying', true);
   }
 
-  pause(): void {
+  public pause(): void {
     this.stateManager.set('isPlaying', false);
   }
 
-  setAutoplay(enabled: boolean, interval?: number): void {
+  public setAutoplay(enabled: boolean, interval?: number): void {
     if (interval !== undefined) {
       this.stateManager.set('autoplayInterval', interval);
     }
     this.stateManager.set('isPlaying', enabled);
   }
 
-  setTransitionDuration(duration: number): void {
+  public setTransitionDuration(duration: number): void {
     this.stateManager.set('transitionDuration', duration);
   }
 
-  setEffect(effectName: string): boolean {
+  public setEffect(effectName: string): boolean {
     if (this.effectManager.has(effectName)) {
       const effect = this.effectManager.get(effectName);
 
       // Check if effect requires WebGL 2.0
       if (effect && effect.requiresWebGL2) {
         if (!(this.renderer instanceof WebGL2Renderer)) {
-          console.warn(
-            `Effect "${effectName}" requires WebGL 2.0, but current renderer is ${this.renderer?.constructor.name}. Falling back to fade effect.`,
-          );
+          Logger.getInstance()
+            .createChild('CarouselCore')
+            .warn(
+              `Effect "${effectName}" requires WebGL 2.0, but current renderer is ${this.renderer?.constructor.name}. Falling back to fade effect.`,
+            );
           // Fallback to fade effect
           return this.setEffect('fade');
         }
@@ -558,22 +592,22 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     return false;
   }
 
-  registerEffect(effect: IEffect): void {
+  public registerEffect(effect: IEffect): void {
     this.effectManager.register(effect);
   }
 
-  getCurrentIndex(): number {
+  public getCurrentIndex(): number {
     return this.stateManager.get('currentIndex');
   }
 
-  getImages(): LoadedImage[] {
+  public getImages(): LoadedImage[] {
     const urls = this.stateManager.get('images');
     return urls
       .map((url) => this.loadedImages.get(url))
       .filter((img): img is LoadedImage => img !== undefined);
   }
 
-  resize(width?: number, height?: number): void {
+  public resize(width?: number, height?: number): void {
     if (!this.renderer) return;
 
     // Use provided dimensions or get from canvas
@@ -607,9 +641,11 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
         // Get current effect and its uniforms
         const effectName = this.stateManager.get('effect');
         const effect = this.effectManager.get(effectName);
-        const uniforms = effect ? effect.getUniforms(0) : {};
+        // For single image render, use progress=1 to show the image fully
+        const uniforms = effect ? effect.getUniforms(1) : {};
 
-        this.renderer.render(texture, null, 0, uniforms, currentImageSrc);
+        // Render with the same texture for both slots and progress=1
+        this.renderer.render(texture, texture, 1, uniforms, currentImageSrc, currentImageSrc);
       }
     } else if (this.renderer instanceof Canvas2DFallback) {
       this.renderer.setImages(currentImage.element, null);
@@ -617,7 +653,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     }
   }
 
-  dispose(): void {
+  public dispose(): void {
     // Stop animations
     if (this.animationId) {
       cancelAnimationFrame(this.animationId);
@@ -626,6 +662,16 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
 
     // Stop autoplay
     this.stopAutoplay();
+
+    // Clear transition queue
+
+    // Clean up all event listeners and timers
+    this.eventManager.destroy();
+
+    // Clean up image loader
+    if ('destroy' in this.imageLoader) {
+      (this.imageLoader as any).destroy();
+    }
 
     // Clean up renderer
     if (this.renderer) {
@@ -643,11 +689,11 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> {
     this.stateManager.removeAllListeners();
   }
 
-  isReady(): boolean {
+  public isReady(): boolean {
     return this.renderer !== null && this.loadedImages.size > 0;
   }
 
-  isUsingWebGL(): boolean {
+  public isUsingWebGL(): boolean {
     return this.isWebGL;
   }
 }

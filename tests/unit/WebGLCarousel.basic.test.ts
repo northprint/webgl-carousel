@@ -1,5 +1,7 @@
 import { WebGLCarousel } from '../../src/WebGLCarousel';
 import { WebGLCarouselOptions } from '../../src/WebGLCarousel';
+import type { WebGLCarouselTestable } from '../types/testTypes';
+import type { CarouselCore } from '../../src/core/CarouselCore';
 
 // Mock for testing without actual WebGL/Canvas2D
 jest.mock('../../src/core/CarouselCore', () => {
@@ -68,7 +70,7 @@ describe('WebGLCarousel Unit Tests', () => {
     it('should throw error if images are not provided', () => {
       expect(() => {
         new WebGLCarousel({ container, images: [] });
-      }).toThrow('At least one image is required');
+      }).toThrow('At least 1 image is required');
     });
 
     it('should throw error if container selector not found', () => {
@@ -135,7 +137,7 @@ describe('WebGLCarousel Unit Tests', () => {
         images: ['image.jpg'],
       });
       
-      const options = (carousel as any).options;
+      const options = (carousel as WebGLCarouselTestable).options;
       expect(options.effect).toBe('fade');
       expect(options.autoplay).toBe(false);
       expect(options.autoplayInterval).toBe(3000);
@@ -164,7 +166,7 @@ describe('WebGLCarousel Unit Tests', () => {
         transitionDuration: 2000,
       });
       
-      const options = (carousel as any).options;
+      const options = (carousel as WebGLCarouselTestable).options;
       expect(options.effect).toBe('slide');
       expect(options.autoplay).toBe(true);
       expect(options.autoplayInterval).toBe(5000);
@@ -181,15 +183,15 @@ describe('WebGLCarousel Unit Tests', () => {
 
   describe('public methods', () => {
     let carousel: WebGLCarousel;
-    let mockCore: any;
+    let mockCore: CarouselCore;
 
     beforeEach(() => {
       carousel = new WebGLCarousel({
         container,
         images: ['image1.jpg', 'image2.jpg', 'image3.jpg'],
       });
-      mockCore = (carousel as any).core;
-      (carousel as any).isInitialized = true; // Bypass initialization check
+      mockCore = (carousel as WebGLCarouselTestable).core;
+      (carousel as WebGLCarouselTestable).isInitialized = true; // Bypass initialization check
     });
 
     afterEach(() => {
@@ -264,24 +266,19 @@ describe('WebGLCarousel Unit Tests', () => {
 
   describe('destroy', () => {
     it('should clean up properly', () => {
-      const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
-      
       const carousel = new WebGLCarousel({
         container,
         images: ['image.jpg'],
       });
       
-      (carousel as any).isInitialized = true;
-      const mockCore = (carousel as any).core;
+      (carousel as WebGLCarouselTestable).isInitialized = true;
+      const mockCore = (carousel as WebGLCarouselTestable).core;
       
       carousel.destroy();
       
       expect(mockCore.dispose).toHaveBeenCalled();
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function));
       expect(container.querySelector('canvas')).toBeNull();
       expect(carousel.isReady()).toBe(false);
-      
-      removeEventListenerSpy.mockRestore();
     });
   });
 });

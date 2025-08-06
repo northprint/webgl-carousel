@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Carousel - React Integration (Standalone Demo)</title>
+  <style>
+    .app {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+    }
+    
+    .app-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+    
+    .app-header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    
+    .carousel-container {
+      max-width: 1200px;
+      height: 600px;
+      margin: 0 auto;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    #carousel {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .status-bar {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      font-size: 1.1rem;
+      backdrop-filter: blur(10px);
+    }
+    
+    .controls {
+      max-width: 1200px;
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    
+    .control-group {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .control-group h3 {
+      margin: 0 0 20px 0;
+      color: #333;
+      font-size: 1.5rem;
+    }
+    
+    .effects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    
+    .effect-btn {
+      padding: 10px 15px;
+      background: #f0f0f0;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .effect-btn:hover {
+      background: #e0e0e0;
+      transform: translateY(-2px);
+    }
+    
+    .effect-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .settings {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .settings label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: #333;
+    }
+    
+    .settings input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    
+    .settings input[type="range"] {
+      flex: 1;
+      margin: 0 10px;
+    }
+    
+    .settings span {
+      min-width: 60px;
+      text-align: right;
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .info {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .info h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .info h3 {
+      color: #555;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    .info ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .info li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+      color: #555;
+    }
+    
+    .info li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    .info pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    
+    .info code {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .note {
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #1565c0;
+    }
+    
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    @media (max-width: 768px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+      
+      .carousel-container {
+        height: 400px;
+      }
+      
+      .app-header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .status-bar {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>WebGL Carousel - React Integration Demo</h1>
+    </header>
+    
+    <div class="note" style="max-width: 1200px; margin: 0 auto 20px;">
+      <strong>Note:</strong> This is a standalone demo showing how the React integration would work. 
+      For the actual React component, please run <code>npm install && npm start</code> in this directory.
+    </div>
+    
+    <div class="carousel-container">
+      <div id="carousel"></div>
+    </div>
+    
+    <div class="status-bar">
+      <span>Current Image: <span id="current-index">1</span> / 5</span>
+      <span>Effect: <span id="current-effect">fade</span></span>
+      <span>Duration: <span id="current-duration">1500</span>ms</span>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <h3>Effects</h3>
+        <div class="effects-grid" id="effects-grid"></div>
+      </div>
+      
+      <div class="control-group">
+        <h3>Settings</h3>
+        <div class="settings">
+          <label>
+            <input type="checkbox" id="autoplay-checkbox" />
+            Autoplay
+          </label>
+          
+          <label>
+            Transition Duration:
+            <input
+              type="range"
+              min="500"
+              max="3000"
+              step="100"
+              value="1500"
+              id="duration-slider"
+            />
+            <span id="duration-value">1500ms</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info">
+      <h2>React Integration Features</h2>
+      <p>This standalone demo simulates what the React component provides:</p>
+      <ul>
+        <li>Declarative component API</li>
+        <li>State management with hooks (useState, useCallback)</li>
+        <li>Event callbacks for all carousel events</li>
+        <li>Dynamic prop updates that trigger re-renders</li>
+        <li>Full TypeScript support with type definitions</li>
+      </ul>
+      
+      <h3>React Component Usage</h3>
+      <pre><code>import { WebGLCarouselReact } from 'webgl-carousel/react';
+
+function App() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const handleImageChange = useCallback((index) => {
+    setCurrentIndex(index);
+  }, []);
+  
+  return (
+    &lt;WebGLCarouselReact
+      images={images}
+      effect="fade"
+      autoplay={true}
+      transitionDuration={1500}
+      onImageChange={handleImageChange}
+    /&gt;
+  );
+}</code></pre>
+
+      <h3>Running the Real React Example</h3>
+      <p>To run the actual React component example:</p>
+      <pre><code>cd examples/react
+npm install
+npm start</code></pre>
+      
+      <p>Then open <a href="http://localhost:3000">http://localhost:3000</a> in your browser.</p>
+    </div>
+  </div>
+  
+  <script src="https://unpkg.com/webgl-carousel@latest"></script>
+  <script>
+    // Images
+    const images = [
+      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=800&fit=crop'
+    ];
+    
+    const effects = [
+      'fade', 'slideLeft', 'slideRight', 'slideUp', 'slideDown',
+      'wave', 'distortion', 'dissolve', 'circle', 'glitch'
+    ];
+    
+    // State (simulating React useState)
+    let state = {
+      currentIndex: 0,
+      selectedEffect: 'fade',
+      isAutoplay: false,
+      transitionDuration: 1500
+    };
+    
+    // Initialize carousel
+    const carousel = new WebGLCarousel.WebGLCarousel({
+      container: '#carousel',
+      images: images,
+      effect: state.selectedEffect,
+      autoplay: state.isAutoplay,
+      transitionDuration: state.transitionDuration,
+      loop: true,
+      preload: true
+    });
+    
+    // Event handlers (simulating React callbacks)
+    const handleImageChange = (index) => {
+      state.currentIndex = index;
+      document.getElementById('current-index').textContent = index + 1;
+      console.log('Image changed to:', index);
+    };
+    
+    const handleTransitionStart = () => {
+      console.log('Transition started');
+    };
+    
+    const handleTransitionEnd = () => {
+      console.log('Transition ended');
+    };
+    
+    // Setup event listeners
+    carousel.on('imageChange', handleImageChange);
+    carousel.on('transitionStart', handleTransitionStart);
+    carousel.on('transitionEnd', handleTransitionEnd);
+    
+    // Create effects buttons
+    const effectsGrid = document.getElementById('effects-grid');
+    effects.forEach(effect => {
+      const btn = document.createElement('button');
+      btn.className = 'effect-btn';
+      if (effect === state.selectedEffect) btn.classList.add('active');
+      btn.textContent = effect;
+      
+      btn.onclick = () => {
+        state.selectedEffect = effect;
+        carousel.setEffect(effect);
+        document.getElementById('current-effect').textContent = effect;
+        
+        // Update button states (simulating React re-render)
+        document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      };
+      
+      effectsGrid.appendChild(btn);
+    });
+    
+    // Settings controls (simulating React controlled components)
+    document.getElementById('autoplay-checkbox').addEventListener('change', (e) => {
+      state.isAutoplay = e.target.checked;
+      carousel.setAutoplay(state.isAutoplay);
+    });
+    
+    const durationSlider = document.getElementById('duration-slider');
+    const durationValue = document.getElementById('duration-value');
+    const currentDurationSpan = document.getElementById('current-duration');
+    
+    durationSlider.addEventListener('input', (e) => {
+      state.transitionDuration = parseInt(e.target.value);
+      durationValue.textContent = state.transitionDuration + 'ms';
+      currentDurationSpan.textContent = state.transitionDuration;
+      carousel.setTransitionDuration(state.transitionDuration);
+    });
+  </script>
+</body>
+</html>

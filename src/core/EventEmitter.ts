@@ -4,8 +4,11 @@ export interface EventMap {
   [event: string]: unknown[];
 }
 
+import { Logger } from '../utils/Logger';
+
 export class EventEmitter<T extends EventMap = EventMap> {
   private events: Map<keyof T, Set<EventHandler>> = new Map();
+  private eventLogger = Logger.getInstance().createChild('EventEmitter');
 
   on<K extends keyof T>(event: K, handler: (...args: T[K]) => void): this {
     if (!this.events.has(event)) {
@@ -33,7 +36,7 @@ export class EventEmitter<T extends EventMap = EventMap> {
         try {
           handler(...args);
         } catch (error) {
-          console.error(`Error in event handler for "${String(event)}":`, error);
+          this.eventLogger.error(`Error in event handler for "${String(event)}"`, error);
         }
       });
     }

@@ -1,4 +1,10 @@
 import { EventEmitter } from './EventEmitter';
+import {
+  createTexture as createWebGLTexture,
+  compileShader as compileWebGLShader,
+  createProgram as createWebGLProgram,
+} from '../utils/webglHelpers';
+import { ShaderType } from '../types/webgl';
 
 export interface WebGLRendererEvents extends Record<string, unknown[]> {
   contextLost: [];
@@ -37,9 +43,14 @@ export abstract class BaseWebGLRenderer<
     // Cache image size first (before checking for existing texture)
     if (!this.imageSizes.has(image.src)) {
       const imageSize = {
-        width: image.naturalWidth || image.width,
-        height: image.naturalHeight || image.height,
+        width: image.naturalWidth || image.width || 800,
+        height: image.naturalHeight || image.height || 600,
       };
+      // Ensure we have valid dimensions
+      if (imageSize.width === 0 || imageSize.height === 0) {
+        imageSize.width = 800;
+        imageSize.height = 600;
+      }
       this.imageSizes.set(image.src, imageSize);
     }
 
@@ -62,73 +73,40 @@ export abstract class BaseWebGLRenderer<
   protected createTexture(image: HTMLImageElement): WebGLTexture | null {
     if (!this.gl) return null;
 
-    const texture = this.gl.createTexture();
-    if (!texture) return null;
-
-    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      this.gl.RGBA,
-      this.gl.RGBA,
-      this.gl.UNSIGNED_BYTE,
-      image,
-    );
-
-    // Set texture parameters
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-
-    return texture;
+    // Use the helper function for consistent texture creation
+    return createWebGLTexture(this.gl, image, {
+      wrapS: this.gl.CLAMP_TO_EDGE,
+      wrapT: this.gl.CLAMP_TO_EDGE,
+      minFilter: this.gl.LINEAR,
+      magFilter: this.gl.LINEAR,
+      generateMipmap: false, // Base renderer doesn't use mipmaps
+      flipY: false,
+      premultiplyAlpha: false,
+    });
   }
 
   // Common shader compilation logic
   protected compileShader(source: string, type: number): WebGLShader | null {
     if (!this.gl) return null;
-
-    const shader = this.gl.createShader(type);
-    if (!shader) {
-      throw new Error('Failed to create shader');
-    }
-
-    this.gl.shaderSource(shader, source);
-    this.gl.compileShader(shader);
-
-    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      const error = this.gl.getShaderInfoLog(shader);
-      this.gl.deleteShader(shader);
-      throw new Error(`Failed to compile shader: ${error}`);
-    }
-
-    return shader;
+    return compileWebGLShader(this.gl, source, type as ShaderType);
   }
 
   // Common program creation logic
   protected createProgram(vertexSource: string, fragmentSource: string): WebGLProgram | null {
     if (!this.gl) return null;
 
-    const vertexShader = this.compileShader(vertexSource, this.gl.VERTEX_SHADER);
-    const fragmentShader = this.compileShader(fragmentSource, this.gl.FRAGMENT_SHADER);
+    const vertexShader = compileWebGLShader(this.gl, vertexSource, ShaderType.VERTEX);
+    const fragmentShader = compileWebGLShader(this.gl, fragmentSource, ShaderType.FRAGMENT);
 
-    if (!vertexShader || !fragmentShader) return null;
-
-    const program = this.gl.createProgram();
-    if (!program) {
-      throw new Error('Failed to create shader program');
+    if (!vertexShader || !fragmentShader) {
+      if (vertexShader) this.gl.deleteShader(vertexShader);
+      if (fragmentShader) this.gl.deleteShader(fragmentShader);
+      return null;
     }
 
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.linkProgram(program);
+    const program = createWebGLProgram(this.gl, vertexShader, fragmentShader);
 
-    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      const error = this.gl.getProgramInfoLog(program);
-      this.gl.deleteProgram(program);
-      throw new Error(`Failed to link shader program: ${error}`);
-    }
-
+    // Clean up shaders after linking
     this.gl.deleteShader(vertexShader);
     this.gl.deleteShader(fragmentShader);
 

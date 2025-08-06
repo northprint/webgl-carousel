@@ -58,3 +58,6 @@ export interface WebGLCarouselEvents extends Record<string, unknown[]> {
   error: [error: Error];
   effectChange: [effectName: string];
 }
+
+// Re-export IEffect from EffectManager for convenience
+export type { IEffect } from './core/EffectManager';

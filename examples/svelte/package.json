@@ -1,0 +1,24 @@
+{
+  "name": "webgl-carousel-svelte-example",
+  "version": "1.0.0",
+  "description": "Svelte integration example for WebGL Carousel",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.0",
+    "@tsconfig/svelte": "^5.0.0",
+    "svelte": "^4.0.0",
+    "svelte-check": "^3.4.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.0.0",
+    "vite": "^4.4.0"
+  },
+  "dependencies": {
+    "webgl-carousel": "^0.2.4"
+  },
+  "type": "module"
+}

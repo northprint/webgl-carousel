@@ -40,12 +40,18 @@ export const createMockWebGLContext = () => {
     RENDERBUFFER: 0x8d41,
     DEPTH_COMPONENT16: 0x81a5,
     DEPTH_ATTACHMENT: 0x8d00,
+    UNPACK_FLIP_Y_WEBGL: 0x9240,
+    UNPACK_PREMULTIPLY_ALPHA_WEBGL: 0x9241,
 
     // Methods
     createTexture: jest.fn(() => mockTexture),
     bindTexture: jest.fn(),
     texImage2D: jest.fn(),
     texParameteri: jest.fn(),
+    texParameterf: jest.fn(),
+    pixelStorei: jest.fn(),
+    generateMipmap: jest.fn(),
+    getExtension: jest.fn(() => null),
     createBuffer: jest.fn(() => mockBuffer),
     bindBuffer: jest.fn(),
     bufferData: jest.fn(),

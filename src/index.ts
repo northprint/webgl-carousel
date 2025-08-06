@@ -1,9 +1,23 @@
-// Main entry point for webgl-carousel
-export const VERSION = '0.1.0';
+/**
+ * WebGL Carousel - Main entry point
+ * A high-performance image carousel with WebGL transitions
+ */
+
+export const VERSION = '0.2.4';
 
 // Main API
 export { WebGLCarousel } from './WebGLCarousel';
 export type { WebGLCarouselOptions, WebGLCarouselEvents } from './WebGLCarousel';
+
+// Public interfaces
+export type {
+  IWebGLCarousel,
+  ICarouselNavigation,
+  ICarouselPlayback,
+  ICarouselEffects,
+  ICarouselLifecycle,
+  ICarouselImages,
+} from './interfaces';
 
 // Core exports for advanced usage
 export { EventEmitter } from './core/EventEmitter';
@@ -71,6 +85,27 @@ export type {
   CarouselTransitionOptions,
 } from './types';
 
+// Export constants for reference
+export {
+  ANIMATION_CONSTANTS,
+  DIMENSION_CONSTANTS,
+  WEBGL_CONSTANTS,
+  MATH_CONSTANTS,
+  UI_CONSTANTS,
+  EFFECT_CONSTANTS,
+  NETWORK_CONSTANTS,
+  TEST_CONSTANTS,
+  VALIDATION_CONSTANTS,
+} from './constants/magic-numbers';
+
+// Export utility classes for advanced users
+export { Logger, LogLevel } from './utils/Logger';
+export { ErrorHandler, ErrorCategory, ErrorSeverity, CarouselError } from './utils/ErrorHandler';
+export { EventManager } from './utils/EventManager';
+export { ResizeObserverManager } from './utils/ResizeObserverManager';
+export { PromiseUtils } from './utils/PromiseUtils';
+export { AsyncQueue } from './utils/AsyncQueue';
+
 // Export React adapter
 export { WebGLCarouselReact } from './adapters/react/WebGLCarouselReact';
 export type { WebGLCarouselReactProps } from './adapters/react/WebGLCarouselReact';
@@ -79,9 +114,8 @@ export type { WebGLCarouselReactProps } from './adapters/react/WebGLCarouselReac
 export { WebGLCarouselVue } from './adapters/vue/WebGLCarouselVue';
 export type { WebGLCarouselVueProps } from './adapters/vue/WebGLCarouselVue';
 
-// Export Svelte adapter reference
-// Note: Svelte components cannot be directly exported in bundled JS
-// Users should import the .svelte file directly from their Svelte projects
+// Export Svelte adapter
+export { default as WebGLCarouselSvelte } from './adapters/svelte/WebGLCarouselSvelte.svelte';
 
 // Default export for convenience
 import { WebGLCarousel as WGLCarousel } from './WebGLCarousel';

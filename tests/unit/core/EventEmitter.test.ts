@@ -60,8 +60,8 @@ describe('EventEmitter', () => {
 
       expect(normalHandler).toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Error in event handler for "test":',
-        expect.any(Error),
+        expect.stringContaining('Error in event handler for "test"'),
+        expect.anything(),
       );
 
       consoleSpy.mockRestore();

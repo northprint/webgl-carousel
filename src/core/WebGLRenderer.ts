@@ -140,13 +140,15 @@ export class WebGLRenderer extends BaseWebGLRenderer<WebGLRenderingContext> {
 
     try {
       const program = super.createProgram(effect.vertexShader, effect.fragmentShader);
-      if (program) {
-        if (this.program) {
-          this.gl.deleteProgram(this.program);
-        }
-        this.program = program;
-        super.cacheUniformsAndAttributes();
+      if (!program) {
+        throw new Error('Failed to create shader program');
       }
+
+      if (this.program) {
+        this.gl.deleteProgram(this.program);
+      }
+      this.program = program;
+      super.cacheUniformsAndAttributes();
     } catch (error) {
       this.emit('error', error as Error);
     }
@@ -164,8 +166,11 @@ export class WebGLRenderer extends BaseWebGLRenderer<WebGLRenderingContext> {
 
     this.gl.useProgram(this.program);
 
+    // Set viewport
+    this.gl.viewport(0, 0, this.canvas!.width, this.canvas!.height);
+
     // Clear
-    this.gl.clearColor(0, 0, 0, 0);
+    this.gl.clearColor(0, 0, 0, 0); // Transparent background
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
     // Bind vertex buffer

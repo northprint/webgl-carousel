@@ -454,12 +454,14 @@ varying vec2 vTexCoord;
 vec2 getCoverUV(vec2 uv, vec2 imageSize, vec2 resolution) {
   float imageAspect = imageSize.x / imageSize.y;
   float screenAspect = resolution.x / resolution.y;
-  vec2 scale;
+  vec2 scale = vec2(1.0);
   
-  if (screenAspect > imageAspect) {
-    scale = vec2(1.0, imageAspect / screenAspect);
+  if (imageAspect > screenAspect) {
+    // Image is wider, scale by height
+    scale.x = imageAspect / screenAspect;
   } else {
-    scale = vec2(screenAspect / imageAspect, 1.0);
+    // Image is taller, scale by width
+    scale.y = screenAspect / imageAspect;
   }
   
   return (uv - 0.5) / scale + 0.5;

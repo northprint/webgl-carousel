@@ -184,6 +184,22 @@ export class MockWebGLRenderingContext {
     // Mock implementation
   }
 
+  texParameterf(target: number, pname: number, param: number): void {
+    // Mock implementation
+  }
+
+  pixelStorei(pname: number, param: number | boolean): void {
+    // Mock implementation
+  }
+
+  generateMipmap(target: number): void {
+    // Mock implementation
+  }
+
+  getExtension(name: string): any {
+    return null;
+  }
+
   deleteTexture(texture: WebGLTexture): void {
     // Mock implementation
   }

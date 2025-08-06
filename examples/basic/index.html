@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Carousel - Basic Usage</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 30px;
+    }
+    
+    #carousel {
+      width: 100%;
+      height: 600px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .info {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .info code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e7f3ff;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>WebGL Carousel - Basic Usage Example</h1>
+    
+    <div id="carousel"></div>
+    
+    <div class="controls">
+      <button id="prev">Previous</button>
+      <button id="play">Play</button>
+      <button id="pause">Pause</button>
+      <button id="next">Next</button>
+    </div>
+    
+    <div class="status" id="status">
+      Current Image: <span id="current">1</span> / <span id="total">5</span> | 
+      Effect: <span id="effect">fade</span>
+    </div>
+    
+    <div class="info">
+      <h2>About This Example</h2>
+      <p>This demonstrates basic WebGL Carousel usage with:</p>
+      <ul>
+        <li>Simple initialization</li>
+        <li>Navigation controls (Previous/Next buttons)</li>
+        <li>Play/Pause functionality</li>
+        <li>Default fade effect</li>
+        <li>Status display</li>
+      </ul>
+      
+      <h3>Code Snippet</h3>
+      <pre><code>const carousel = new WebGLCarousel.WebGLCarousel({
+  container: '#carousel',
+  images: images,
+  effect: 'fade',
+  transitionDuration: 1500,
+  autoplay: false,
+  loop: true
+});</code></pre>
+    </div>
+  </div>
+
+  <!-- Use CDN version for simplicity -->
+  <script src="https://unpkg.com/webgl-carousel@latest"></script>
+  <script>
+    // Sample images
+    const images = [
+      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&h=800&fit=crop'
+    ];
+    
+    // Initialize carousel
+    const carousel = new WebGLCarousel.WebGLCarousel({
+      container: '#carousel',
+      images: images,
+      effect: 'fade',
+      transitionDuration: 1500,
+      autoplay: false,
+      loop: true,
+      preload: true
+    });
+    
+    // Update status display
+    function updateStatus() {
+      document.getElementById('current').textContent = carousel.getCurrentIndex() + 1;
+      document.getElementById('total').textContent = images.length;
+    }
+    
+    // Setup event listeners
+    carousel.on('imageChange', (index) => {
+      updateStatus();
+      console.log('Image changed to:', index);
+    });
+    
+    carousel.on('ready', () => {
+      console.log('Carousel is ready!');
+      updateStatus();
+    });
+    
+    carousel.on('transitionStart', () => {
+      console.log('Transition started');
+    });
+    
+    carousel.on('transitionEnd', () => {
+      console.log('Transition ended');
+    });
+    
+    // Control buttons
+    document.getElementById('prev').addEventListener('click', () => {
+      carousel.previous();
+    });
+    
+    document.getElementById('next').addEventListener('click', () => {
+      carousel.next();
+    });
+    
+    document.getElementById('play').addEventListener('click', () => {
+      carousel.setAutoplay(true);
+      carousel.setAutoplayInterval(3000);
+    });
+    
+    document.getElementById('pause').addEventListener('click', () => {
+      carousel.setAutoplay(false);
+    });
+    
+    // Initialize status
+    updateStatus();
+  </script>
+</body>
+</html>

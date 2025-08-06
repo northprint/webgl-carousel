@@ -223,7 +223,7 @@ describe('ImageLoader', () => {
       expect(results).toHaveLength(3); // All images are returned (even if some failed)
       expect(progressCallback).toHaveBeenCalledTimes(3);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Failed to load image: img2.jpg',
+        expect.stringContaining('Failed to load image: img2.jpg'),
         expect.any(Error),
       );
 

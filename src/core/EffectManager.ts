@@ -21,9 +21,12 @@ export interface IEffect {
   getInstanceData?(): { positions: Float32Array; offsets: Float32Array; scales: Float32Array };
 }
 
+import { Logger } from '../utils/Logger';
+
 export class EffectManager {
   private effects: Map<string, IEffect> = new Map();
   private defaultEffectName = 'fade';
+  private logger = Logger.getInstance().createChild('EffectManager');
 
   register(effect: IEffect): void {
     if (!effect.name) {
@@ -31,7 +34,7 @@ export class EffectManager {
     }
 
     if (this.effects.has(effect.name)) {
-      console.warn(`Effect "${effect.name}" is already registered. Overwriting...`);
+      this.logger.warn(`Effect "${effect.name}" is already registered. Overwriting...`);
     }
 
     this.effects.set(effect.name, effect);

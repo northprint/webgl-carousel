@@ -1,5 +1,6 @@
 import { BaseEffect } from './BaseEffect';
 import { createFragmentShader } from './shaderUtils';
+import { MATH_CONSTANTS, EFFECT_CONSTANTS } from '../constants/magic-numbers';
 
 export interface GlitchOptions {
   intensity?: number;
@@ -122,7 +123,7 @@ export class GlitchEffect extends BaseEffect {
   `);
 
   getUniforms(progress: number): Record<string, number | number[]> {
-    const time = (Date.now() - this.startTime) / 1000;
+    const time = (Date.now() - this.startTime) / 1000; // Convert to seconds
     return {
       uProgress: progress,
       uIntensity: this.intensity,

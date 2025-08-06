@@ -1,4 +1,12 @@
 import { BaseWebGLRenderer } from './BaseWebGLRenderer';
+import { Logger } from '../utils/Logger';
+import {
+  createTexture as createWebGLTexture,
+  createRenderTexture,
+  compileShader as compileWebGLShader,
+  createProgram as createWebGLProgram,
+} from '../utils/webglHelpers';
+import { ShaderType } from '../types/webgl';
 
 export interface WebGL2RendererOptions {
   antialias?: boolean;
@@ -54,9 +62,14 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
       }
 
       // Enable WebGL 2.0 features
-      this.gl.enable(this.gl.DEPTH_TEST);
-      this.gl.enable(this.gl.CULL_FACE);
-      this.gl.cullFace(this.gl.BACK);
+      // Disable depth test for 2D rendering
+      this.gl.disable(this.gl.DEPTH_TEST);
+      // Disable face culling for 2D quad
+      this.gl.disable(this.gl.CULL_FACE);
+
+      // Enable blending for transparency
+      this.gl.enable(this.gl.BLEND);
+      this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
       this.setupEventListeners();
       this.initializeDefaultMesh();
@@ -79,52 +92,40 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
   private initializeDefaultMesh(): void {
     if (!this.gl) return;
 
-    // Create VAO
+    // Create VAO and set up default quad
     this.vertexArray = this.gl.createVertexArray();
     this.gl.bindVertexArray(this.vertexArray);
 
-    // Default quad mesh
+    // Setup simple quad vertices (interleaved position and texCoord)
+    // With flipY: true in texture, use normal texture coordinates
     const vertices = new Float32Array([
       -1.0,
       -1.0,
-      0.0, // Position
       0.0,
-      1.0, // TexCoord (flipped Y)
+      0.0,
+      0.0, // Bottom-left: position(x,y,z), texCoord(u,v)
       1.0,
       -1.0,
-      0.0, // Position
+      0.0,
       1.0,
-      1.0, // TexCoord
+      0.0, // Bottom-right
       -1.0,
       1.0,
-      0.0, // Position
       0.0,
-      0.0, // TexCoord
+      0.0,
+      1.0, // Top-left
       1.0,
       1.0,
-      0.0, // Position
+      0.0,
       1.0,
-      0.0, // TexCoord
+      1.0, // Top-right
     ]);
-
-    const indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
 
     this.vertexBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, vertices, this.gl.STATIC_DRAW);
 
-    this.indexBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-    this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, indices, this.gl.STATIC_DRAW);
-
-    this.meshData = {
-      vertices,
-      indices,
-      texCoords: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
-    };
-
-    // Don't set up vertex attributes here - wait until shader is loaded
-    // Attributes will be set up in setupMeshAttributes() after shader program is created
+    // Note: Attributes will be set up later when program is created
 
     // Unbind VAO
     this.gl.bindVertexArray(null);
@@ -178,7 +179,9 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
       this.gl.enableVertexAttribArray(positionLoc);
       this.gl.vertexAttribPointer(positionLoc, 3, this.gl.FLOAT, false, stride, 0);
     } else {
-      console.error('[WebGL2Renderer.setupMeshAttributes] aPosition not found in shader!');
+      Logger.getInstance()
+        .createChild('WebGL2Renderer')
+        .error('aPosition not found in shader', { method: 'setupMeshAttributes' });
     }
 
     // TexCoord attribute
@@ -188,7 +191,9 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
       this.gl.enableVertexAttribArray(texCoordLoc);
       this.gl.vertexAttribPointer(texCoordLoc, 2, this.gl.FLOAT, false, stride, 3 * 4);
     } else {
-      console.error('[WebGL2Renderer.setupMeshAttributes] aTexCoord not found in shader!');
+      Logger.getInstance()
+        .createChild('WebGL2Renderer')
+        .error('aTexCoord not found in shader', { method: 'setupMeshAttributes' });
     }
 
     // Instance attributes if available
@@ -287,6 +292,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
         
         vec4 color0 = texture(uTexture0, uv0);
         vec4 color1 = texture(uTexture1, uv1);
+        
         fragColor = mix(color0, color1, uProgress);
       }
     `;
@@ -324,12 +330,38 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
         this.program = program;
         super.cacheUniformsAndAttributes();
 
-        // Re-setup mesh attributes with new program
-        if (this.vertexArray && this.meshData) {
+        // Clear meshData for simple effects (they should use drawArrays)
+        // Only keep meshData if it was explicitly set via setMesh
+        // This allows standard effects to use drawArrays
+        if (!effect.transformFeedbackVaryings) {
+          this.meshData = null;
+        }
+
+        // Setup attributes for VAO
+        if (this.vertexArray) {
           this.gl.bindVertexArray(this.vertexArray);
           this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer);
-          this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-          this.setupMeshAttributes();
+
+          if (this.meshData) {
+            // Setup mesh attributes for custom mesh
+            this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+            this.setupMeshAttributes();
+          } else {
+            // Setup attributes for default quad
+            const positionLoc = this.gl.getAttribLocation(this.program, 'aPosition');
+            const texCoordLoc = this.gl.getAttribLocation(this.program, 'aTexCoord');
+
+            if (positionLoc >= 0) {
+              this.gl.enableVertexAttribArray(positionLoc);
+              this.gl.vertexAttribPointer(positionLoc, 3, this.gl.FLOAT, false, 20, 0);
+            }
+
+            if (texCoordLoc >= 0) {
+              this.gl.enableVertexAttribArray(texCoordLoc);
+              this.gl.vertexAttribPointer(texCoordLoc, 2, this.gl.FLOAT, false, 20, 12);
+            }
+          }
+
           this.gl.bindVertexArray(null);
         }
       }
@@ -346,36 +378,23 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
   ): WebGLProgram | null {
     if (!this.gl) return null;
 
-    const vertexShader = this.compileShader(vertexSource, this.gl.VERTEX_SHADER);
-    const fragmentShader = this.compileShader(fragmentSource, this.gl.FRAGMENT_SHADER);
+    const vertexShader = compileWebGLShader(this.gl, vertexSource, ShaderType.VERTEX);
+    const fragmentShader = compileWebGLShader(this.gl, fragmentSource, ShaderType.FRAGMENT);
 
-    if (!vertexShader || !fragmentShader) return null;
-
-    const program = this.gl.createProgram();
-    if (!program) {
-      throw new Error('Failed to create shader program');
+    if (!vertexShader || !fragmentShader) {
+      if (vertexShader) this.gl.deleteShader(vertexShader);
+      if (fragmentShader) this.gl.deleteShader(fragmentShader);
+      return null;
     }
 
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
+    const program = createWebGLProgram(
+      this.gl,
+      vertexShader,
+      fragmentShader,
+      transformFeedbackVaryings,
+    );
 
-    // Setup transform feedback if specified
-    if (transformFeedbackVaryings && transformFeedbackVaryings.length > 0) {
-      this.gl.transformFeedbackVaryings(
-        program,
-        transformFeedbackVaryings,
-        this.gl.INTERLEAVED_ATTRIBS,
-      );
-    }
-
-    this.gl.linkProgram(program);
-
-    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      const error = this.gl.getProgramInfoLog(program);
-      this.gl.deleteProgram(program);
-      throw new Error(`Failed to link shader program: ${error}`);
-    }
-
+    // Clean up shaders after linking
     this.gl.deleteShader(vertexShader);
     this.gl.deleteShader(fragmentShader);
 
@@ -384,23 +403,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
 
   protected compileShader(source: string, type: number): WebGLShader | null {
     if (!this.gl) return null;
-
-    const shader = this.gl.createShader(type);
-    if (!shader) {
-      throw new Error('Failed to create shader');
-    }
-
-    this.gl.shaderSource(shader, source);
-    this.gl.compileShader(shader);
-
-    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      const error = this.gl.getShaderInfoLog(shader);
-      console.error('[WebGL2Renderer] Shader compilation error:', error);
-      this.gl.deleteShader(shader);
-      throw new Error(`Failed to compile shader: ${error}`);
-    }
-
-    return shader;
+    return compileWebGLShader(this.gl, source, type as ShaderType);
   }
 
   protected cacheUniformsAndAttributes(): void {
@@ -454,74 +457,33 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
   protected createTexture(image: HTMLImageElement): WebGLTexture | null {
     if (!this.gl) return null;
 
-    const texture = this.gl.createTexture();
-    if (!texture) return null;
-
-    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-
-    try {
-      this.gl.texImage2D(
-        this.gl.TEXTURE_2D,
-        0,
-        this.gl.RGBA,
-        this.gl.RGBA,
-        this.gl.UNSIGNED_BYTE,
-        image,
-      );
-    } catch (error) {
-      console.error('[WebGL2Renderer.createTexture] Failed to create texture:', error);
-      this.gl.deleteTexture(texture);
-      return null;
-    }
-
-    // Generate mipmaps
-    this.gl.generateMipmap(this.gl.TEXTURE_2D);
-
-    // Set texture parameters
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(
-      this.gl.TEXTURE_2D,
-      this.gl.TEXTURE_MIN_FILTER,
-      this.gl.LINEAR_MIPMAP_LINEAR,
-    );
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-
-    // Enable anisotropic filtering if available
-    const ext = this.gl.getExtension('EXT_texture_filter_anisotropic');
-    if (ext) {
-      const maxAnisotropy = this.gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
-      this.gl.texParameterf(this.gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-    }
-
-    return texture;
+    // Use the helper function with WebGL2-specific options
+    // Use simpler settings to match WebGL 1.0
+    return createWebGLTexture(this.gl, image, {
+      wrapS: this.gl.CLAMP_TO_EDGE,
+      wrapT: this.gl.CLAMP_TO_EDGE,
+      minFilter: this.gl.LINEAR, // No mipmaps for now
+      magFilter: this.gl.LINEAR,
+      generateMipmap: false, // Disable mipmaps to match WebGL 1.0
+      flipY: true, // Flip Y to match WebGL convention
+      premultiplyAlpha: false,
+      anisotropic: false, // Disable anisotropic filtering for now
+    });
   }
 
   createComputeTexture(width: number, height: number, data?: Float32Array): WebGLTexture | null {
     if (!this.gl) return null;
 
-    const texture = this.gl.createTexture();
-    if (!texture) return null;
-
-    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    this.gl.texImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      this.gl.RGBA32F,
-      width,
-      height,
-      0,
-      this.gl.RGBA,
-      this.gl.FLOAT,
-      data || null,
-    );
-
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-
-    return texture;
+    // Use the helper function for compute textures
+    return createRenderTexture(this.gl, width, height, {
+      internalFormat: this.gl.RGBA32F,
+      format: this.gl.RGBA,
+      type: this.gl.FLOAT,
+      wrapS: this.gl.CLAMP_TO_EDGE,
+      wrapT: this.gl.CLAMP_TO_EDGE,
+      minFilter: this.gl.NEAREST,
+      magFilter: this.gl.NEAREST,
+    });
   }
 
   setupTransformFeedback(buffers: WebGLBuffer[], _varyings: string[]): void {
@@ -551,7 +513,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     instanceCount?: number,
   ): void {
     if (!this.gl || !this.program || !currentTexture || !this.vertexArray) {
-      console.error('[WebGL2Renderer.render] Missing required resources:', {
+      Logger.getInstance().createChild('WebGL2Renderer').error('Missing required resources', {
         gl: !!this.gl,
         program: !!this.program,
         currentTexture: !!currentTexture,
@@ -561,16 +523,22 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     }
 
     this.gl.useProgram(this.program);
-    this.gl.bindVertexArray(this.vertexArray);
+
+    // Bind VAO if it exists
+    if (this.vertexArray) {
+      this.gl.bindVertexArray(this.vertexArray);
+    }
+
+    // Set viewport
+    this.gl.viewport(0, 0, this.canvas!.width, this.canvas!.height);
 
     // Clear
-    this.gl.clearColor(0, 0, 0, 0);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    this.gl.clearColor(0, 0, 0, 0); // Transparent background
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
     // Bind textures
     this.gl.activeTexture(this.gl.TEXTURE0);
     this.gl.bindTexture(this.gl.TEXTURE_2D, currentTexture);
-
     if (nextTexture) {
       this.gl.activeTexture(this.gl.TEXTURE1);
       this.gl.bindTexture(this.gl.TEXTURE_2D, nextTexture);
@@ -581,9 +549,9 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     const texture1Loc = this.uniforms.get('uTexture1');
     const progressLoc = this.uniforms.get('uProgress');
 
-    if (texture0Loc) this.gl.uniform1i(texture0Loc, 0);
-    if (texture1Loc) this.gl.uniform1i(texture1Loc, 1);
-    if (progressLoc) this.gl.uniform1f(progressLoc, progress);
+    if (texture0Loc) this.gl!.uniform1i(texture0Loc, 0);
+    if (texture1Loc) this.gl!.uniform1i(texture1Loc, 1);
+    if (progressLoc) this.gl!.uniform1f(progressLoc, progress);
 
     // Set resolution uniform if available
     const resolutionLoc = this.uniforms.get('uResolution');
@@ -641,6 +609,8 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     // Draw
 
     try {
+      // VAO already has vertex data and attributes set up, no need to re-set them
+
       if (this.meshData) {
         if (instanceCount && instanceCount > 1) {
           this.gl.drawElementsInstanced(
@@ -659,6 +629,22 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
           );
         }
       } else {
+        // Debug: Check if VAO is properly bound
+        const currentVAO = this.gl.getParameter(this.gl.VERTEX_ARRAY_BINDING);
+        // Debug: Check vertex attributes
+        const positionLoc = this.gl.getAttribLocation(this.program!, 'aPosition');
+        const texCoordLoc = this.gl.getAttribLocation(this.program!, 'aTexCoord');
+
+        if (positionLoc >= 0) {
+          const enabled = this.gl.getVertexAttrib(positionLoc, this.gl.VERTEX_ATTRIB_ARRAY_ENABLED);
+          const size = this.gl.getVertexAttrib(positionLoc, this.gl.VERTEX_ATTRIB_ARRAY_SIZE);
+        }
+
+        if (texCoordLoc >= 0) {
+          const enabled = this.gl.getVertexAttrib(texCoordLoc, this.gl.VERTEX_ATTRIB_ARRAY_ENABLED);
+          const size = this.gl.getVertexAttrib(texCoordLoc, this.gl.VERTEX_ATTRIB_ARRAY_SIZE);
+        }
+
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
       }
 
@@ -683,14 +669,21 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
             errorString = 'OUT_OF_MEMORY';
             break;
         }
-        console.error(`[WebGL2Renderer.render] GL Error: ${error} (${errorString})`);
+        Logger.getInstance()
+          .createChild('WebGL2Renderer')
+          .error(`GL Error: ${error} (${errorString})`, { error, errorString });
       }
     } catch (error) {
-      console.error('[WebGL2Renderer.render] Draw error:', error);
+      Logger.getInstance()
+        .createChild('WebGL2Renderer')
+        .error('Draw error', error as Error);
       throw error;
     }
 
-    this.gl.bindVertexArray(null);
+    // Unbind VAO
+    if (this.vertexArray) {
+      this.gl.bindVertexArray(null);
+    }
   }
 
   renderWithTransformFeedback(
