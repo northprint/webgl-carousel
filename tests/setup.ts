@@ -268,19 +268,50 @@ import * as matchers from '@testing-library/jest-dom/matchers';
 
 expect.extend(matchers);
 
-// Mock console.warn to reduce noise in tests
+// Mock console methods to reduce noise in tests
 const originalWarn = console.warn;
+const originalError = console.error;
+const originalLog = console.log;
+
 beforeAll(() => {
+  // Suppress console.warn
   console.warn = vi.fn((...args) => {
     // Suppress specific warnings
     if (args[0]?.includes('Effect') && args[0]?.includes('already registered')) {
       return;
     }
+    // Suppress WebGLCarousel logs in test environment
+    if (args[0]?.includes('[WebGLCarousel]')) {
+      return;
+    }
     originalWarn(...args);
+  });
+  
+  // Suppress console.error in test environment
+  console.error = vi.fn((...args) => {
+    // Suppress WebGLCarousel error logs in tests
+    if (args[0]?.includes('[WebGLCarousel]')) {
+      return;
+    }
+    originalError(...args);
+  });
+  
+  // Suppress console.log in test environment
+  console.log = vi.fn((...args) => {
+    // Suppress WebGLCarousel logs in tests
+    if (args[0]?.includes('[WebGLCarousel]')) {
+      return;
+    }
+    // Only show in non-CI environments
+    if (!process.env.CI) {
+      originalLog(...args);
+    }
   });
 });
 
 afterAll(() => {
   console.warn = originalWarn;
+  console.error = originalError;
+  console.log = originalLog;
   cleanup();
 });
