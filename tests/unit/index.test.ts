@@ -7,7 +7,7 @@ import { WebGLCarousel, VERSION } from '../../src/index';
 
 describe('WebGLCarousel', () => {
   it('should export VERSION', () => {
-    expect(VERSION).toBe('0.1.0');
+    expect(VERSION).toBe('0.2.5');
   });
 
   it('should create instance', () => {

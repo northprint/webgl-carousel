@@ -5,16 +5,7 @@
 import { Logger } from './Logger';
 import { BufferTarget, BufferUsage, ShaderType } from '../types/webgl';
 
-import type {
-  TextureTarget,
-  TextureParameter,
-  TextureFilter,
-  TextureWrap,
-  TextureInfo,
-  BufferInfo,
-  ProgramInfo,
-  CompiledShader,
-} from '../types/webgl';
+import type { TextureFilter, TextureWrap } from '../types/webgl';
 
 const logger = Logger.getInstance().createChild('WebGLHelpers');
 

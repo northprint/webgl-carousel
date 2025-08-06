@@ -3,7 +3,7 @@
  * A high-performance image carousel with WebGL transitions
  */
 
-export const VERSION = '0.2.4';
+export const VERSION = '0.2.5';
 
 // Main API
 export { WebGLCarousel } from './WebGLCarousel';

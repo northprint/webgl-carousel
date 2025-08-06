@@ -1,6 +1,5 @@
 import { BaseEffect } from './BaseEffect';
 import { createFragmentShader } from './shaderUtils';
-import { MATH_CONSTANTS, EFFECT_CONSTANTS } from '../constants/magic-numbers';
 
 export interface GlitchOptions {
   intensity?: number;
