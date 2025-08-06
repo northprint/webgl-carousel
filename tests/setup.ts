@@ -222,7 +222,9 @@ export class MockWebGLRenderingContext {
 }
 
 // Mock HTMLCanvasElement.getContext
-HTMLCanvasElement.prototype.getContext = jest.fn(function(
+import { vi } from 'vitest';
+
+HTMLCanvasElement.prototype.getContext = vi.fn(function(
   this: HTMLCanvasElement,
   contextType: string,
 ) {
@@ -231,11 +233,11 @@ HTMLCanvasElement.prototype.getContext = jest.fn(function(
   }
   if (contextType === '2d') {
     const ctx = {
-      drawImage: jest.fn(),
-      clearRect: jest.fn(),
-      fillRect: jest.fn(),
-      save: jest.fn(),
-      restore: jest.fn(),
+      drawImage: vi.fn(),
+      clearRect: vi.fn(),
+      fillRect: vi.fn(),
+      save: vi.fn(),
+      restore: vi.fn(),
       globalAlpha: 1,
       imageSmoothingEnabled: undefined as boolean | undefined,
       imageSmoothingQuality: undefined as string | undefined,
@@ -257,15 +259,19 @@ Object.defineProperty(HTMLImageElement.prototype, 'src', {
 });
 
 // Mock HTMLCanvasElement.toDataURL
-HTMLCanvasElement.prototype.toDataURL = jest.fn(() => 'data:image/png;base64,mockdata');
+HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/png;base64,mockdata');
 
-// Import jest-dom matchers for React testing
-import '@testing-library/jest-dom';
+// Import testing-library matchers for Vitest
+import { expect, beforeAll, afterAll } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
+
+expect.extend(matchers);
 
 // Mock console.warn to reduce noise in tests
 const originalWarn = console.warn;
 beforeAll(() => {
-  console.warn = jest.fn((...args) => {
+  console.warn = vi.fn((...args) => {
     // Suppress specific warnings
     if (args[0]?.includes('Effect') && args[0]?.includes('already registered')) {
       return;
@@ -276,4 +282,5 @@ beforeAll(() => {
 
 afterAll(() => {
   console.warn = originalWarn;
+  cleanup();
 });

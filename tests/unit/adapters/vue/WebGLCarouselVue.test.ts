@@ -1,10 +1,11 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { mount, VueWrapper } from '@vue/test-utils';
 import { WebGLCarouselVue } from '../../../../src/adapters/vue/WebGLCarouselVue';
 import { WebGLCarousel } from '../../../../src/WebGLCarousel';
 import type { BaseEffect } from '../../../../src/effects/BaseEffect';
 
 // Mock WebGLCarousel
-jest.mock('../../../../src/WebGLCarousel');
+vi.mock('../../../../src/WebGLCarousel');
 
 describe('WebGLCarouselVue', () => {
   let wrapper: VueWrapper<any>;
@@ -18,34 +19,34 @@ describe('WebGLCarouselVue', () => {
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock carousel instance
     mockCarouselInstance = {
-      on: jest.fn(),
-      off: jest.fn(),
-      emit: jest.fn(),
-      next: jest.fn(),
-      previous: jest.fn(),
-      goTo: jest.fn(),
-      getCurrentIndex: jest.fn(() => 0),
-      getTotalImages: jest.fn(() => mockImages.length),
-      getImageCount: jest.fn(() => mockImages.length),
-      setEffect: jest.fn(),
-      getAvailableEffects: jest.fn(() => ['fade', 'slide', 'zoom']),
-      registerEffect: jest.fn(),
-      play: jest.fn(),
-      pause: jest.fn(),
-      isPlaying: jest.fn(() => false),
-      setAutoplayInterval: jest.fn(),
-      setAutoplay: jest.fn(),
-      updateImages: jest.fn(),
-      isTransitioning: jest.fn(() => false),
-      destroy: jest.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn(),
+      next: vi.fn(),
+      previous: vi.fn(),
+      goTo: vi.fn(),
+      getCurrentIndex: vi.fn(() => 0),
+      getTotalImages: vi.fn(() => mockImages.length),
+      getImageCount: vi.fn(() => mockImages.length),
+      setEffect: vi.fn(),
+      getAvailableEffects: vi.fn(() => ['fade', 'slide', 'zoom']),
+      registerEffect: vi.fn(),
+      play: vi.fn(),
+      pause: vi.fn(),
+      isPlaying: vi.fn(() => false),
+      setAutoplayInterval: vi.fn(),
+      setAutoplay: vi.fn(),
+      updateImages: vi.fn(),
+      isTransitioning: vi.fn(() => false),
+      destroy: vi.fn(),
     };
 
     // Mock constructor
-    (WebGLCarousel as jest.MockedClass<typeof WebGLCarousel>).mockImplementation(
+    (WebGLCarousel as vi.MockedClass<typeof WebGLCarousel>).mockImplementation(
       () => mockCarouselInstance
     );
   });
@@ -93,10 +94,10 @@ describe('WebGLCarouselVue', () => {
   });
 
   it('should register event listeners', () => {
-    const onTransitionStart = jest.fn();
-    const onTransitionEnd = jest.fn();
-    const onError = jest.fn();
-    const onReady = jest.fn();
+    const onTransitionStart = vi.fn();
+    const onTransitionEnd = vi.fn();
+    const onError = vi.fn();
+    const onReady = vi.fn();
 
     wrapper = mount(WebGLCarouselVue, {
       props: {
@@ -242,7 +243,7 @@ describe('WebGLCarouselVue', () => {
       name: 'custom',
       vertexShader: 'vertex',
       fragmentShader: 'fragment',
-      getUniforms: jest.fn(),
+      getUniforms: vi.fn(),
     };
 
     wrapper = mount(WebGLCarouselVue, {
@@ -306,7 +307,7 @@ describe('WebGLCarouselVue', () => {
       name: 'custom',
       vertexShader: 'vertex',
       fragmentShader: 'fragment',
-      getUniforms: jest.fn(),
+      getUniforms: vi.fn(),
     };
 
     wrapper.vm.registerEffect(mockEffect);

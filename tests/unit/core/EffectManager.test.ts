@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { EffectManager, IEffect, createEffectManager } from '../../../src/core/EffectManager';
 
 // Mock effect implementation
@@ -44,7 +45,7 @@ describe('EffectManager', () => {
     });
 
     it('should warn when overwriting existing effect', () => {
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation();
       
       const effect1 = new MockEffect('test');
       const effect2 = new MockEffect('test');

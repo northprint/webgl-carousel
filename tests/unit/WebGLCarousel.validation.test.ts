@@ -1,9 +1,10 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { WebGLCarousel } from '../../src/WebGLCarousel';
 import { VALIDATION_RULES } from '../../src/constants/defaults';
 
 // Mock the modules
-jest.mock('../../src/core/CarouselCore');
-jest.mock('../../src/ui/UIController');
+vi.mock('../../src/core/CarouselCore');
+vi.mock('../../src/ui/UIController');
 
 describe('WebGLCarousel validation', () => {
   let container: HTMLDivElement;
@@ -15,7 +16,7 @@ describe('WebGLCarousel validation', () => {
 
   afterEach(() => {
     document.body.removeChild(container);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('container validation', () => {
@@ -255,8 +256,8 @@ describe('WebGLCarousel validation', () => {
 
     it('should preserve user-provided values', () => {
       const customEasing = (t: number) => t * t;
-      const onImageChange = jest.fn();
-      const onError = jest.fn();
+      const onImageChange = vi.fn();
+      const onError = vi.fn();
 
       const carousel = new WebGLCarousel({
         container,

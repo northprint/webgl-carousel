@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,26 +7,26 @@ import type { WebGLCarouselReactRef } from '../../../../src/adapters/react';
 
 // Mock WebGLCarousel
 const mockCarouselInstance = {
-  on: jest.fn(),
-  emit: jest.fn(),
-  next: jest.fn(),
-  previous: jest.fn(),
-  goTo: jest.fn(),
-  setEffect: jest.fn(),
-  getAvailableEffects: jest.fn().mockReturnValue(['fade', 'slide', 'flip']),
-  registerEffect: jest.fn(),
-  play: jest.fn(),
-  pause: jest.fn(),
-  setTransitionDuration: jest.fn(),
-  getCurrentIndex: jest.fn().mockReturnValue(0),
-  getImageCount: jest.fn().mockReturnValue(3),
-  isReady: jest.fn().mockReturnValue(true),
-  destroy: jest.fn(),
+  on: vi.fn(),
+  emit: vi.fn(),
+  next: vi.fn(),
+  previous: vi.fn(),
+  goTo: vi.fn(),
+  setEffect: vi.fn(),
+  getAvailableEffects: vi.fn().mockReturnValue(['fade', 'slide', 'flip']),
+  registerEffect: vi.fn(),
+  play: vi.fn(),
+  pause: vi.fn(),
+  setTransitionDuration: vi.fn(),
+  getCurrentIndex: vi.fn().mockReturnValue(0),
+  getImageCount: vi.fn().mockReturnValue(3),
+  isReady: vi.fn().mockReturnValue(true),
+  destroy: vi.fn(),
 };
 
-jest.mock('../../../../src/WebGLCarousel', () => {
+vi.mock('../../../../src/WebGLCarousel', () => {
   return {
-    WebGLCarousel: jest.fn().mockImplementation((options) => {
+    WebGLCarousel: vi.fn().mockImplementation((options) => {
       const listeners: Record<string, Function[]> = {};
       
       // Set up event handling
@@ -55,7 +56,7 @@ describe('WebGLCarouselReact', () => {
   
   beforeEach(() => {
     // Clear all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should render without crashing', () => {
@@ -82,19 +83,21 @@ describe('WebGLCarouselReact', () => {
     const container = screen.getByRole('region');
     expect(container).toHaveClass('custom-carousel');
     expect(container).toHaveStyle({
-      backgroundColor: 'red',
       width: '800px',
       height: '600px',
     });
+    // Check backgroundColor separately as JSDOM returns RGB format
+    const style = window.getComputedStyle(container);
+    expect(style.backgroundColor).toBe('rgb(255, 0, 0)');
   });
 
   it('should call event handlers', async () => {
-    const onReady = jest.fn();
-    const onImageChange = jest.fn();
-    const onTransitionStart = jest.fn();
-    const onTransitionEnd = jest.fn();
-    const onError = jest.fn();
-    const onEffectChange = jest.fn();
+    const onReady = vi.fn();
+    const onImageChange = vi.fn();
+    const onTransitionStart = vi.fn();
+    const onTransitionEnd = vi.fn();
+    const onError = vi.fn();
+    const onEffectChange = vi.fn();
 
 
     render(

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UIController } from '../../../src/ui/UIController';
 import { StyleManager } from '../../../src/ui/StyleManager';
 import { STYLE_IDS } from '../../../src/styles/carouselStyles';
@@ -370,7 +371,7 @@ describe('UIController', () => {
         navigation: true,
       });
 
-      const spy = jest.fn();
+      const spy = vi.fn();
       uiController.on('navigationClick', spy);
 
       uiController.destroy();
