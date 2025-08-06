@@ -471,7 +471,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
     });
   }
 
-  createComputeTexture(width: number, height: number, data?: Float32Array): WebGLTexture | null {
+  createComputeTexture(width: number, height: number, _data?: Float32Array): WebGLTexture | null {
     if (!this.gl) return null;
 
     // Use the helper function for compute textures
@@ -629,21 +629,7 @@ export class WebGL2Renderer extends BaseWebGLRenderer<WebGL2RenderingContext> {
           );
         }
       } else {
-        // Debug: Check if VAO is properly bound
-        const currentVAO = this.gl.getParameter(this.gl.VERTEX_ARRAY_BINDING);
-        // Debug: Check vertex attributes
-        const positionLoc = this.gl.getAttribLocation(this.program!, 'aPosition');
-        const texCoordLoc = this.gl.getAttribLocation(this.program!, 'aTexCoord');
-
-        if (positionLoc >= 0) {
-          const enabled = this.gl.getVertexAttrib(positionLoc, this.gl.VERTEX_ATTRIB_ARRAY_ENABLED);
-          const size = this.gl.getVertexAttrib(positionLoc, this.gl.VERTEX_ATTRIB_ARRAY_SIZE);
-        }
-
-        if (texCoordLoc >= 0) {
-          const enabled = this.gl.getVertexAttrib(texCoordLoc, this.gl.VERTEX_ATTRIB_ARRAY_ENABLED);
-          const size = this.gl.getVertexAttrib(texCoordLoc, this.gl.VERTEX_ATTRIB_ARRAY_SIZE);
-        }
+        // VAO is properly bound and has attributes set up
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
       }

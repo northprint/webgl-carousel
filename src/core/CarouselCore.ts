@@ -193,7 +193,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> implements IC
   private async preloadImages(): Promise<void> {
     const images = this.stateManager.get('images');
 
-    const loadedImages = await this.imageLoader.preloadWithProgress(images, (loaded, _total) => {
+    const loadedImages = await this.imageLoader.preloadWithProgress(images, (_loaded, _total) => {
       // Progress callback - no initial render here anymore
     });
 
@@ -670,7 +670,7 @@ export class CarouselCore extends EventEmitter<CarouselCoreEvents> implements IC
 
     // Clean up image loader
     if ('destroy' in this.imageLoader) {
-      (this.imageLoader as any).destroy();
+      (this.imageLoader as unknown as { destroy: () => void }).destroy();
     }
 
     // Clean up renderer

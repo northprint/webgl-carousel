@@ -1,5 +1,5 @@
 // Main entry point for webgl-carousel core (without framework adapters)
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.5';
 
 // Main API
 export { WebGLCarousel } from './WebGLCarousel';
