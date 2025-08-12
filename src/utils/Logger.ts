@@ -235,11 +235,9 @@ export class Logger {
         console.log(...args);
         break;
       case LogLevel.WARN:
-        // eslint-disable-next-line no-console
         console.warn(...args);
         break;
       case LogLevel.ERROR:
-        // eslint-disable-next-line no-console
         console.error(...args);
         break;
     }

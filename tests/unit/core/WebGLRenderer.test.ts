@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { WebGLRenderer } from '../../../src/core/WebGLRenderer';
 import { MockWebGLRenderingContext } from '../../setup';
 
@@ -25,9 +26,9 @@ describe('WebGLRenderer', () => {
 
     it('should return false when WebGL is not supported', () => {
       const originalGetContext = HTMLCanvasElement.prototype.getContext;
-      HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue(null);
+      HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue(null);
 
-      const errorHandler = jest.fn();
+      const errorHandler = vi.fn();
       renderer.on('error', errorHandler);
 
       const result = renderer.initialize(canvas);
@@ -38,7 +39,7 @@ describe('WebGLRenderer', () => {
     });
 
     it('should setup context loss event listeners', () => {
-      const addEventListenerSpy = jest.spyOn(canvas, 'addEventListener');
+      const addEventListenerSpy = vi.spyOn(canvas, 'addEventListener');
       renderer.initialize(canvas);
 
       expect(addEventListenerSpy).toHaveBeenCalledWith(
@@ -91,7 +92,7 @@ describe('WebGLRenderer', () => {
         `,
       };
 
-      const errorHandler = jest.fn();
+      const errorHandler = vi.fn();
       renderer.on('error', errorHandler);
 
       renderer.setEffect(customEffect);
@@ -104,8 +105,8 @@ describe('WebGLRenderer', () => {
       // Mock shader compilation failure
       const gl = renderer.getContext() as any;
       if (gl) {
-        gl.getShaderParameter = jest.fn().mockReturnValue(false);
-        gl.getShaderInfoLog = jest.fn().mockReturnValue('Shader compilation error');
+        gl.getShaderParameter = vi.fn().mockReturnValue(false);
+        gl.getShaderInfoLog = vi.fn().mockReturnValue('Shader compilation error');
       }
 
       const invalidEffect = {
@@ -113,7 +114,7 @@ describe('WebGLRenderer', () => {
         fragmentShader: 'invalid shader code',
       };
 
-      const errorHandler = jest.fn();
+      const errorHandler = vi.fn();
       renderer.on('error', errorHandler);
 
       renderer.setEffect(invalidEffect);
@@ -182,7 +183,7 @@ describe('WebGLRenderer', () => {
     it('should emit contextLost event', () => {
       renderer.initialize(canvas);
 
-      const contextLostHandler = jest.fn();
+      const contextLostHandler = vi.fn();
       renderer.on('contextLost', contextLostHandler);
 
       const event = new Event('webglcontextlost');
@@ -194,7 +195,7 @@ describe('WebGLRenderer', () => {
     it('should emit contextRestored event and reinitialize', () => {
       renderer.initialize(canvas);
 
-      const contextRestoredHandler = jest.fn();
+      const contextRestoredHandler = vi.fn();
       renderer.on('contextRestored', contextRestoredHandler);
 
       const event = new Event('webglcontextrestored');
@@ -209,7 +210,7 @@ describe('WebGLRenderer', () => {
     it('should clean up resources', () => {
       renderer.initialize(canvas);
 
-      const removeEventListenerSpy = jest.spyOn(canvas, 'removeEventListener');
+      const removeEventListenerSpy = vi.spyOn(canvas, 'removeEventListener');
 
       renderer.dispose();
 

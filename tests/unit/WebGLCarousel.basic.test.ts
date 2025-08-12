@@ -1,27 +1,28 @@
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { WebGLCarousel } from '../../src/WebGLCarousel';
 import { WebGLCarouselOptions } from '../../src/WebGLCarousel';
 import type { WebGLCarouselTestable } from '../types/testTypes';
 import type { CarouselCore } from '../../src/core/CarouselCore';
 
 // Mock for testing without actual WebGL/Canvas2D
-jest.mock('../../src/core/CarouselCore', () => {
+vi.mock('../../src/core/CarouselCore', () => {
   return {
-    CarouselCore: jest.fn().mockImplementation(() => ({
-      initialize: jest.fn().mockResolvedValue(true),
-      next: jest.fn(),
-      previous: jest.fn(),
-      goTo: jest.fn(),
-      setEffect: jest.fn().mockReturnValue(true),
-      setAutoplay: jest.fn(),
-      setTransitionDuration: jest.fn(),
-      getCurrentIndex: jest.fn().mockReturnValue(0),
-      registerEffect: jest.fn(),
-      resize: jest.fn(),
-      dispose: jest.fn(),
-      on: jest.fn(),
+    CarouselCore: vi.fn().mockImplementation(() => ({
+      initialize: vi.fn().mockResolvedValue(true),
+      next: vi.fn(),
+      previous: vi.fn(),
+      goTo: vi.fn(),
+      setEffect: vi.fn().mockReturnValue(true),
+      setAutoplay: vi.fn(),
+      setTransitionDuration: vi.fn(),
+      getCurrentIndex: vi.fn().mockReturnValue(0),
+      registerEffect: vi.fn(),
+      resize: vi.fn(),
+      dispose: vi.fn(),
+      on: vi.fn(),
       effectManager: {
-        list: jest.fn().mockReturnValue(['fade', 'slide', 'flip', 'wave', 'distortion']),
-        register: jest.fn(),
+        list: vi.fn().mockReturnValue(['fade', 'slide', 'flip', 'wave', 'distortion']),
+        register: vi.fn(),
       },
     })),
   };
@@ -39,7 +40,7 @@ describe('WebGLCarousel Unit Tests', () => {
     
     // Mock getBoundingClientRect to return proper dimensions
     originalGetBoundingClientRect = container.getBoundingClientRect;
-    container.getBoundingClientRect = jest.fn(() => ({
+    container.getBoundingClientRect = vi.fn(() => ({
       width: 800,
       height: 600,
       top: 0,

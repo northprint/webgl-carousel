@@ -396,3 +396,168 @@ export function clearCanvas(
 
   gl.clear(mask);
 }
+
+/**
+ * Create a shader (alias for compileShader for backward compatibility)
+ */
+export function createShader(
+  gl: WebGLRenderingContext | WebGL2RenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null {
+  return compileShader(gl, source, type);
+}
+
+/**
+ * Get WebGL context with fallback options
+ */
+export function getWebGLContext(
+  canvas: HTMLCanvasElement,
+  options?: WebGLContextAttributes,
+): WebGLRenderingContext | null {
+  const contextNames = ['webgl', 'experimental-webgl'];
+  for (const name of contextNames) {
+    try {
+      const context = canvas.getContext(name, options) as WebGLRenderingContext | null;
+      if (context) {
+        return context;
+      }
+    } catch {
+      // Continue to next context name
+    }
+  }
+  return null;
+}
+
+/**
+ * Check if WebGL is supported
+ */
+export function checkWebGLSupport(canvas: HTMLCanvasElement): boolean {
+  return getWebGLContext(canvas) !== null;
+}
+
+/**
+ * Get maximum texture size
+ */
+export function getMaxTextureSize(gl: WebGLRenderingContext | null): number {
+  if (!gl) return 0;
+  return gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
+}
+
+/**
+ * Set up multiple vertex attributes
+ */
+export function setupVertexAttributes(
+  gl: WebGLRenderingContext,
+  program: WebGLProgram,
+  attributes: Record<
+    string,
+    {
+      location?: number;
+      size: number;
+      type: number;
+      normalized: boolean;
+      stride: number;
+      offset: number;
+    }
+  >,
+): void {
+  for (const [name, attr] of Object.entries(attributes)) {
+    const location = attr.location ?? gl.getAttribLocation(program, name);
+    if (location >= 0) {
+      setupVertexAttribute(
+        gl,
+        location,
+        attr.size,
+        attr.type,
+        attr.normalized,
+        attr.stride,
+        attr.offset,
+      );
+    }
+  }
+}
+
+/**
+ * Set uniform values
+ */
+export function setUniforms(
+  gl: WebGLRenderingContext,
+  program: WebGLProgram,
+  uniforms: Record<string, any>,
+): void {
+  for (const [name, value] of Object.entries(uniforms)) {
+    const location = gl.getUniformLocation(program, name);
+    if (!location) continue;
+
+    if (typeof value === 'number') {
+      // Check if it's an integer or float
+      if (Number.isInteger(value)) {
+        gl.uniform1i(location, value);
+      } else {
+        gl.uniform1f(location, value);
+      }
+    } else if (typeof value === 'boolean') {
+      gl.uniform1i(location, value ? 1 : 0);
+    } else if (Array.isArray(value) || value instanceof Float32Array) {
+      const length = value.length;
+      if (length === 2) {
+        gl.uniform2fv(location, value);
+      } else if (length === 3) {
+        gl.uniform3fv(location, value);
+      } else if (length === 4) {
+        gl.uniform4fv(location, value);
+      }
+    }
+  }
+}
+
+/**
+ * Handle WebGL context loss
+ */
+export function handleContextLoss(
+  canvas: HTMLCanvasElement,
+  onLost?: (event: Event) => void,
+  onRestored?: (event: Event) => void,
+): () => void {
+  const handleLost = (event: Event) => {
+    event.preventDefault();
+    onLost?.(event);
+  };
+
+  const handleRestored = (event: Event) => {
+    onRestored?.(event);
+  };
+
+  canvas.addEventListener('webglcontextlost', handleLost);
+  canvas.addEventListener('webglcontextrestored', handleRestored);
+
+  return () => {
+    canvas.removeEventListener('webglcontextlost', handleLost);
+    canvas.removeEventListener('webglcontextrestored', handleRestored);
+  };
+}
+
+/**
+ * Log WebGL information
+ */
+export function logWebGLInfo(gl: WebGLRenderingContext | null): void {
+  if (!gl) return;
+
+  // eslint-disable-next-line no-console
+  console.log('WebGL Info:');
+  // eslint-disable-next-line no-console
+  console.log(`  Version: ${gl.getParameter(gl.VERSION)}`);
+  // eslint-disable-next-line no-console
+  console.log(`  Vendor: ${gl.getParameter(gl.VENDOR)}`);
+  // eslint-disable-next-line no-console
+  console.log(`  Renderer: ${gl.getParameter(gl.RENDERER)}`);
+  // eslint-disable-next-line no-console
+  console.log(`  Max Texture Size: ${gl.getParameter(gl.MAX_TEXTURE_SIZE)}`);
+
+  const extensions = gl.getSupportedExtensions();
+  if (extensions) {
+    // eslint-disable-next-line no-console
+    console.log(`  Extensions: ${extensions.join(', ')}`);
+  }
+}
