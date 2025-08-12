@@ -422,7 +422,7 @@ export function getWebGLContext(
       if (context) {
         return context;
       }
-    } catch (e) {
+    } catch {
       // Continue to next context name
     }
   }
@@ -450,19 +450,30 @@ export function getMaxTextureSize(gl: WebGLRenderingContext | null): number {
 export function setupVertexAttributes(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
-  attributes: Record<string, {
-    location?: number;
-    size: number;
-    type: number;
-    normalized: boolean;
-    stride: number;
-    offset: number;
-  }>,
+  attributes: Record<
+    string,
+    {
+      location?: number;
+      size: number;
+      type: number;
+      normalized: boolean;
+      stride: number;
+      offset: number;
+    }
+  >,
 ): void {
   for (const [name, attr] of Object.entries(attributes)) {
     const location = attr.location ?? gl.getAttribLocation(program, name);
     if (location >= 0) {
-      setupVertexAttribute(gl, location, attr.size, attr.type, attr.normalized, attr.stride, attr.offset);
+      setupVertexAttribute(
+        gl,
+        location,
+        attr.size,
+        attr.type,
+        attr.normalized,
+        attr.stride,
+        attr.offset,
+      );
     }
   }
 }
@@ -533,14 +544,20 @@ export function handleContextLoss(
 export function logWebGLInfo(gl: WebGLRenderingContext | null): void {
   if (!gl) return;
 
+  // eslint-disable-next-line no-console
   console.log('WebGL Info:');
+  // eslint-disable-next-line no-console
   console.log(`  Version: ${gl.getParameter(gl.VERSION)}`);
+  // eslint-disable-next-line no-console
   console.log(`  Vendor: ${gl.getParameter(gl.VENDOR)}`);
+  // eslint-disable-next-line no-console
   console.log(`  Renderer: ${gl.getParameter(gl.RENDERER)}`);
+  // eslint-disable-next-line no-console
   console.log(`  Max Texture Size: ${gl.getParameter(gl.MAX_TEXTURE_SIZE)}`);
-  
+
   const extensions = gl.getSupportedExtensions();
   if (extensions) {
+    // eslint-disable-next-line no-console
     console.log(`  Extensions: ${extensions.join(', ')}`);
   }
 }
