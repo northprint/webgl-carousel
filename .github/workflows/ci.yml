@@ -77,7 +77,7 @@ jobs:
         ls -lh dist/
         
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: dist
         path: dist/
@@ -118,7 +118,7 @@ jobs:
     
     - name: Upload Playwright report
       if: failure()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: playwright-report-${{ matrix.browser }}
         path: playwright-report/
